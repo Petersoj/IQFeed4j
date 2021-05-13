@@ -1,0 +1,101 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+
+    dependencies {
+        // For Maven and Maven Central support
+        classpath group: 'com.bmuschko', name: 'gradle-nexus-plugin', version: '2.3.1'
+        classpath group: 'org.jsonschema2pojo', name: 'jsonschema2pojo-gradle-plugin', version: '1.0.2'
+    }
+}
+
+
+plugins {
+    id 'java'
+
+    // For Maven and Maven Central support
+    id 'maven-publish'
+    id 'com.bmuschko.nexus' version '2.3.1'
+    id 'io.codearte.nexus-staging' version '0.11.0'
+}
+
+group 'net.jacobpeterson'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Logging framework
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
+
+    // Google Guava for a variety of useful methods
+    implementation group: 'com.google.guava', name: 'guava', version: '20.0'
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+javadoc {
+    // Used to suppress Javadoc linting warnings
+    options.addStringOption('Xdoclint:none', '-quiet')
+    // Explicitly define Charset for Javadocs
+    options.addStringOption("charset", "UTF-8")
+    // Add Java SE 8 link
+    options.addStringOption("link", "https://docs.oracle.com/javase/8/docs/api/")
+}
+
+//
+// START Publishing
+//
+modifyPom {
+    project {
+        name = 'IQFeed4j'
+        description = 'A Java API for DTN IQFeed.'
+        url = 'https://github.com/Petersoj/IQFeed4j'
+        inceptionYear = '2021'
+
+        licenses {
+            license {
+                name = 'MIT License'
+                url = 'https://opensource.org/licenses/MIT'
+            }
+        }
+
+        developers {
+            developer {
+                id = 'Petersoj'
+                name = 'Jacob Peterson'
+            }
+        }
+
+        scm {
+            url = "https://github.com/Petersoj/IQFeed4j.git"
+            connection = "scm:git:https://github.com/Petersoj/IQFeed4j.git"
+            developerConnection = "scm:git:git@github.com/Petersoj/IQFeed4j.git"
+        }
+    }
+}
+
+extraArchive {
+    sources = true
+    tests = true
+    javadoc = true
+}
+
+nexus {
+    sign = true
+    repositoryUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+    snapshotRepositoryUrl = 'https://oss.sonatype.org/content/repositories/snapshots/'
+}
+
+nexusStaging {
+    packageGroup = "net.jacobpeterson"
+}
+//
+// END Publishing
+//
