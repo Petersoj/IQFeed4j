@@ -10,9 +10,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 
 import static net.jacobpeterson.util.csv.CSVUtil.valueEquals;
 
@@ -28,11 +25,7 @@ public abstract class AbstractFeed implements Runnable, AsyncExceptionListener {
     protected final String host;
     protected final int port;
     protected final String protocolVersion;
-    private final List<FeedMessageHandler> feedMessageHandlers;
-    private final List<FeedMessageHandler> feedMessageHandlersToAdd;
-    private final List<FeedMessageHandler> feedMessageHandlersToRemove;
     private final Object startStopLock;
-    private final Object handleMessageLock;
 
     private Thread socketThread;
     private Socket feedSocket;
@@ -55,11 +48,7 @@ public abstract class AbstractFeed implements Runnable, AsyncExceptionListener {
         this.port = port;
         this.protocolVersion = protocolVersion;
 
-        feedMessageHandlers = new ArrayList<>();
-        feedMessageHandlersToAdd = new LinkedList<>();
-        feedMessageHandlersToRemove = new LinkedList<>();
         startStopLock = new Object();
-        handleMessageLock = new Object();
 
         intentionalSocketClose = false;
     }
@@ -160,7 +149,6 @@ public abstract class AbstractFeed implements Runnable, AsyncExceptionListener {
 
                     checkProtocolMessage(csv);
                     onMessageReceived(csv);
-                    callMessageHandlers(csv);
                 }
             } catch (Exception exception) {
                 if (!intentionalSocketClose) {
@@ -205,46 +193,16 @@ public abstract class AbstractFeed implements Runnable, AsyncExceptionListener {
     }
 
     /**
-     * Called when a message is received. Note that this method does not need to call the {@link #feedMessageHandlers}
-     * as that is done in {@link AbstractFeed}. This method is called with thread-safety.
+     * Called when a message is received. This method should not block!
      *
      * @param csv the CSV
      */
     protected abstract void onMessageReceived(String[] csv);
 
     /**
-     * Call the {@link FeedMessageHandler#handleMessage(String[])} method for the {@link #feedMessageHandlers}. This
-     * method is thread-safe.
-     *
-     * @param csv the CSV
-     */
-    private void callMessageHandlers(String[] csv) {
-        // It's a bummer that we have to use expensive concurrency-safety here, especially in a method that gets called
-        // frequently, but it's necessary to prevent race conditions, concurrent modifications exceptions,
-        // and other unpredictable behavior.
-
-        // Remove all 'FeedMessageHandler's that were request to be removed then add all 'FeedMessageHandler's
-        // that were request to be added.
-        synchronized (handleMessageLock) {
-            feedMessageHandlers.removeAll(feedMessageHandlersToRemove);
-            feedMessageHandlersToRemove.clear();
-
-            feedMessageHandlers.addAll(feedMessageHandlersToAdd);
-            feedMessageHandlersToAdd.clear();
-        }
-
-        // Loop through all 'feedMessageHandlers'.
-        // Note that this doesn't need to acquire 'handleMessageLock' since 'feedMessageHandlers' is isolated
-        // to this instance and is not modified outside a lock.
-        for (FeedMessageHandler feedMessageHandler : feedMessageHandlers) {
-            feedMessageHandler.handleMessage(csv);
-        }
-    }
-
-    /**
      * Called when the protocol version has been validated.
      * <br>
-     * If this method is overridden, be sure to call the super method.
+     * If this method is overridden, be sure to call the super method!
      *
      * @throws IOException thrown for {@link IOException}s
      */
@@ -301,30 +259,6 @@ public abstract class AbstractFeed implements Runnable, AsyncExceptionListener {
      */
     public boolean isValid() {
         return isFeedSocketOpen() && isProtocolVersionValidated();
-    }
-
-    /**
-     * Adds a {@link FeedMessageHandler}. This method is thread-safe and can be called at any time (even within {@link
-     * FeedMessageHandler#handleMessage(String[])}).
-     *
-     * @param feedMessageHandler the {@link FeedMessageHandler}
-     */
-    public void addFeedMessageHandler(FeedMessageHandler feedMessageHandler) {
-        synchronized (handleMessageLock) {
-            feedMessageHandlersToAdd.add(feedMessageHandler);
-        }
-    }
-
-    /**
-     * Removes a {@link FeedMessageHandler}. This method is thread-safe and can be called at any time (even within
-     * {@link FeedMessageHandler#handleMessage(String[])}).
-     *
-     * @param feedMessageHandler the {@link FeedMessageHandler}
-     */
-    public void removeFeedMessageHandler(FeedMessageHandler feedMessageHandler) {
-        synchronized (handleMessageLock) {
-            feedMessageHandlersToRemove.add(feedMessageHandler);
-        }
     }
 
     /**
