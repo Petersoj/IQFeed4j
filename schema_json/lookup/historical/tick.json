@@ -1,0 +1,54 @@
+{
+  "type": "object",
+  "title": "POJO for HTX, HTD, and HTT requests. See <a href=\"https://www.iqfeed.net/dev/api/docs//HistoricalviaTCPIP.cfm\">HistoricalViaTCPIP</a>",
+  "properties": {
+    "timestamp": {
+      "existingJavaType": "java.time.LocalDateTime",
+      "title": "The timestamp."
+    },
+    "last": {
+      "existingJavaType": "java.lang.Double",
+      "title": "The last price."
+    },
+    "lastSize": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "The last size."
+    },
+    "totalVolume": {
+      "existingJavaType": "java.lang.Long",
+      "title": "The total volume."
+    },
+    "bid": {
+      "existingJavaType": "java.lang.Double",
+      "title": "The bid price."
+    },
+    "ask": {
+      "existingJavaType": "java.lang.Double",
+      "title": "The ask price."
+    },
+    "tickID": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "The tick ID."
+    },
+    "basisForLast": {
+      "existingJavaType": "java.lang.Character",
+      "title": "Possible single character values include:\nC - Last Qualified Trade.\nE - Extended Trade = Form T trade.\nO - Other Trade = Any trade not accounted for by C or E.\nS - Settle = Daily settle, only applicable to commodities.\n"
+    },
+    "tradeMarketCenter": {
+      "existingJavaType": "java.lang.Short",
+      "title": "The Market Center the trade occurred at."
+    },
+    "tradeConditions": {
+      "existingJavaType": "java.lang.String",
+      "title": "The trade conditions. Format: One to four, 2 digit hex numbers."
+    },
+    "tradeAggressor": {
+      "existingJavaType": "java.lang.Byte",
+      "title": "The trade aggressor. Possible values include:\n0 - Invalid (not supported).\n1 - Buy.\n2 - Sell.\n3 - Neither buy nor sell.\n"
+    },
+    "dayCode": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "The day of month the trade applies to."
+    }
+  }
+}

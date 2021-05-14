@@ -1,4 +1,4 @@
-package net.jacobpeterson.util.csv;
+package net.jacobpeterson.iqfeed4j.util.csv;
 
 /**
  * {@link CSVUtil} defines utility methods for CSVs.

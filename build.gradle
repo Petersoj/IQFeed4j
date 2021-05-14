@@ -1,3 +1,5 @@
+import org.jsonschema2pojo.gradle.GenerateJsonSchemaJavaTask
+
 buildscript {
     repositories {
         mavenCentral()
@@ -7,7 +9,8 @@ buildscript {
     dependencies {
         // For Maven and Maven Central support
         classpath group: 'com.bmuschko', name: 'gradle-nexus-plugin', version: '2.3.1'
-        classpath group: 'org.jsonschema2pojo', name: 'jsonschema2pojo-gradle-plugin', version: '1.0.2'
+        // For JSONSchema2POJO
+        classpath group: 'org.jsonschema2pojo', name: 'jsonschema2pojo-gradle-plugin', version: 'latest.integration'
     }
 }
 
@@ -20,6 +23,11 @@ plugins {
     id 'com.bmuschko.nexus' version '2.3.1'
     id 'io.codearte.nexus-staging' version '0.11.0'
 }
+
+// Calling 'apply' here because 'jsonschema2pojo' doesn't exist in the Gradle Central Plugin Repository (it's only
+// in Maven central).
+apply plugin: 'jsonschema2pojo'
+tasks.getByName("generateJsonSchema2Pojo").enabled(false) // Disable default 'jsonSchema2Pojo' task
 
 group 'net.jacobpeterson'
 version '1.0-SNAPSHOT'
@@ -98,4 +106,74 @@ nexusStaging {
 }
 //
 // END Publishing
+//
+
+//
+// START POJO generation
+//
+// The generated POJOs will be in a package structure analogous to the path in the 'schema_json/' directory
+// See: https://github.com/joelittlejohn/jsonschema2pojo/wiki/Reference
+
+final def targetDirectoryPath = file("${project.buildDir}/generated-sources/schemajson").getPath()
+
+task generatePOJOs() {
+    final def jsonSourceDirectory = file("${project.projectDir}/schema_json").getPath()
+    final def jsonPackageNameStart = "net.jacobpeterson.iqfeed4j.model"
+
+    // Loop through all files in schema JSON file tree
+    file(jsonSourceDirectory).eachFileRecurse { jsonFile ->
+        if (jsonFile.getName().endsWith(".json")) {
+            def startPackageIndex = jsonFile.getAbsolutePath().indexOf(jsonSourceDirectory) +
+                    jsonSourceDirectory.length()
+            def targetPackage = jsonPackageNameStart + jsonFile.getParentFile().getAbsolutePath()
+                    .substring(startPackageIndex)
+                    .replace(File.separator, '.').replace('-', '').replace('_', '')
+                    .toLowerCase()
+
+            def jsonToPOJOTask = tasks.create('JSONSchema2POJO-' + targetPackage + "." + jsonFile.getName(),
+                    GenerateJsonSchemaJavaTask)
+
+            // Configure this task to participate in incremental builds so that it only executes when changes occur
+            jsonToPOJOTask.configure {
+                inputs.file(jsonFile)
+                outputs.dir(targetDirectoryPath)
+            }
+
+            jsonToPOJOTask.doFirst {
+                jsonToPOJOTask.configuration.source = files(jsonFile.getAbsolutePath())
+                jsonToPOJOTask.configuration.targetDirectory = file(targetDirectoryPath)
+                jsonToPOJOTask.configuration.targetPackage = targetPackage
+            }
+
+            dependsOn jsonToPOJOTask
+        }
+    }
+}
+
+compileJava {
+    dependsOn generatePOJOs
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir targetDirectoryPath
+        }
+    }
+}
+
+jsonSchema2Pojo {
+    includeAdditionalProperties = false
+    targetDirectory = file(targetDirectoryPath)
+    propertyWordDelimiters = ['-', '_'] as char[]
+    annotationStyle = 'none'
+    sourceType = 'jsonschema'
+    customDateTimePattern = "yyyy-MM-ddTHH:mm:ssZ"
+    includeConstructors = true
+    serializable = true
+    includeGetters = true
+    includeSetters = true
+}
+//
+// END POJO generation
 //

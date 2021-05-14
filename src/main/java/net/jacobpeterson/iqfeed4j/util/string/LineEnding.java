@@ -1,4 +1,4 @@
-package net.jacobpeterson.util.string;
+package net.jacobpeterson.iqfeed4j.util.string;
 
 /**
  * {@link LineEnding} defines enums for the various types of ASCII line endings.

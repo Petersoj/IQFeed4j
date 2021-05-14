@@ -1,4 +1,4 @@
-package net.jacobpeterson.util.exception;
+package net.jacobpeterson.iqfeed4j.util.exception;
 
 public interface AsyncExceptionListener {
 

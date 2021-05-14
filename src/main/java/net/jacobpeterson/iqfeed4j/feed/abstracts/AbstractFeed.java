@@ -1,7 +1,8 @@
-package net.jacobpeterson.feed.abstracts;
+package net.jacobpeterson.iqfeed4j.feed.abstracts;
 
-import net.jacobpeterson.util.exception.AsyncExceptionListener;
-import net.jacobpeterson.util.string.LineEnding;
+import net.jacobpeterson.iqfeed4j.util.csv.CSVUtil;
+import net.jacobpeterson.iqfeed4j.util.exception.AsyncExceptionListener;
+import net.jacobpeterson.iqfeed4j.util.string.LineEnding;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -10,8 +11,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-
-import static net.jacobpeterson.util.csv.CSVUtil.valueEquals;
 
 /**
  * {@link AbstractFeed} represents a TCP socket/feed for IQFeed.
@@ -167,9 +166,9 @@ public abstract class AbstractFeed implements Runnable, AsyncExceptionListener {
      */
     private void checkProtocolMessage(String[] csv) throws IOException {
         if (!protocolVersionValidated &&
-                valueEquals(csv, 0, "S") &&
-                valueEquals(csv, 1, "CURRENT PROTOCOL") &&
-                valueEquals(csv, 2, protocolVersion)) {
+                CSVUtil.valueEquals(csv, 0, "S") &&
+                CSVUtil.valueEquals(csv, 1, "CURRENT PROTOCOL") &&
+                CSVUtil.valueEquals(csv, 2, protocolVersion)) {
             protocolVersionValidated = true;
             onProtocolVersionValidated();
         }
@@ -188,8 +187,8 @@ public abstract class AbstractFeed implements Runnable, AsyncExceptionListener {
      * @return true if the 'csv' represents an error message
      */
     public boolean isErrorMessage(String[] csv) {
-        return valueEquals(csv, 0, ERROR_MESSAGE_IDENTIFIER) ||
-                valueEquals(csv, 1, ERROR_MESSAGE_IDENTIFIER);
+        return CSVUtil.valueEquals(csv, 0, ERROR_MESSAGE_IDENTIFIER) ||
+                CSVUtil.valueEquals(csv, 1, ERROR_MESSAGE_IDENTIFIER);
     }
 
     /**
