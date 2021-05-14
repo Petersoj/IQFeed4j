@@ -55,7 +55,7 @@ javadoc {
 modifyPom {
     project {
         name = 'IQFeed4j'
-        description = 'A Java API for DTN IQFeed.'
+        description = 'A Java API for the market data vendor DTN IQFeed.'
         url = 'https://github.com/Petersoj/IQFeed4j'
         inceptionYear = '2021'
 
