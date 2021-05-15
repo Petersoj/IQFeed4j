@@ -173,7 +173,7 @@ public abstract class AbstractFeed implements Runnable, AsyncExceptionListener {
                 } else {
                     // Notes that no comma-separated value should have a comma in it, otherwise
                     // it will be treated like two individual comma-separated values.
-                    onMessageReceived(line.split(","));
+                    onMessageReceived(line.split(",")); // Splitting by one char doesn't use Regex
                 }
             } catch (Exception exception) {
                 if (!intentionalSocketClose) {

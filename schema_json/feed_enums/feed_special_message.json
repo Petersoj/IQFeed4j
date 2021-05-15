@@ -3,14 +3,18 @@
   "title": "Request errors that are received from IQFeed.",
   "enum": [
     "!NO_DATA!",
-    "!SYNTAX_ERROR!"
+    "!SYNTAX_ERROR!",
+    "!ENDMSG!"
   ],
   "javaEnums": [
     {
-      "name": "NO_DATA"
+      "name": "NO_DATA_ERROR"
     },
     {
-      "name": "SYNTAX"
+      "name": "SYNTAX_ERROR"
+    },
+    {
+      "name": "END_OF_MESSAGE"
     }
   ]
 }
