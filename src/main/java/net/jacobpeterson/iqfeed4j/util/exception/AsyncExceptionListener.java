@@ -1,5 +1,8 @@
 package net.jacobpeterson.iqfeed4j.util.exception;
 
+/**
+ * {@link AsyncExceptionListener} allows for the handling of {@link Exception}s asynchronously.
+ */
 public interface AsyncExceptionListener {
 
     /**

@@ -1,0 +1,42 @@
+{
+  "type": "object",
+  "title": "Status message that gives information about each client connected to IQFeed and is received once per second after being turned on. See <a href=\"http://www.iqfeed.net/dev/api/docs/AdminSystemMessages.cfm\">Admin Port System Messages</a>",
+  "properties": {
+    "type": {
+      "existingJavaType": "java.lang.Byte",
+      "title": "Value\tClient Type\n0\tAdmin\n1\tLevel 1\n2\tLevel 2\n3\tLookup"
+    },
+    "clientID": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "Numeric identifier (unique by client type) for each client."
+    },
+    "clientName": {
+      "existingJavaType": "java.lang.String",
+      "title": "Name of the client. This is set by the 3rd party app using the S,SET CLIENT NAME command on the socket connection it is connected to."
+    },
+    "startTime": {
+      "existingJavaType": "java.time.LocalDateTime",
+      "title": "Time the client connected to IQFeed."
+    },
+    "symbols": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "Number of symbols being watched by client. Only valid for Level 1 and Level 2 client types."
+    },
+    "regionalSymbols": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "Number of regional symbols being watched by client. Only valid for Level 1 client type."
+    },
+    "kiloBytesReceived": {
+      "existingJavaType": "java.lang.Double",
+      "title": "Number of kilobytes received from the client."
+    },
+    "kiloBytesSent": {
+      "existingJavaType": "java.lang.Double",
+      "title": "Number of kilobytes sent to the client."
+    },
+    "kiloBytesQueued": {
+      "existingJavaType": "java.lang.Double",
+      "title": "Number of kilobytes queued by IQConnect waiting to be delivered to the client."
+    }
+  }
+}

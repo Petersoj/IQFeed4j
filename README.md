@@ -1,4 +1,4 @@
-<p align="center"><img src="https://i.imgur.com/4Gx8Y25.png" alt="Logo"></p>
+<p align="center"><a href="https://petersoj.github.io/IQFeed4j/" target="_blank"><img src="https://i.imgur.com/4Gx8Y25.png" alt="Logo"></a></p>
 
 # Overview
 

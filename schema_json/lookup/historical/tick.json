@@ -31,8 +31,20 @@
       "title": "The tick ID."
     },
     "basisForLast": {
-      "existingJavaType": "java.lang.Character",
-      "title": "Possible single character values include:\nC - Last Qualified Trade.\nE - Extended Trade = Form T trade.\nO - Other Trade = Any trade not accounted for by C or E.\nS - Settle = Daily settle, only applicable to commodities.\n"
+      "type": "string",
+      "enum": [
+        "C",
+        "E",
+        "O",
+        "S"
+      ],
+      "javaEnumNames": [
+        "LAST_QUALIFIED_TRADE",
+        "EXTENDED_TRADE",
+        "OTHER_TRADE",
+        "SETTLE"
+      ],
+      "title": "The basis for last trade."
     },
     "tradeMarketCenter": {
       "existingJavaType": "java.lang.Short",
@@ -43,8 +55,20 @@
       "title": "The trade conditions. Format: One to four, 2 digit hex numbers."
     },
     "tradeAggressor": {
-      "existingJavaType": "java.lang.Byte",
-      "title": "The trade aggressor. Possible values include:\n0 - Invalid (not supported).\n1 - Buy.\n2 - Sell.\n3 - Neither buy nor sell.\n"
+      "type": "string",
+      "enum": [
+        "0",
+        "1",
+        "2",
+        "3"
+      ],
+      "javaEnumNames": [
+        "INVALID",
+        "BUY",
+        "SELL",
+        "NEITHER_BUY_NOR_SELL"
+      ],
+      "title": "The trade aggressor."
     },
     "dayCode": {
       "existingJavaType": "java.lang.Integer",

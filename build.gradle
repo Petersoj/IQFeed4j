@@ -1,3 +1,4 @@
+import com.bmuschko.gradle.nexus.ExtraArchivePlugin
 import org.jsonschema2pojo.gradle.GenerateJsonSchemaJavaTask
 
 buildscript {
@@ -14,7 +15,6 @@ buildscript {
     }
 }
 
-
 plugins {
     id 'java'
 
@@ -27,7 +27,7 @@ plugins {
 // Calling 'apply' here because 'jsonschema2pojo' doesn't exist in the Gradle Central Plugin Repository (it's only
 // in Maven central).
 apply plugin: 'jsonschema2pojo'
-tasks.getByName("generateJsonSchema2Pojo").enabled(false) // Disable default 'jsonSchema2Pojo' task
+tasks.getByName('generateJsonSchema2Pojo').enabled(false) // Disable default 'jsonSchema2Pojo' task
 
 group 'net.jacobpeterson'
 version '1.0-SNAPSHOT'
@@ -52,9 +52,9 @@ javadoc {
     // Used to suppress Javadoc linting warnings
     options.addStringOption('Xdoclint:none', '-quiet')
     // Explicitly define Charset for Javadocs
-    options.addStringOption("charset", "UTF-8")
+    options.addStringOption('charset', 'UTF-8')
     // Add Java SE 8 link
-    options.addStringOption("link", "https://docs.oracle.com/javase/8/docs/api/")
+    options.addStringOption('link', 'https://docs.oracle.com/javase/8/docs/api/')
 }
 
 //
@@ -82,9 +82,9 @@ modifyPom {
         }
 
         scm {
-            url = "https://github.com/Petersoj/IQFeed4j.git"
-            connection = "scm:git:https://github.com/Petersoj/IQFeed4j.git"
-            developerConnection = "scm:git:git@github.com/Petersoj/IQFeed4j.git"
+            url = 'https://github.com/Petersoj/IQFeed4j.git'
+            connection = 'scm:git:https://github.com/Petersoj/IQFeed4j.git'
+            developerConnection = 'scm:git:git@github.com/Petersoj/IQFeed4j.git'
         }
     }
 }
@@ -95,6 +95,17 @@ extraArchive {
     javadoc = true
 }
 
+// Lowercase all archive names
+afterEvaluate {
+    jar.archiveBaseName.set(jar.archiveBaseName.get().toLowerCase())
+    for (taskName in [ExtraArchivePlugin.SOURCES_JAR_TASK_NAME,
+                      ExtraArchivePlugin.TESTS_JAR_TASK_NAME,
+                      ExtraArchivePlugin.JAVADOC_JAR_TASK_NAME]) {
+        final def taskArchiveBaseName = ((org.gradle.jvm.tasks.Jar) tasks.getByName(taskName)).archiveBaseName
+        taskArchiveBaseName.set(taskArchiveBaseName.get().toLowerCase())
+    }
+}
+
 nexus {
     sign = true
     repositoryUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
@@ -102,7 +113,7 @@ nexus {
 }
 
 nexusStaging {
-    packageGroup = "net.jacobpeterson"
+    packageGroup = 'net.jacobpeterson'
 }
 //
 // END Publishing
@@ -118,11 +129,11 @@ final def targetDirectoryPath = file("${project.buildDir}/generated-sources/sche
 
 task generatePOJOs() {
     final def jsonSourceDirectory = file("${project.projectDir}/schema_json").getPath()
-    final def jsonPackageNameStart = "net.jacobpeterson.iqfeed4j.model"
+    final def jsonPackageNameStart = 'net.jacobpeterson.iqfeed4j.model'
 
     // Loop through all files in schema JSON file tree
     file(jsonSourceDirectory).eachFileRecurse { jsonFile ->
-        if (jsonFile.getName().endsWith(".json")) {
+        if (jsonFile.getName().endsWith('.json')) {
             def startPackageIndex = jsonFile.getAbsolutePath().indexOf(jsonSourceDirectory) +
                     jsonSourceDirectory.length()
             def targetPackage = jsonPackageNameStart + jsonFile.getParentFile().getAbsolutePath()
@@ -130,7 +141,7 @@ task generatePOJOs() {
                     .replace(File.separator, '.').replace('-', '').replace('_', '')
                     .toLowerCase()
 
-            def jsonToPOJOTask = tasks.create('JSONSchema2POJO-' + targetPackage + "." + jsonFile.getName(),
+            def jsonToPOJOTask = tasks.create('JSONSchema2POJO-' + targetPackage + '.' + jsonFile.getName(),
                     GenerateJsonSchemaJavaTask)
 
             // Configure this task to participate in incremental builds so that it only executes when changes occur
@@ -168,7 +179,7 @@ jsonSchema2Pojo {
     propertyWordDelimiters = ['-', '_'] as char[]
     annotationStyle = 'none'
     sourceType = 'jsonschema'
-    customDateTimePattern = "yyyy-MM-ddTHH:mm:ssZ"
+    customDateTimePattern = 'yyyy-MM-ddTHH:mm:ssZ'
     includeConstructors = true
     serializable = true
     includeGetters = true

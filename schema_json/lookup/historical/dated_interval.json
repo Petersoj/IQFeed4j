@@ -1,6 +1,6 @@
 {
   "type": "object",
-  "title": "Interval POJO for HDX, HDT, HWX, and HMX requests. See <a href=\"https://www.iqfeed.net/dev/api/docs//HistoricalviaTCPIP.cfm\">HistoricalViaTCPIP</a>",
+  "title": "Interval POJO for HDX, HDT, HWX, and HMX requests. See <a href=\"https://www.iqfeed.net/dev/api/docs//HistoricalviaTCPIP.cfm\">Historical via TCP/IP</a>",
   "properties": {
     "date": {
       "existingJavaType": "java.time.LocalDate",

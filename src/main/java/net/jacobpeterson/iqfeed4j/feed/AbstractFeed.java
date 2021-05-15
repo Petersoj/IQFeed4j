@@ -1,4 +1,4 @@
-package net.jacobpeterson.iqfeed4j.feed.abstracts;
+package net.jacobpeterson.iqfeed4j.feed;
 
 import net.jacobpeterson.iqfeed4j.util.csv.CSVUtil;
 import net.jacobpeterson.iqfeed4j.util.exception.AsyncExceptionListener;
