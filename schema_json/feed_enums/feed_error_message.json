@@ -1,0 +1,16 @@
+{
+  "type": "string",
+  "title": "Request errors that are received from IQFeed.",
+  "enum": [
+    "!NO_DATA!",
+    "!SYNTAX_ERROR!"
+  ],
+  "javaEnums": [
+    {
+      "name": "NO_DATA"
+    },
+    {
+      "name": "SYNTAX"
+    }
+  ]
+}

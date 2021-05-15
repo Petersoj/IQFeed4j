@@ -1,0 +1,8 @@
+{
+  "type": "string",
+  "title": "System commands that are sent to IQFeed.",
+  "enum": [
+    "SET PROTOCOL",
+    "SET CLIENT NAME"
+  ]
+}

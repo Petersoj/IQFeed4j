@@ -1,0 +1,17 @@
+{
+  "type": "string",
+  "title": "Admin messages that are received from IQFeed. See <a href=\"http://www.iqfeed.net/dev/api/docs/AdminSystemMessages.cfm\">Admin Port System Messages</a>",
+  "enum": [
+    "CURRENT PROTOCOL",
+    "REGISTER CLIENT APP COMPLETED",
+    "REMOVE CLIENT APP COMPLETED",
+    "CURRENT LOGINID",
+    "CURRENT PASSWORD",
+    "LOGIN INFO SAVED",
+    "LOGIN INFO NOT SAVED",
+    "AUTOCONNECT ON",
+    "AUTOCONNECT OFF",
+    "STATS",
+    "CLIENTSTATS"
+  ]
+}

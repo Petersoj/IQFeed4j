@@ -38,11 +38,19 @@
         "O",
         "S"
       ],
-      "javaEnumNames": [
-        "LAST_QUALIFIED_TRADE",
-        "EXTENDED_TRADE",
-        "OTHER_TRADE",
-        "SETTLE"
+      "javaEnums": [
+        {
+          "name": "LAST_QUALIFIED_TRADE"
+        },
+        {
+          "name": "EXTENDED_TRADE"
+        },
+        {
+          "name": "OTHER_TRADE"
+        },
+        {
+          "name": "SETTLE"
+        }
       ],
       "title": "The basis for last trade."
     },
@@ -62,11 +70,19 @@
         "2",
         "3"
       ],
-      "javaEnumNames": [
-        "INVALID",
-        "BUY",
-        "SELL",
-        "NEITHER_BUY_NOR_SELL"
+      "javaEnums": [
+        {
+          "name": "INVALID"
+        },
+        {
+          "name": "BUY"
+        },
+        {
+          "name": "SELL"
+        },
+        {
+          "name": "NEITHER_BUY_NOR_SELL"
+        }
       ],
       "title": "The trade aggressor."
     },

@@ -1,8 +1,11 @@
 package net.jacobpeterson.iqfeed4j.feed;
 
-import net.jacobpeterson.iqfeed4j.util.csv.CSVUtil;
+import net.jacobpeterson.iqfeed4j.model.feedenums.FeedCommand;
+import net.jacobpeterson.iqfeed4j.model.feedenums.FeedMessageType;
 import net.jacobpeterson.iqfeed4j.util.exception.AsyncExceptionListener;
 import net.jacobpeterson.iqfeed4j.util.string.LineEnding;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -11,19 +14,26 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
 
 /**
  * {@link AbstractFeed} represents a TCP socket/feed for IQFeed.
  */
 public abstract class AbstractFeed implements Runnable, AsyncExceptionListener {
 
+    /**
+     * Protocol versions are managed by the version control branches.
+     */
+    public static final String CURRENTLY_SUPPORTED_PROTOCOL_VERSION = "6.1";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFeed.class);
     private static final int SOCKET_THREAD_JOIN_WAIT_MILLIS = 5000;
-    private static final String ERROR_MESSAGE_IDENTIFIER = "E";
 
     protected final String feedName;
     protected final String host;
     protected final int port;
-    protected final String protocolVersion;
     private final Object startStopLock;
 
     private Thread socketThread;
@@ -36,16 +46,14 @@ public abstract class AbstractFeed implements Runnable, AsyncExceptionListener {
     /**
      * Instantiates a new {@link AbstractFeed}.
      *
-     * @param feedName        the feed name
-     * @param host            the host
-     * @param port            the port
-     * @param protocolVersion the protocol version
+     * @param feedName the feed name
+     * @param host     the host
+     * @param port     the port
      */
-    public AbstractFeed(String feedName, String host, int port, String protocolVersion) {
+    public AbstractFeed(String feedName, String host, int port) {
         this.feedName = feedName;
         this.host = host;
         this.port = port;
-        this.protocolVersion = protocolVersion;
 
         startStopLock = new Object();
 
@@ -78,10 +86,10 @@ public abstract class AbstractFeed implements Runnable, AsyncExceptionListener {
             feedReader = new BufferedReader(new InputStreamReader(feedSocket.getInputStream(),
                     StandardCharsets.US_ASCII));
 
+            LOGGER.debug("{} feed socket connection established.", feedName);
+
             socketThread = new Thread(this);
             socketThread.start();
-
-            sendSetProtocolMessage();
         }
     }
 
@@ -133,6 +141,27 @@ public abstract class AbstractFeed implements Runnable, AsyncExceptionListener {
 
     @Override
     public void run() {
+        // Send and check protocol version messages
+        try {
+            sendSetProtocolMessage();
+            String[] protocolCSV = feedReader.readLine().split(",");
+
+            if (valueEquals(protocolCSV, 0, FeedMessageType.SYSTEM.value()) &&
+                    valueEquals(protocolCSV, 1, FeedMessageType.CURRENT_PROTOCOL.value()) &&
+                    valueEquals(protocolCSV, 2, CURRENTLY_SUPPORTED_PROTOCOL_VERSION)) {
+                LOGGER.debug("Protocol version validated: {}", (Object) protocolCSV);
+
+                sendSetClientNameMessage();
+
+                protocolVersionValidated = true;
+                onProtocolVersionValidated();
+            } else {
+                throw new RuntimeException("Protocol version not validated! Message: " + Arrays.toString(protocolCSV));
+            }
+        } catch (Exception exception) {
+            onAsyncException("Could not set up feed!", exception);
+        }
+
         while (!Thread.currentThread().isInterrupted()) { // Check if thread has been closed/interrupted
             try {
                 String line = feedReader.readLine();
@@ -144,33 +173,13 @@ public abstract class AbstractFeed implements Runnable, AsyncExceptionListener {
                 } else {
                     // Notes that no comma-separated value should have a comma in it, otherwise
                     // it will be treated like two individual comma-separated values.
-                    String[] csv = line.split(",");
-
-                    checkProtocolMessage(csv);
-                    onMessageReceived(csv);
+                    onMessageReceived(line.split(","));
                 }
             } catch (Exception exception) {
                 if (!intentionalSocketClose) {
-                    onAsyncException("Could not read and process feed socket line!", exception);
+                    onAsyncException("Could not read and process feed socket message line!", exception);
                 }
             }
-        }
-    }
-
-    /**
-     * Check for "CURRENT PROTOCOL" message response.
-     *
-     * @param csv the CSV
-     *
-     * @throws IOException thrown for {@link IOException}s
-     */
-    private void checkProtocolMessage(String[] csv) throws IOException {
-        if (!protocolVersionValidated &&
-                CSVUtil.valueEquals(csv, 0, "S") &&
-                CSVUtil.valueEquals(csv, 1, "CURRENT PROTOCOL") &&
-                CSVUtil.valueEquals(csv, 2, protocolVersion)) {
-            protocolVersionValidated = true;
-            onProtocolVersionValidated();
         }
     }
 
@@ -187,8 +196,8 @@ public abstract class AbstractFeed implements Runnable, AsyncExceptionListener {
      * @return true if the 'csv' represents an error message
      */
     public boolean isErrorMessage(String[] csv) {
-        return CSVUtil.valueEquals(csv, 0, ERROR_MESSAGE_IDENTIFIER) ||
-                CSVUtil.valueEquals(csv, 1, ERROR_MESSAGE_IDENTIFIER);
+        return valueEquals(csv, 0, FeedMessageType.ERROR.value()) ||
+                valueEquals(csv, 1, FeedMessageType.ERROR.value());
     }
 
     /**
@@ -200,14 +209,8 @@ public abstract class AbstractFeed implements Runnable, AsyncExceptionListener {
 
     /**
      * Called when the protocol version has been validated.
-     * <br>
-     * If this method is overridden, be sure to call the super method!
-     *
-     * @throws IOException thrown for {@link IOException}s
      */
-    protected void onProtocolVersionValidated() throws IOException {
-        sendSetClientNameMessage();
-    }
+    protected abstract void onProtocolVersionValidated();
 
     /**
      * Sends a message line. This method is synchronized with this object instance.
@@ -224,21 +227,25 @@ public abstract class AbstractFeed implements Runnable, AsyncExceptionListener {
     }
 
     /**
-     * Sends the "SET PROTOCOL" message.
+     * Sends the {@link FeedCommand#SET_PROTOCOL} message.
      *
      * @throws IOException thrown for {@link IOException}s
      */
     protected void sendSetProtocolMessage() throws IOException {
-        sendMessageLine("S,SET PROTOCOL," + protocolVersion, LineEnding.CR_LF);
+        sendMessageLine(String.format("%s,%s,%s",
+                FeedMessageType.SYSTEM.value(), FeedCommand.SET_PROTOCOL.value(), CURRENTLY_SUPPORTED_PROTOCOL_VERSION),
+                LineEnding.CR_LF);
     }
 
     /**
-     * Sends the "SET CLIENT NAME" message.
+     * Sends the {@link FeedCommand#SET_CLIENT_NAME} message.
      *
      * @throws IOException thrown for {@link IOException}s
      */
     protected void sendSetClientNameMessage() throws IOException {
-        sendMessageLine("S,SET CLIENT NAME," + feedName, LineEnding.CR_LF);
+        sendMessageLine(String.format("%s,%s,%s",
+                FeedMessageType.SYSTEM.value(), FeedCommand.SET_CLIENT_NAME.value(), feedName),
+                LineEnding.CR_LF);
     }
 
     /**
@@ -276,15 +283,6 @@ public abstract class AbstractFeed implements Runnable, AsyncExceptionListener {
      */
     public int getPort() {
         return port;
-    }
-
-    /**
-     * Gets {@link #protocolVersion}.
-     *
-     * @return a {@link String}
-     */
-    public String getProtocolVersion() {
-        return protocolVersion;
     }
 
     /**

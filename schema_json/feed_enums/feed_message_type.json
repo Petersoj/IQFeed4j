@@ -1,0 +1,17 @@
+{
+  "type": "string",
+  "title": "Message types that are received from IQFeed.",
+  "enum": [
+    "S",
+    "E",
+    "CURRENT PROTOCOL"
+  ],
+  "javaEnums": [
+    {
+      "name": "SYSTEM"
+    },
+    {
+      "name": "ERROR"
+    }
+  ]
+}
