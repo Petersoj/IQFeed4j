@@ -32,7 +32,7 @@ public abstract class AbstractFeed implements Runnable, AsyncExceptionListener {
     private static final int SOCKET_THREAD_JOIN_WAIT_MILLIS = 5000;
 
     protected final String feedName;
-    protected final String host;
+    protected final String hostname;
     protected final int port;
     private final Object startStopLock;
 
@@ -47,12 +47,12 @@ public abstract class AbstractFeed implements Runnable, AsyncExceptionListener {
      * Instantiates a new {@link AbstractFeed}.
      *
      * @param feedName the feed name
-     * @param host     the host
+     * @param hostname the host name
      * @param port     the port
      */
-    public AbstractFeed(String feedName, String host, int port) {
+    public AbstractFeed(String feedName, String hostname, int port) {
         this.feedName = feedName;
-        this.host = host;
+        this.hostname = hostname;
         this.port = port;
 
         startStopLock = new Object();
@@ -80,7 +80,7 @@ public abstract class AbstractFeed implements Runnable, AsyncExceptionListener {
                 cleanupState();
             }
 
-            feedSocket = new Socket(host, port);
+            feedSocket = new Socket(hostname, port);
             feedWriter = new BufferedWriter(new OutputStreamWriter(feedSocket.getOutputStream(),
                     StandardCharsets.US_ASCII));
             feedReader = new BufferedReader(new InputStreamReader(feedSocket.getInputStream(),
@@ -201,16 +201,16 @@ public abstract class AbstractFeed implements Runnable, AsyncExceptionListener {
     }
 
     /**
+     * Called when the protocol version has been validated.
+     */
+    protected abstract void onProtocolVersionValidated();
+
+    /**
      * Called when a message is received. This method should not block!
      *
      * @param csv the CSV
      */
     protected abstract void onMessageReceived(String[] csv);
-
-    /**
-     * Called when the protocol version has been validated.
-     */
-    protected abstract void onProtocolVersionValidated();
 
     /**
      * Sends a message line. This method is synchronized with this object instance.

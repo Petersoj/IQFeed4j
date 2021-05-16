@@ -3,8 +3,28 @@
   "title": "Status message that gives information about each client connected to IQFeed and is received once per second after being turned on. See <a href=\"http://www.iqfeed.net/dev/api/docs/AdminSystemMessages.cfm\">Admin Port System Messages</a>",
   "properties": {
     "type": {
-      "existingJavaType": "java.lang.Byte",
-      "title": "Value\tClient Type\n0\tAdmin\n1\tLevel 1\n2\tLevel 2\n3\tLookup"
+      "type": "string",
+      "enum": [
+        "0",
+        "1",
+        "2",
+        "3"
+      ],
+      "javaEnums": [
+        {
+          "name": "ADMIN"
+        },
+        {
+          "name": "LEVEL_1"
+        },
+        {
+          "name": "LEVEL_2"
+        },
+        {
+          "name": "LOOKUP"
+        }
+      ],
+      "title": "The basis for last trade."
     },
     "clientID": {
       "existingJavaType": "java.lang.Integer",
