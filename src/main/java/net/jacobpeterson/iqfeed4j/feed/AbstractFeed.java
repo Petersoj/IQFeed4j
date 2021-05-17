@@ -206,7 +206,7 @@ public abstract class AbstractFeed implements Runnable, AsyncExceptionListener {
     protected abstract void onProtocolVersionValidated();
 
     /**
-     * Called when a message is received. This method should not block!
+     * Called when a message is received. NOTE: THIS METHOD SHOULD NOT BLOCK.
      *
      * @param csv the CSV
      */

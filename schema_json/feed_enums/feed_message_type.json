@@ -12,6 +12,9 @@
     },
     {
       "name": "ERROR"
+    },
+    {
+      "name": "CURRENT_PROTOCOL"
     }
   ]
 }

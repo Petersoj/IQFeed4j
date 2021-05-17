@@ -110,7 +110,7 @@ public final class CSVMapper<T> {
      * @param csv    the CSV
      * @param offset offset to add to mapped indices when applying {@link MappingFunctions}
      *
-     * @return the POJO
+     * @return the POJO, or null if unsuccessful
      */
     public T map(String[] csv, int offset) {
         try {
@@ -161,7 +161,7 @@ public final class CSVMapper<T> {
         }
 
         /**
-         * Applies the mapping functions.
+         * Applies the mapping functions. Note this could throw a variety of {@link Exception}s.
          *
          * @param instance the POJO instance
          * @param value    the CSV value

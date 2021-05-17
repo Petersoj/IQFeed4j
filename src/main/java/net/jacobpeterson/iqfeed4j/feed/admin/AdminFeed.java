@@ -1,6 +1,7 @@
 package net.jacobpeterson.iqfeed4j.feed.admin;
 
 import net.jacobpeterson.iqfeed4j.feed.AbstractFeed;
+import net.jacobpeterson.iqfeed4j.model.feedenums.FeedMessageType;
 import net.jacobpeterson.iqfeed4j.model.feedenums.streaming.admin.AdminMessageType;
 import net.jacobpeterson.iqfeed4j.model.streaming.admin.ClientStatistics;
 import net.jacobpeterson.iqfeed4j.model.streaming.admin.FeedStatistics;
@@ -17,6 +18,8 @@ import static net.jacobpeterson.iqfeed4j.util.csv.CSVMapper.DateTimeConverters.M
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVMapper.PrimitiveConvertors.DOUBLE;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVMapper.PrimitiveConvertors.INT;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVMapper.PrimitiveConvertors.STRING;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueExists;
 
 /**
  * {@link AdminFeed} represents the Admin {@link AbstractFeed}.
@@ -65,7 +68,10 @@ public class AdminFeed extends AbstractFeed {
 
     }
 
-    private final HashMap<AdminMessageType, ArrayList<CompletableFuture<?>>> futureListOfAdminMessageTypes;
+    private final HashMap<AdminMessageType, ArrayList<CompletableFuture<Void>>> voidFutureListOfAdminMessageTypes;
+    private final HashMap<AdminMessageType, ArrayList<CompletableFuture<String>>> stringFutureListOfAdminMessageTypes;
+    private final ArrayList<CompletableFuture<FeedStatistics>> feedStatisticsFutureList;
+    private final ArrayList<CompletableFuture<ClientStatistics>> clientStatisticsFutureList;
     private final HashMap<Integer, FeedStatistics> feedStatisticsOfClientIDs;
 
     private FeedStatistics lastFeedStatistics;
@@ -80,11 +86,22 @@ public class AdminFeed extends AbstractFeed {
     public AdminFeed(String feedName, String hostname, int port) {
         super(feedName + FEED_NAME_SUFFIX, hostname, port);
 
-        // Create and populate 'futureListOfAdminMessageTypes'
-        futureListOfAdminMessageTypes = new HashMap<>();
-        for (AdminMessageType adminMessageType : AdminMessageType.values()) {
-            futureListOfAdminMessageTypes.put(adminMessageType, new ArrayList<>());
-        }
+        voidFutureListOfAdminMessageTypes = new HashMap<>();
+        // Create corresponding Void Future Lists
+        voidFutureListOfAdminMessageTypes.put(AdminMessageType.REGISTER_CLIENT_APP_COMPLETED, new ArrayList<>());
+        voidFutureListOfAdminMessageTypes.put(AdminMessageType.REMOVE_CLIENT_APP_COMPLETED, new ArrayList<>());
+        voidFutureListOfAdminMessageTypes.put(AdminMessageType.LOGIN_INFO_SAVED, new ArrayList<>());
+        voidFutureListOfAdminMessageTypes.put(AdminMessageType.LOGIN_INFO_NOT_SAVED, new ArrayList<>());
+        voidFutureListOfAdminMessageTypes.put(AdminMessageType.AUTOCONNECT_ON, new ArrayList<>());
+        voidFutureListOfAdminMessageTypes.put(AdminMessageType.AUTOCONNECT_OFF, new ArrayList<>());
+
+        stringFutureListOfAdminMessageTypes = new HashMap<>();
+        // Create corresponding String Future Lists
+        stringFutureListOfAdminMessageTypes.put(AdminMessageType.CURRENT_LOGINID, new ArrayList<>());
+        stringFutureListOfAdminMessageTypes.put(AdminMessageType.CURRENT_PASSWORD, new ArrayList<>());
+
+        feedStatisticsFutureList = new ArrayList<>();
+        clientStatisticsFutureList = new ArrayList<>();
 
         feedStatisticsOfClientIDs = new HashMap<>();
     }
@@ -94,7 +111,63 @@ public class AdminFeed extends AbstractFeed {
 
     @Override
     protected void onMessageReceived(String[] csv) {
-        // TODO
+        // Confirm message format
+        if (!valueEquals(csv, 0, FeedMessageType.SYSTEM.value()) || !valueExists(csv, 1)) {
+            LOGGER.error("Received unknown message format: {}", (Object) csv);
+            return;
+        }
+
+        try {
+            AdminMessageType parsedAdminMessageType = AdminMessageType.fromValue(csv[1]);
+
+            switch (parsedAdminMessageType) {
+                // Complete Void Futures
+                case REGISTER_CLIENT_APP_COMPLETED:
+                case REMOVE_CLIENT_APP_COMPLETED:
+                case LOGIN_INFO_SAVED:
+                case LOGIN_INFO_NOT_SAVED:
+                case AUTOCONNECT_ON:
+                case AUTOCONNECT_OFF:
+                    for (CompletableFuture<Void> voidFuture : voidFutureListOfAdminMessageTypes
+                            .get(parsedAdminMessageType)) {
+                        voidFuture.complete(null);
+                    }
+                    voidFutureListOfAdminMessageTypes.get(parsedAdminMessageType).clear();
+                    break;
+                // Complete String Futures
+                case CURRENT_LOGINID:
+                case CURRENT_PASSWORD:
+                    if (valueExists(csv, 2)) {
+                        for (CompletableFuture<String> stringFuture : stringFutureListOfAdminMessageTypes
+                                .get(parsedAdminMessageType)) {
+                            stringFuture.complete(csv[2]);
+                        }
+                    } else {
+                        LOGGER.error("Received unknown message format: {}", (Object) csv);
+                    }
+                    break;
+                case STATS:
+                    FeedStatistics feedStatistics = FEED_STATISTICS_CSV_MAPPER.map(csv, 2);
+                    if (feedStatistics != null) {
+                        for (CompletableFuture<FeedStatistics> feedStatisticsFuture : feedStatisticsFutureList) {
+                            feedStatisticsFuture.complete(feedStatistics);
+                        }
+                    }
+                    break;
+                case CLIENTSTATS:
+                    ClientStatistics clientStatistics = CLIENT_STATISTICS_CSV_MAPPER.map(csv, 2);
+                    if (clientStatistics != null) {
+                        for (CompletableFuture<ClientStatistics> clientStatisticsFuture : clientStatisticsFutureList) {
+                            clientStatisticsFuture.complete(clientStatistics);
+                        }
+                    }
+                    break;
+                default:
+                    LOGGER.error("Unhandled message type: {}", parsedAdminMessageType);
+            }
+        } catch (Exception exception) {
+            LOGGER.error("Received unknown message type: {}", csv[1], exception);
+        }
     }
 
     @Override
