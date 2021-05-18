@@ -13,7 +13,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
 
@@ -37,7 +36,6 @@ public abstract class AbstractFeed implements Runnable {
     protected final String feedName;
     protected final String hostname;
     protected final int port;
-    protected final Object messageReceivedLock;
     private final Object startStopLock;
 
     private Thread socketThread;
@@ -60,7 +58,6 @@ public abstract class AbstractFeed implements Runnable {
         this.hostname = hostname;
         this.port = port;
 
-        messageReceivedLock = new Object();
         startStopLock = new Object();
 
         intentionalSocketClose = false;
@@ -93,6 +90,14 @@ public abstract class AbstractFeed implements Runnable {
                     StandardCharsets.US_ASCII));
 
             LOGGER.debug("{} feed socket connection established.", feedName);
+
+            // Send protocol version command first
+            String protocolVersionCommand = String.format("%s,%s,%s%s",
+                    FeedMessageType.SYSTEM.value(), FeedCommand.SET_PROTOCOL.value(),
+                    CURRENTLY_SUPPORTED_PROTOCOL_VERSION,
+                    LineEnding.CR_LF.getASCIIString());
+            LOGGER.debug("Setting protocol version: {}", protocolVersionCommand);
+            sendMessage(protocolVersionCommand);
 
             socketThread = new Thread(this);
             socketThread.start();
@@ -152,26 +157,6 @@ public abstract class AbstractFeed implements Runnable {
         // Confirm #start() method has released 'startStopLock' and exited synchronized scope
         synchronized (startStopLock) {}
 
-        // Send and check protocol version messages
-        try {
-            sendSetProtocolMessage();
-            String[] protocolCSV = feedReader.readLine().split(COMMA_DELIMITER);
-            if (valueEquals(protocolCSV, 0, FeedMessageType.SYSTEM.value()) &&
-                    valueEquals(protocolCSV, 1, FeedMessageType.CURRENT_PROTOCOL.value()) &&
-                    valueEquals(protocolCSV, 2, CURRENTLY_SUPPORTED_PROTOCOL_VERSION)) {
-                LOGGER.debug("Protocol version validated: {}", (Object) protocolCSV);
-
-                sendSetClientNameMessage();
-
-                protocolVersionValidated = true;
-                onProtocolVersionValidated();
-            } else {
-                throw new RuntimeException("Protocol version not validated! Message: " + Arrays.toString(protocolCSV));
-            }
-        } catch (Exception exception) {
-            onAsyncException("Could not set up feed!", exception);
-        }
-
         while (!Thread.currentThread().isInterrupted()) { // Check if thread has been closed/interrupted
             try {
                 String line = feedReader.readLine();
@@ -181,14 +166,33 @@ public abstract class AbstractFeed implements Runnable {
                     cleanupState();
                     return;
                 } else {
+                    // TODO remove in production
+                    LOGGER.trace("Received message line: {}", line);
+
                     // Notes that no comma-separated value should have a comma in it, otherwise
                     // it will be treated like two individual comma-separated values.
                     String[] csv = line.split(COMMA_DELIMITER); // Splitting by one char doesn't use slow Regex
-                    synchronized (messageReceivedLock) { // Can be optimized away if not used in subclasses
+
+                    // Confirm protocol version valid
+                    if (protocolVersionValidated) {
+                        // Call message handlers
                         onMessageReceived(csv);
                         if (customFeedMessageListener != null) {
                             customFeedMessageListener.onMessageReceived(csv);
                         }
+                    } else if (valueEquals(csv, 0, FeedMessageType.SYSTEM.value()) &&
+                            valueEquals(csv, 1, FeedMessageType.CURRENT_PROTOCOL.value()) &&
+                            valueEquals(csv, 2, CURRENTLY_SUPPORTED_PROTOCOL_VERSION)) {
+                        LOGGER.debug("Protocol version validated: {}", (Object) csv);
+
+                        String clientNameCommand = String.format("%s,%s,%s%s",
+                                FeedMessageType.SYSTEM.value(), FeedCommand.SET_CLIENT_NAME.value(), feedName,
+                                LineEnding.CR_LF.getASCIIString());
+                        LOGGER.debug("Setting client name: {}", clientNameCommand);
+                        sendMessage(clientNameCommand);
+
+                        protocolVersionValidated = true;
+                        onProtocolVersionValidated();
                     }
                 }
             } catch (Exception exception) {
@@ -205,8 +209,7 @@ public abstract class AbstractFeed implements Runnable {
     protected abstract void onProtocolVersionValidated();
 
     /**
-     * Called when a message is received. It uses {@link #messageReceivedLock} as its synchronization lock. NOTE: THIS
-     * METHOD SHOULD NEVER BLOCK.
+     * Called when a message is received. NOTE: THIS METHOD SHOULD NEVER BLOCK.
      *
      * @param csv the CSV
      */
@@ -230,28 +233,6 @@ public abstract class AbstractFeed implements Runnable {
     protected synchronized void sendMessage(String message) throws IOException {
         feedWriter.write(message);
         feedWriter.flush();
-    }
-
-    /**
-     * Sends the {@link FeedCommand#SET_PROTOCOL} message.
-     *
-     * @throws IOException thrown for {@link IOException}s
-     */
-    protected void sendSetProtocolMessage() throws IOException {
-        sendMessage(String.format("%s,%s,%s%s",
-                FeedMessageType.SYSTEM.value(), FeedCommand.SET_PROTOCOL.value(), CURRENTLY_SUPPORTED_PROTOCOL_VERSION,
-                LineEnding.CR_LF));
-    }
-
-    /**
-     * Sends the {@link FeedCommand#SET_CLIENT_NAME} message.
-     *
-     * @throws IOException thrown for {@link IOException}s
-     */
-    protected void sendSetClientNameMessage() throws IOException {
-        sendMessage(String.format("%s,%s,%s%s",
-                FeedMessageType.SYSTEM.value(), FeedCommand.SET_CLIENT_NAME.value(), feedName,
-                LineEnding.CR_LF));
     }
 
     /**

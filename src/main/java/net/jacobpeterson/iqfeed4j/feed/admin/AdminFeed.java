@@ -34,7 +34,7 @@ import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueExists;
 public class AdminFeed extends AbstractFeed {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AdminFeed.class);
-    private static final String FEED_NAME_SUFFIX = "Admin Feed";
+    private static final String FEED_NAME_SUFFIX = " Admin Feed";
     private static final CSVMapper<ClientStatistics> CLIENT_STATISTICS_CSV_MAPPER;
     private static final CSVMapper<FeedStatistics> FEED_STATISTICS_CSV_MAPPER;
 
@@ -75,6 +75,7 @@ public class AdminFeed extends AbstractFeed {
 
     }
 
+    protected final Object messageReceivedLock;
     private final HashMap<Integer, ClientStatistics> clientStatisticsOfClientIDs;
     private final HashMap<AdminMessageType, CompletableFuture<Void>> voidFutureOfAdminMessageTypes;
     private final HashMap<AdminMessageType, CompletableFuture<String>> stringFutureOfAdminMessageTypes;
@@ -85,13 +86,14 @@ public class AdminFeed extends AbstractFeed {
     /**
      * Instantiates a new {@link AdminFeed}.
      *
-     * @param feedName the feed name
-     * @param hostname the host name
-     * @param port     the port
+     * @param adminFeedName the admin feed name
+     * @param hostname      the host name
+     * @param port          the port
      */
-    public AdminFeed(String feedName, String hostname, int port) {
-        super(feedName + FEED_NAME_SUFFIX, hostname, port);
+    public AdminFeed(String adminFeedName, String hostname, int port) {
+        super(adminFeedName + FEED_NAME_SUFFIX, hostname, port);
 
+        messageReceivedLock = new Object();
         clientStatisticsOfClientIDs = new HashMap<>();
         voidFutureOfAdminMessageTypes = new HashMap<>();
         stringFutureOfAdminMessageTypes = new HashMap<>();
@@ -113,56 +115,66 @@ public class AdminFeed extends AbstractFeed {
             return;
         }
 
-        try {
-            AdminMessageType parsedAdminMessageType = AdminMessageType.fromValue(csv[1]);
+        synchronized (messageReceivedLock) {
+            try {
+                AdminMessageType parsedAdminMessageType = AdminMessageType.fromValue(csv[1]);
 
-            switch (parsedAdminMessageType) {
-                // Complete Void Futures
-                case REGISTER_CLIENT_APP_COMPLETED:
-                case REMOVE_CLIENT_APP_COMPLETED:
-                case LOGIN_INFO_SAVED:
-                case LOGIN_INFO_NOT_SAVED:
-                case AUTOCONNECT_ON:
-                case AUTOCONNECT_OFF:
-                    CompletableFuture<Void> voidFuture = voidFutureOfAdminMessageTypes.get(parsedAdminMessageType);
-                    if (voidFuture != null) {
-                        voidFuture.complete(null);
-                    }
-                    voidFutureOfAdminMessageTypes.put(parsedAdminMessageType, null);
-                    break;
-                // Complete String Futures
-                case CURRENT_LOGINID:
-                case CURRENT_PASSWORD:
-                    if (valueExists(csv, 2)) {
-                        CompletableFuture<String> stringFuture =
-                                stringFutureOfAdminMessageTypes.get(parsedAdminMessageType);
-                        if (stringFuture != null) {
-                            stringFuture.complete(csv[2]);
+                switch (parsedAdminMessageType) {
+                    // Complete Void Futures
+                    case REGISTER_CLIENT_APP_COMPLETED:
+                    case REMOVE_CLIENT_APP_COMPLETED:
+                    case LOGIN_INFO_SAVED:
+                    case LOGIN_INFO_NOT_SAVED:
+                    case AUTOCONNECT_ON:
+                    case AUTOCONNECT_OFF:
+                        CompletableFuture<Void> voidFuture = voidFutureOfAdminMessageTypes.get(parsedAdminMessageType);
+                        if (voidFuture != null) {
+                            voidFuture.complete(null);
                         }
-                        stringFutureOfAdminMessageTypes.put(parsedAdminMessageType, null);
-                    } else {
-                        LOGGER.error("Received unknown message format: {}", (Object) csv);
-                    }
-                    break;
-                case STATS:
-                    FeedStatistics feedStatistics = FEED_STATISTICS_CSV_MAPPER.map(csv, 2);
-                    if (feedStatistics != null && feedStatisticsFuture != null) {
-                        lastFeedStatistics = feedStatistics;
-                        feedStatisticsFuture.complete(feedStatistics);
-                    }
-                    break;
-                case CLIENTSTATS:
-                    ClientStatistics clientStatistics = CLIENT_STATISTICS_CSV_MAPPER.map(csv, 2);
-                    if (clientStatistics != null && clientStatisticsFuture != null) {
-                        clientStatisticsOfClientIDs.put(clientStatistics.getClientID(), clientStatistics);
-                        clientStatisticsFuture.complete(clientStatistics);
-                    }
-                    break;
-                default:
-                    LOGGER.error("Unhandled message type: {}", parsedAdminMessageType);
+                        voidFutureOfAdminMessageTypes.put(parsedAdminMessageType, null);
+                        break;
+                    // Complete String Futures
+                    case CURRENT_LOGINID:
+                    case CURRENT_PASSWORD:
+                        if (valueExists(csv, 2)) {
+                            CompletableFuture<String> stringFuture =
+                                    stringFutureOfAdminMessageTypes.get(parsedAdminMessageType);
+                            if (stringFuture != null) {
+                                stringFuture.complete(csv[2]);
+                            }
+                            stringFutureOfAdminMessageTypes.put(parsedAdminMessageType, null);
+                        } else {
+                            LOGGER.error("Received unknown message format: {}", (Object) csv);
+                        }
+                        break;
+                    case STATS:
+                        FeedStatistics feedStatistics = FEED_STATISTICS_CSV_MAPPER.map(csv, 2);
+                        if (feedStatistics != null) {
+                            lastFeedStatistics = feedStatistics;
+
+                            if (feedStatisticsFuture != null) {
+                                feedStatisticsFuture.complete(feedStatistics);
+                                feedStatisticsFuture = null;
+                            }
+                        }
+                        break;
+                    case CLIENTSTATS:
+                        ClientStatistics clientStatistics = CLIENT_STATISTICS_CSV_MAPPER.map(csv, 2);
+                        if (clientStatistics != null) {
+                            clientStatisticsOfClientIDs.put(clientStatistics.getClientID(), clientStatistics);
+
+                            if (clientStatisticsFuture != null) {
+                                clientStatisticsFuture.complete(clientStatistics);
+                                clientStatisticsFuture = null;
+                            }
+                        }
+                        break;
+                    default:
+                        LOGGER.error("Unhandled message type: {}", parsedAdminMessageType);
+                }
+            } catch (Exception exception) {
+                LOGGER.error("Received unknown message type: {}", csv[1], exception);
             }
-        } catch (Exception exception) {
-            LOGGER.error("Received unknown message type: {}", csv[1], exception);
         }
     }
 
@@ -189,7 +201,9 @@ public class AdminFeed extends AbstractFeed {
             }
         }
 
-        sendMessage(joiner.toString());
+        String command = joiner.toString();
+        LOGGER.debug("Sending Admin command message: {}", command);
+        sendMessage(command);
     }
 
     //
@@ -407,6 +421,28 @@ public class AdminFeed extends AbstractFeed {
     //
     // END Feed commands
     //
+
+    /**
+     * Gets a {@link CompletableFuture} for the next {@link FeedStatistics} message.
+     *
+     * @return a {@link CompletableFuture} of {@link FeedStatistics}
+     */
+    public CompletableFuture<FeedStatistics> getNextFeedStatistics() {
+        CompletableFuture<FeedStatistics> feedStatisticsFuture = new CompletableFuture<>();
+        this.feedStatisticsFuture = feedStatisticsFuture;
+        return feedStatisticsFuture;
+    }
+
+    /**
+     * Gets a {@link CompletableFuture} for the next {@link ClientStatistics} message.
+     *
+     * @return a {@link CompletableFuture} of {@link ClientStatistics}
+     */
+    public CompletableFuture<ClientStatistics> getNextClientStatistics() {
+        CompletableFuture<ClientStatistics> clientStatisticsFuture = new CompletableFuture<>();
+        this.clientStatisticsFuture = clientStatisticsFuture;
+        return clientStatisticsFuture;
+    }
 
     /**
      * Gets {@link #clientStatisticsOfClientIDs}.

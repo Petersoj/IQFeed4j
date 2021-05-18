@@ -49,6 +49,8 @@ targetCompatibility = 1.8
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 javadoc {
+    // Explicitly define source version
+    options.addStringOption('source', '8')
     // Used to suppress Javadoc linting warnings
     options.addStringOption('Xdoclint:none', '-quiet')
     // Explicitly define Charset for Javadocs

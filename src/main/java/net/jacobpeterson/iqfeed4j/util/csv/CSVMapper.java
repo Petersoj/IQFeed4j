@@ -3,9 +3,13 @@ package net.jacobpeterson.iqfeed4j.util.csv;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.concurrent.Callable;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -48,7 +52,10 @@ public final class CSVMapper<T> {
                 (value) -> LocalDateTime.parse(value, DATE_SPACE_TIME_FORMATTER);
 
         private static final DateTimeFormatter MONTH3_DAY_TIME_AM_PM_FORMATTER =
-                DateTimeFormatter.ofPattern("MMM dd HH:mmaa");
+                new DateTimeFormatterBuilder()
+                        .appendPattern("MMM dd h:mma")
+                        .parseDefaulting(ChronoField.YEAR, LocalDate.now().getYear())
+                        .toFormatter(Locale.ENGLISH);
         public static final Function<String, LocalDateTime> MONTH3_DAY_TIME_AM_PM =
                 (value) -> LocalDateTime.parse(value, MONTH3_DAY_TIME_AM_PM_FORMATTER);
     }
@@ -78,7 +85,7 @@ public final class CSVMapper<T> {
      * @param stringToFieldConverter see {@link MappingFunctions} constructor doc
      */
     public <P> void addMapping(BiConsumer<T, P> fieldSetter, Function<String, P> stringToFieldConverter) {
-        int nextCSVIndex = mappingFunctionsOfCSVIndices.keySet().stream().max(Integer::compareTo).orElse(0);
+        int nextCSVIndex = mappingFunctionsOfCSVIndices.keySet().stream().max(Integer::compareTo).orElse(-1) + 1;
         setMapping(nextCSVIndex, fieldSetter, stringToFieldConverter);
     }
 
@@ -108,7 +115,7 @@ public final class CSVMapper<T> {
      * {@link #addMapping(BiConsumer, Function)}.
      *
      * @param csv    the CSV
-     * @param offset offset to add to mapped indices when applying {@link MappingFunctions}
+     * @param offset offset to add to CSV indices when applying {@link MappingFunctions}
      *
      * @return the POJO, or null if unsuccessful
      */
