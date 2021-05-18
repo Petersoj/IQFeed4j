@@ -1,16 +1,23 @@
 package net.jacobpeterson.iqfeed4j.feed.admin;
 
 import net.jacobpeterson.iqfeed4j.feed.AbstractFeed;
+import net.jacobpeterson.iqfeed4j.model.feedenums.FeedCommand;
 import net.jacobpeterson.iqfeed4j.model.feedenums.FeedMessageType;
+import net.jacobpeterson.iqfeed4j.model.feedenums.misc.OnOffOption;
+import net.jacobpeterson.iqfeed4j.model.feedenums.streaming.admin.AdminCommand;
 import net.jacobpeterson.iqfeed4j.model.feedenums.streaming.admin.AdminMessageType;
 import net.jacobpeterson.iqfeed4j.model.streaming.admin.ClientStatistics;
 import net.jacobpeterson.iqfeed4j.model.streaming.admin.FeedStatistics;
+import net.jacobpeterson.iqfeed4j.model.streaming.admin.FeedStatistics.Status;
 import net.jacobpeterson.iqfeed4j.util.csv.CSVMapper;
+import net.jacobpeterson.iqfeed4j.util.string.LineEnding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.StringJoiner;
 import java.util.concurrent.CompletableFuture;
 
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVMapper.DateTimeConverters.DATE_SPACE_TIME;
@@ -22,7 +29,7 @@ import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueExists;
 
 /**
- * {@link AdminFeed} represents the Admin {@link AbstractFeed}.
+ * {@link AdminFeed} represents the Admin {@link AbstractFeed}. Methods in this class are not synchronized.
  */
 public class AdminFeed extends AbstractFeed {
 
@@ -56,7 +63,7 @@ public class AdminFeed extends AbstractFeed {
         FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setAttemptedReconnections, INT);
         FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setStartTime, MONTH3_DAY_TIME_AM_PM);
         FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setMarketTime, MONTH3_DAY_TIME_AM_PM);
-        FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setStatus, FeedStatistics.Status::fromValue);
+        FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setStatus, Status::fromValue);
         FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setIqFeedVersion, STRING);
         FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setLoginID, STRING);
         FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setTotalKiloBytesReceived, DOUBLE);
@@ -68,12 +75,11 @@ public class AdminFeed extends AbstractFeed {
 
     }
 
-    private final HashMap<AdminMessageType, ArrayList<CompletableFuture<Void>>> voidFutureListOfAdminMessageTypes;
-    private final HashMap<AdminMessageType, ArrayList<CompletableFuture<String>>> stringFutureListOfAdminMessageTypes;
-    private final ArrayList<CompletableFuture<FeedStatistics>> feedStatisticsFutureList;
-    private final ArrayList<CompletableFuture<ClientStatistics>> clientStatisticsFutureList;
-    private final HashMap<Integer, FeedStatistics> feedStatisticsOfClientIDs;
-
+    private final HashMap<Integer, ClientStatistics> clientStatisticsOfClientIDs;
+    private final HashMap<AdminMessageType, CompletableFuture<Void>> voidFutureOfAdminMessageTypes;
+    private final HashMap<AdminMessageType, CompletableFuture<String>> stringFutureOfAdminMessageTypes;
+    private CompletableFuture<FeedStatistics> feedStatisticsFuture;
+    private CompletableFuture<ClientStatistics> clientStatisticsFuture;
     private FeedStatistics lastFeedStatistics;
 
     /**
@@ -86,24 +92,9 @@ public class AdminFeed extends AbstractFeed {
     public AdminFeed(String feedName, String hostname, int port) {
         super(feedName + FEED_NAME_SUFFIX, hostname, port);
 
-        voidFutureListOfAdminMessageTypes = new HashMap<>();
-        // Create corresponding Void Future Lists
-        voidFutureListOfAdminMessageTypes.put(AdminMessageType.REGISTER_CLIENT_APP_COMPLETED, new ArrayList<>());
-        voidFutureListOfAdminMessageTypes.put(AdminMessageType.REMOVE_CLIENT_APP_COMPLETED, new ArrayList<>());
-        voidFutureListOfAdminMessageTypes.put(AdminMessageType.LOGIN_INFO_SAVED, new ArrayList<>());
-        voidFutureListOfAdminMessageTypes.put(AdminMessageType.LOGIN_INFO_NOT_SAVED, new ArrayList<>());
-        voidFutureListOfAdminMessageTypes.put(AdminMessageType.AUTOCONNECT_ON, new ArrayList<>());
-        voidFutureListOfAdminMessageTypes.put(AdminMessageType.AUTOCONNECT_OFF, new ArrayList<>());
-
-        stringFutureListOfAdminMessageTypes = new HashMap<>();
-        // Create corresponding String Future Lists
-        stringFutureListOfAdminMessageTypes.put(AdminMessageType.CURRENT_LOGINID, new ArrayList<>());
-        stringFutureListOfAdminMessageTypes.put(AdminMessageType.CURRENT_PASSWORD, new ArrayList<>());
-
-        feedStatisticsFutureList = new ArrayList<>();
-        clientStatisticsFutureList = new ArrayList<>();
-
-        feedStatisticsOfClientIDs = new HashMap<>();
+        clientStatisticsOfClientIDs = new HashMap<>();
+        voidFutureOfAdminMessageTypes = new HashMap<>();
+        stringFutureOfAdminMessageTypes = new HashMap<>();
     }
 
     @Override
@@ -111,6 +102,11 @@ public class AdminFeed extends AbstractFeed {
 
     @Override
     protected void onMessageReceived(String[] csv) {
+        if (valueEquals(csv, 0, FeedMessageType.ERROR.value())) {
+            LOGGER.error("Received error message! {}", (Object) csv);
+            return;
+        }
+
         // Confirm message format
         if (!valueEquals(csv, 0, FeedMessageType.SYSTEM.value()) || !valueExists(csv, 1)) {
             LOGGER.error("Received unknown message format: {}", (Object) csv);
@@ -128,38 +124,38 @@ public class AdminFeed extends AbstractFeed {
                 case LOGIN_INFO_NOT_SAVED:
                 case AUTOCONNECT_ON:
                 case AUTOCONNECT_OFF:
-                    for (CompletableFuture<Void> voidFuture : voidFutureListOfAdminMessageTypes
-                            .get(parsedAdminMessageType)) {
+                    CompletableFuture<Void> voidFuture = voidFutureOfAdminMessageTypes.get(parsedAdminMessageType);
+                    if (voidFuture != null) {
                         voidFuture.complete(null);
                     }
-                    voidFutureListOfAdminMessageTypes.get(parsedAdminMessageType).clear();
+                    voidFutureOfAdminMessageTypes.put(parsedAdminMessageType, null);
                     break;
                 // Complete String Futures
                 case CURRENT_LOGINID:
                 case CURRENT_PASSWORD:
                     if (valueExists(csv, 2)) {
-                        for (CompletableFuture<String> stringFuture : stringFutureListOfAdminMessageTypes
-                                .get(parsedAdminMessageType)) {
+                        CompletableFuture<String> stringFuture =
+                                stringFutureOfAdminMessageTypes.get(parsedAdminMessageType);
+                        if (stringFuture != null) {
                             stringFuture.complete(csv[2]);
                         }
+                        stringFutureOfAdminMessageTypes.put(parsedAdminMessageType, null);
                     } else {
                         LOGGER.error("Received unknown message format: {}", (Object) csv);
                     }
                     break;
                 case STATS:
                     FeedStatistics feedStatistics = FEED_STATISTICS_CSV_MAPPER.map(csv, 2);
-                    if (feedStatistics != null) {
-                        for (CompletableFuture<FeedStatistics> feedStatisticsFuture : feedStatisticsFutureList) {
-                            feedStatisticsFuture.complete(feedStatistics);
-                        }
+                    if (feedStatistics != null && feedStatisticsFuture != null) {
+                        lastFeedStatistics = feedStatistics;
+                        feedStatisticsFuture.complete(feedStatistics);
                     }
                     break;
                 case CLIENTSTATS:
                     ClientStatistics clientStatistics = CLIENT_STATISTICS_CSV_MAPPER.map(csv, 2);
-                    if (clientStatistics != null) {
-                        for (CompletableFuture<ClientStatistics> clientStatisticsFuture : clientStatisticsFutureList) {
-                            clientStatisticsFuture.complete(clientStatistics);
-                        }
+                    if (clientStatistics != null && clientStatisticsFuture != null) {
+                        clientStatisticsOfClientIDs.put(clientStatistics.getClientID(), clientStatistics);
+                        clientStatisticsFuture.complete(clientStatistics);
                     }
                     break;
                 default:
@@ -171,7 +167,262 @@ public class AdminFeed extends AbstractFeed {
     }
 
     @Override
-    public void onAsyncException(String message, Exception exception) {
+    protected void onAsyncException(String message, Exception exception) {
         LOGGER.error(message, exception);
+    }
+
+    /**
+     * Sends a {@link FeedCommand#SYSTEM} {@link AdminCommand}.
+     *
+     * @param adminCommand the {@link AdminCommand}
+     * @param arguments    the arguments. Null for no arguments.
+     *
+     * @throws IOException thrown for {@link IOException}s
+     */
+    public void sendAdminCommand(AdminCommand adminCommand, String... arguments) throws IOException {
+        StringJoiner joiner = new StringJoiner(",", "", LineEnding.CR_LF.getASCIIString());
+        joiner.add(FeedCommand.SYSTEM.value());
+        joiner.add(adminCommand.value());
+        if (arguments != null && arguments.length != 0) {
+            for (String argument : arguments) {
+                joiner.add(argument);
+            }
+        }
+
+        sendMessage(joiner.toString());
+    }
+
+    //
+    // START Feed commands
+    //
+
+    /**
+     * Gets the {@link AdminCommand} {@link CompletableFuture} or calls {@link #sendAdminCommand(AdminCommand,
+     * String...)} and creates/puts a new {@link CompletableFuture}. This method is synchronized with {@link
+     * #messageReceivedLock}.
+     *
+     * @param <T>                       the {@link CompletableFuture} type
+     * @param futureOfAdminMessageTypes the {@link CompletableFuture}s of {@link AdminMessageType}s
+     * @param adminMessageType          the {@link AdminMessageType}
+     * @param adminCommand              the {@link AdminCommand} for the {@link AdminMessageType}
+     * @param arguments                 the arguments
+     *
+     * @return a {@link CompletableFuture}
+     *
+     * @throws IOException thrown for {@link IOException}s
+     */
+    private <T> CompletableFuture<T> getOrSendAdminCommandFuture(
+            Map<AdminMessageType, CompletableFuture<T>> futureOfAdminMessageTypes, AdminMessageType adminMessageType,
+            AdminCommand adminCommand, String... arguments) throws IOException {
+        synchronized (messageReceivedLock) {
+            CompletableFuture<T> messageFuture = futureOfAdminMessageTypes.get(adminMessageType);
+            if (messageFuture != null) {
+                return messageFuture;
+            }
+
+            sendAdminCommand(adminCommand, arguments);
+            messageFuture = new CompletableFuture<>();
+            futureOfAdminMessageTypes.put(adminMessageType, messageFuture);
+            return messageFuture;
+        }
+    }
+
+    /**
+     * Registers your application with the feed. Users will not be able to login to the feed until an application is
+     * registered.
+     *
+     * @param productID      the Registered Product ID that you were assigned when you created your developer API
+     *                       account.
+     * @param productVersion the version of YOUR application.
+     *
+     * @return a {@link CompletableFuture} completed upon command response
+     *
+     * @throws Exception thrown for {@link Exception}s
+     */
+    public CompletableFuture<Void> registerClientApp(String productID, String productVersion) throws Exception {
+        return getOrSendAdminCommandFuture(voidFutureOfAdminMessageTypes,
+                AdminMessageType.REGISTER_CLIENT_APP_COMPLETED,
+                AdminCommand.REGISTER_CLIENT_APP, productID, productVersion);
+    }
+
+    /**
+     * Removes the registration of your application with the feed.
+     *
+     * @param productID      the Registered Product ID that you were assigned when you created your developer API
+     *                       account.
+     * @param productVersion the version of YOUR application.
+     *
+     * @return a {@link CompletableFuture} completed upon command response
+     *
+     * @throws Exception thrown for {@link Exception}s
+     */
+    public CompletableFuture<Void> removeClientApp(String productID, String productVersion) throws Exception {
+        return getOrSendAdminCommandFuture(voidFutureOfAdminMessageTypes,
+                AdminMessageType.REMOVE_CLIENT_APP_COMPLETED,
+                AdminCommand.REMOVE_CLIENT_APP, productID, productVersion);
+    }
+
+    /**
+     * Sets the user loginID for IQFeed.
+     *
+     * @param loginID the loginID that was assigned to the user when they created their datafeed account.
+     *
+     * @return a {@link CompletableFuture} completed upon command response
+     *
+     * @throws Exception thrown for {@link Exception}s
+     */
+    public CompletableFuture<String> setLoginID(String loginID) throws Exception {
+        return getOrSendAdminCommandFuture(stringFutureOfAdminMessageTypes,
+                AdminMessageType.CURRENT_LOGINID,
+                AdminCommand.SET_LOGINID, loginID);
+    }
+
+    /**
+     * Sets the user password for IQFeed.
+     *
+     * @param loginID the password that was assigned to the user when they created their datafeed account.
+     *
+     * @return a {@link CompletableFuture} completed upon command response
+     *
+     * @throws Exception thrown for {@link Exception}s
+     */
+    public CompletableFuture<String> setPassword(String loginID) throws Exception {
+        return getOrSendAdminCommandFuture(stringFutureOfAdminMessageTypes,
+                AdminMessageType.CURRENT_PASSWORD,
+                AdminCommand.SET_PASSWORD, loginID);
+    }
+
+    /**
+     * Sets the save login info (loginID/password) flag for IQFeed. This will be ignored at the time of connection if
+     * either the loginID, password are not set.
+     *
+     * @param onOffOption {@link OnOffOption#ON} if you want IQConnect to save the user's loginID and password or {@link
+     *                    OnOffOption#OFF} if you do not want IQConnect to save the user's loginID and password.
+     *
+     * @return a {@link CompletableFuture} completed upon command response
+     *
+     * @throws Exception thrown for {@link Exception}s
+     */
+    public CompletableFuture<Void> setSaveLoginInfo(OnOffOption onOffOption) throws Exception {
+        switch (onOffOption) {
+            case ON:
+                return getOrSendAdminCommandFuture(voidFutureOfAdminMessageTypes,
+                        AdminMessageType.LOGIN_INFO_SAVED,
+                        AdminCommand.SET_SAVE_LOGIN_INFO, onOffOption.value());
+            case OFF:
+                return getOrSendAdminCommandFuture(voidFutureOfAdminMessageTypes,
+                        AdminMessageType.LOGIN_INFO_NOT_SAVED,
+                        AdminCommand.SET_SAVE_LOGIN_INFO, onOffOption.value());
+            default:
+                throw new UnsupportedOperationException();
+        }
+    }
+
+    /**
+     * Sets the auto connect flag for IQFeed. This will be ignored at the time of connection if either the loginID,
+     * password are not set.
+     *
+     * @param onOffOption {@link OnOffOption#ON} if you want IQConnect to automatically connect to the servers or {@link
+     *                    OnOffOption#OFF} if you do not want IQConnect to automatically connect.
+     *
+     * @return a {@link CompletableFuture} completed upon command response
+     *
+     * @throws Exception thrown for {@link Exception}s
+     */
+    public CompletableFuture<Void> setAutoconnect(OnOffOption onOffOption) throws Exception {
+        switch (onOffOption) {
+            case ON:
+                return getOrSendAdminCommandFuture(voidFutureOfAdminMessageTypes,
+                        AdminMessageType.AUTOCONNECT_ON,
+                        AdminCommand.SET_AUTOCONNECT, onOffOption.value());
+            case OFF:
+                return getOrSendAdminCommandFuture(voidFutureOfAdminMessageTypes,
+                        AdminMessageType.AUTOCONNECT_OFF,
+                        AdminCommand.SET_AUTOCONNECT, onOffOption.value());
+            default:
+                throw new UnsupportedOperationException();
+        }
+    }
+
+    /**
+     * Tells IQConnect.exe to initiate a connection to the servers. This happens automatically upon launching the feed
+     * unless the ProductID and/or Product version have not been set. This message is ignored if the feed is already
+     * connected.
+     * <br>
+     * There is no set message associated with this command but you should notice the connection status in the {@link
+     * #getLastFeedStatistics()} message change from {@link Status#NOT_CONNECTED} to {@link Status#CONNECTED} if the
+     * connection was successful.
+     *
+     * @throws Exception thrown for {@link Exception}s
+     */
+    public void connect() throws Exception {
+        sendAdminCommand(AdminCommand.CONNECT);
+    }
+
+    /**
+     * Tells IQConnect.exe to disconnect from the IQFeed servers. This happens automatically as soon as the last client
+     * connection to IQConnect is terminated and the ClientsConnected value in the S,STATS message returns to zero
+     * (after having incremented above zero). This message is ignored if the feed is already disconnected.
+     * <br>
+     * There is no set message associated with this command but you should notice the connection status in the {@link
+     * #getLastFeedStatistics()} message change from {@link Status#CONNECTED} to {@link Status#NOT_CONNECTED} if the
+     * disconnection was successful.
+     *
+     * @throws Exception thrown for {@link Exception}s
+     */
+    public void disconnect() throws Exception {
+        sendAdminCommand(AdminCommand.DISCONNECT);
+    }
+
+    /**
+     * Tells IQConnect.exe to start streaming client stats to your connection.
+     * <br>
+     * There is no set message associated with this command but you should start receiving {@link ClientStatistics}
+     * messages (detailed on the Admin System Messages page). You will receive 1 stats message per second per client
+     * currently connected to IQFeed.
+     *
+     * @throws Exception thrown for {@link Exception}s
+     * @see #getClientStatisticsOfClientIDs()
+     */
+    public void setClientStatsOn() throws Exception {
+        sendAdminCommand(AdminCommand.CLIENTSTATS_ON);
+    }
+
+    /**
+     * Tells IQConnect.exe to stop streaming client stats to your connection.
+     * <br>
+     * There is no set message associated with this command but you should stop receiving {@link ClientStatistics}
+     * messages.
+     *
+     * @throws Exception thrown for {@link Exception}s
+     * @see #getClientStatisticsOfClientIDs()
+     */
+    public void setClientStatsOff() throws Exception {
+        sendAdminCommand(AdminCommand.CLIENTSTATS_OFF);
+        synchronized (messageReceivedLock) {
+            clientStatisticsOfClientIDs.clear();
+        }
+    }
+
+    //
+    // END Feed commands
+    //
+
+    /**
+     * Gets {@link #clientStatisticsOfClientIDs}.
+     *
+     * @return a {@link HashMap}
+     */
+    public HashMap<Integer, ClientStatistics> getClientStatisticsOfClientIDs() {
+        return clientStatisticsOfClientIDs;
+    }
+
+    /**
+     * Gets {@link #lastFeedStatistics}.
+     *
+     * @return the last {@link FeedStatistics}
+     */
+    public FeedStatistics getLastFeedStatistics() {
+        return lastFeedStatistics;
     }
 }

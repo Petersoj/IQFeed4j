@@ -1,0 +1,8 @@
+{
+  "type": "string",
+  "title": "Defines enums for on or off.",
+  "enum": [
+    "On",
+    "Off"
+  ]
+}

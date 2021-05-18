@@ -2,7 +2,19 @@
   "type": "string",
   "title": "System commands that are sent to IQFeed.",
   "enum": [
+    "S",
     "SET PROTOCOL",
     "SET CLIENT NAME"
+  ],
+  "javaEnums": [
+    {
+      "name": "SYSTEM"
+    },
+    {
+      "name": "SET_PROTOCOL"
+    },
+    {
+      "name": "SET_CLIENT_NAME"
+    }
   ]
 }

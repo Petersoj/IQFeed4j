@@ -2,7 +2,6 @@ package net.jacobpeterson.iqfeed4j.feed;
 
 import net.jacobpeterson.iqfeed4j.model.feedenums.FeedCommand;
 import net.jacobpeterson.iqfeed4j.model.feedenums.FeedMessageType;
-import net.jacobpeterson.iqfeed4j.util.exception.AsyncExceptionListener;
 import net.jacobpeterson.iqfeed4j.util.string.LineEnding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,12 +20,16 @@ import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
 /**
  * {@link AbstractFeed} represents a TCP socket/feed for IQFeed.
  */
-public abstract class AbstractFeed implements Runnable, AsyncExceptionListener {
+public abstract class AbstractFeed implements Runnable {
 
     /**
      * Protocol versions are managed by the version control branches.
      */
     public static final String CURRENTLY_SUPPORTED_PROTOCOL_VERSION = "6.1";
+    /**
+     * A comma (,).
+     */
+    public static final String COMMA_DELIMITER = ",";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFeed.class);
     private static final int SOCKET_THREAD_JOIN_WAIT_MILLIS = 5000;
@@ -34,6 +37,7 @@ public abstract class AbstractFeed implements Runnable, AsyncExceptionListener {
     protected final String feedName;
     protected final String hostname;
     protected final int port;
+    protected final Object messageReceivedLock;
     private final Object startStopLock;
 
     private Thread socketThread;
@@ -42,6 +46,7 @@ public abstract class AbstractFeed implements Runnable, AsyncExceptionListener {
     private BufferedReader feedReader;
     private boolean intentionalSocketClose;
     private boolean protocolVersionValidated;
+    protected FeedMessageListener customFeedMessageListener;
 
     /**
      * Instantiates a new {@link AbstractFeed}.
@@ -55,6 +60,7 @@ public abstract class AbstractFeed implements Runnable, AsyncExceptionListener {
         this.hostname = hostname;
         this.port = port;
 
+        messageReceivedLock = new Object();
         startStopLock = new Object();
 
         intentionalSocketClose = false;
@@ -104,6 +110,8 @@ public abstract class AbstractFeed implements Runnable, AsyncExceptionListener {
             closeSocket();
             interruptAndJoinThread();
             cleanupState();
+
+            LOGGER.debug("{} feed socket stopped.", feedName);
         }
     }
 
@@ -141,11 +149,13 @@ public abstract class AbstractFeed implements Runnable, AsyncExceptionListener {
 
     @Override
     public void run() {
+        // Confirm #start() method has released 'startStopLock' and exited synchronized scope
+        synchronized (startStopLock) {}
+
         // Send and check protocol version messages
         try {
             sendSetProtocolMessage();
-            String[] protocolCSV = feedReader.readLine().split(",");
-
+            String[] protocolCSV = feedReader.readLine().split(COMMA_DELIMITER);
             if (valueEquals(protocolCSV, 0, FeedMessageType.SYSTEM.value()) &&
                     valueEquals(protocolCSV, 1, FeedMessageType.CURRENT_PROTOCOL.value()) &&
                     valueEquals(protocolCSV, 2, CURRENTLY_SUPPORTED_PROTOCOL_VERSION)) {
@@ -173,7 +183,13 @@ public abstract class AbstractFeed implements Runnable, AsyncExceptionListener {
                 } else {
                     // Notes that no comma-separated value should have a comma in it, otherwise
                     // it will be treated like two individual comma-separated values.
-                    onMessageReceived(line.split(",")); // Splitting by one char doesn't use Regex
+                    String[] csv = line.split(COMMA_DELIMITER); // Splitting by one char doesn't use slow Regex
+                    synchronized (messageReceivedLock) { // Can be optimized away if not used in subclasses
+                        onMessageReceived(csv);
+                        if (customFeedMessageListener != null) {
+                            customFeedMessageListener.onMessageReceived(csv);
+                        }
+                    }
                 }
             } catch (Exception exception) {
                 if (!intentionalSocketClose) {
@@ -184,45 +200,35 @@ public abstract class AbstractFeed implements Runnable, AsyncExceptionListener {
     }
 
     /**
-     * Checks for error message format.
-     * <br>
-     * e.g. <code>[Request ID], E, [Error Text]</code> or <code>E, [Error Text]</code>
-     * <br>
-     * If the 'Request ID' is the char literal 'E', then this will always return true unfortunately (this is a flaw with
-     * the IQFeed API)
-     *
-     * @param csv the CSV
-     *
-     * @return true if the 'csv' represents an error message
-     */
-    public boolean isErrorMessage(String[] csv) {
-        return valueEquals(csv, 0, FeedMessageType.ERROR.value()) ||
-                valueEquals(csv, 1, FeedMessageType.ERROR.value());
-    }
-
-    /**
      * Called when the protocol version has been validated.
      */
     protected abstract void onProtocolVersionValidated();
 
     /**
-     * Called when a message is received. NOTE: THIS METHOD SHOULD NOT BLOCK.
+     * Called when a message is received. It uses {@link #messageReceivedLock} as its synchronization lock. NOTE: THIS
+     * METHOD SHOULD NEVER BLOCK.
      *
      * @param csv the CSV
      */
     protected abstract void onMessageReceived(String[] csv);
 
     /**
-     * Sends a message line. This method is synchronized with this object instance.
+     * Called when an asynchronous {@link Exception} has occurred.
      *
-     * @param message    the message
-     * @param lineEnding the {@link LineEnding} for the message
+     * @param message   the message
+     * @param exception the {@link Exception}
+     */
+    protected abstract void onAsyncException(String message, Exception exception);
+
+    /**
+     * Sends a message. This method is synchronized.
+     *
+     * @param message the message
      *
      * @throws IOException thrown for {@link IOException}s
      */
-    protected synchronized void sendMessageLine(String message, LineEnding lineEnding) throws IOException {
+    protected synchronized void sendMessage(String message) throws IOException {
         feedWriter.write(message);
-        feedWriter.write(lineEnding.getASCIIString());
         feedWriter.flush();
     }
 
@@ -232,9 +238,9 @@ public abstract class AbstractFeed implements Runnable, AsyncExceptionListener {
      * @throws IOException thrown for {@link IOException}s
      */
     protected void sendSetProtocolMessage() throws IOException {
-        sendMessageLine(String.format("%s,%s,%s",
-                FeedMessageType.SYSTEM.value(), FeedCommand.SET_PROTOCOL.value(), CURRENTLY_SUPPORTED_PROTOCOL_VERSION),
-                LineEnding.CR_LF);
+        sendMessage(String.format("%s,%s,%s%s",
+                FeedMessageType.SYSTEM.value(), FeedCommand.SET_PROTOCOL.value(), CURRENTLY_SUPPORTED_PROTOCOL_VERSION,
+                LineEnding.CR_LF));
     }
 
     /**
@@ -243,9 +249,9 @@ public abstract class AbstractFeed implements Runnable, AsyncExceptionListener {
      * @throws IOException thrown for {@link IOException}s
      */
     protected void sendSetClientNameMessage() throws IOException {
-        sendMessageLine(String.format("%s,%s,%s",
-                FeedMessageType.SYSTEM.value(), FeedCommand.SET_CLIENT_NAME.value(), feedName),
-                LineEnding.CR_LF);
+        sendMessage(String.format("%s,%s,%s%s",
+                FeedMessageType.SYSTEM.value(), FeedCommand.SET_CLIENT_NAME.value(), feedName,
+                LineEnding.CR_LF));
     }
 
     /**
@@ -292,5 +298,14 @@ public abstract class AbstractFeed implements Runnable, AsyncExceptionListener {
      */
     public boolean isProtocolVersionValidated() {
         return protocolVersionValidated;
+    }
+
+    /**
+     * Sets {@link #customFeedMessageListener}.
+     *
+     * @param customFeedMessageListener the custom {@link FeedMessageListener}
+     */
+    public void setCustomFeedMessageListener(FeedMessageListener customFeedMessageListener) {
+        this.customFeedMessageListener = customFeedMessageListener;
     }
 }
