@@ -8,7 +8,6 @@ import net.jacobpeterson.iqfeed4j.model.feedenums.streaming.admin.AdminCommand;
 import net.jacobpeterson.iqfeed4j.model.feedenums.streaming.admin.AdminMessageType;
 import net.jacobpeterson.iqfeed4j.model.streaming.admin.ClientStatistics;
 import net.jacobpeterson.iqfeed4j.model.streaming.admin.FeedStatistics;
-import net.jacobpeterson.iqfeed4j.model.streaming.admin.FeedStatistics.Status;
 import net.jacobpeterson.iqfeed4j.util.csv.CSVMapper;
 import net.jacobpeterson.iqfeed4j.util.string.LineEnding;
 import org.slf4j.Logger;
@@ -63,7 +62,7 @@ public class AdminFeed extends AbstractFeed {
         FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setAttemptedReconnections, INT);
         FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setStartTime, MONTH3_DAY_TIME_AM_PM);
         FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setMarketTime, MONTH3_DAY_TIME_AM_PM);
-        FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setStatus, Status::fromValue);
+        FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setStatus, FeedStatistics.Status::fromValue);
         FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setIqFeedVersion, STRING);
         FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setLoginID, STRING);
         FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setTotalKiloBytesReceived, DOUBLE);
@@ -72,7 +71,6 @@ public class AdminFeed extends AbstractFeed {
         FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setTotalKiloBytesSent, DOUBLE);
         FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setKiloBytesPerSecSent, DOUBLE);
         FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setAvgKiloBytesPerSecSent, DOUBLE);
-
     }
 
     protected final Object messageReceivedLock;
@@ -428,8 +426,11 @@ public class AdminFeed extends AbstractFeed {
      * @return a {@link CompletableFuture} of {@link FeedStatistics}
      */
     public CompletableFuture<FeedStatistics> getNextFeedStatistics() {
-        CompletableFuture<FeedStatistics> feedStatisticsFuture = new CompletableFuture<>();
-        this.feedStatisticsFuture = feedStatisticsFuture;
+        if (feedStatisticsFuture != null) {
+            return feedStatisticsFuture;
+        }
+
+        feedStatisticsFuture = new CompletableFuture<>();
         return feedStatisticsFuture;
     }
 
@@ -439,8 +440,11 @@ public class AdminFeed extends AbstractFeed {
      * @return a {@link CompletableFuture} of {@link ClientStatistics}
      */
     public CompletableFuture<ClientStatistics> getNextClientStatistics() {
-        CompletableFuture<ClientStatistics> clientStatisticsFuture = new CompletableFuture<>();
-        this.clientStatisticsFuture = clientStatisticsFuture;
+        if (clientStatisticsFuture != null) {
+            return clientStatisticsFuture;
+        }
+
+        clientStatisticsFuture = new CompletableFuture<>();
         return clientStatisticsFuture;
     }
 
