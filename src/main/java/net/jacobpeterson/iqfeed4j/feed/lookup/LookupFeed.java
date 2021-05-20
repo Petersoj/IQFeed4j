@@ -91,7 +91,7 @@ public class LookupFeed extends AbstractFeed {
 
     @Override
     protected void onMessageReceived(String[] csv) {
-        if (isErrorMessage(csv)) {
+        if (valueEquals(csv, 0, FeedMessageType.ERROR.value())) {
             LOGGER.error("Received error message! {}", (Object) csv);
             return;
         }
@@ -103,19 +103,39 @@ public class LookupFeed extends AbstractFeed {
     }
 
     /**
-     * Checks for error message format.
+     * Checks for a request ID error message format.
      * <br>
-     * e.g. <code>[Request ID], E, [Error Text]</code> or <code>E, [Error Text]</code>
-     * <br>
-     * If the 'Request ID' is the char literal 'E', then this will always return true unfortunately (this is a flaw with
-     * the IQFeed API)
+     * e.g. <code>[Request ID], E, &lt;Error Text&gt;</code>
      *
      * @param csv the CSV
      *
-     * @return true if the 'csv' represents an error message
+     * @return true if the CSV represents an error message
      */
-    protected boolean isErrorMessage(String[] csv) {
-        return valueEquals(csv, 0, FeedMessageType.ERROR.value()) ||
-                valueEquals(csv, 1, FeedMessageType.ERROR.value());
+    protected boolean isRequestIDErrorMessage(String[] csv) {
+        return valueEquals(csv, 1, FeedMessageType.ERROR.value());
+    }
+
+    /**
+     * Gets a new Request ID. This method is synchronized.
+     *
+     * @return a new request ID
+     */
+    private int getNewRequestID() {
+        synchronized (requestIDs) {
+            int maxRequestID = requestIDs.stream().max(Integer::compareTo).orElse(-1) + 1;
+            requestIDs.add(maxRequestID);
+            return maxRequestID;
+        }
+    }
+
+    /**
+     * Removes a Request ID. This method is synchronized.
+     *
+     * @param requestID the request ID
+     */
+    private void removeRequestID(String requestID) {
+        synchronized (requestIDs) {
+            requestIDs.remove(Integer.parseInt(requestID));
+        }
     }
 }

@@ -209,7 +209,7 @@ public abstract class AbstractFeed implements Runnable {
     protected abstract void onProtocolVersionValidated();
 
     /**
-     * Called when a message is received. NOTE: THIS METHOD SHOULD NEVER BLOCK.
+     * Called when a message is received. NOTE: THIS METHOD SHOULD NEVER BLOCK AND SHOULD NEVER THROWN AN EXCEPTION.
      *
      * @param csv the CSV
      */

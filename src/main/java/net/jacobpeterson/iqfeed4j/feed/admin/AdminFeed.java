@@ -1,13 +1,16 @@
 package net.jacobpeterson.iqfeed4j.feed.admin;
 
 import net.jacobpeterson.iqfeed4j.feed.AbstractFeed;
+import net.jacobpeterson.iqfeed4j.feed.SingleMessageFuture;
 import net.jacobpeterson.iqfeed4j.model.feedenums.FeedCommand;
 import net.jacobpeterson.iqfeed4j.model.feedenums.FeedMessageType;
 import net.jacobpeterson.iqfeed4j.model.feedenums.misc.OnOffOption;
 import net.jacobpeterson.iqfeed4j.model.feedenums.streaming.admin.AdminCommand;
 import net.jacobpeterson.iqfeed4j.model.feedenums.streaming.admin.AdminMessageType;
 import net.jacobpeterson.iqfeed4j.model.streaming.admin.ClientStatistics;
+import net.jacobpeterson.iqfeed4j.model.streaming.admin.ClientStatistics.Type;
 import net.jacobpeterson.iqfeed4j.model.streaming.admin.FeedStatistics;
+import net.jacobpeterson.iqfeed4j.model.streaming.admin.FeedStatistics.Status;
 import net.jacobpeterson.iqfeed4j.util.csv.CSVMapper;
 import net.jacobpeterson.iqfeed4j.util.string.LineEnding;
 import org.slf4j.Logger;
@@ -17,13 +20,10 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringJoiner;
-import java.util.concurrent.CompletableFuture;
 
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVMapper.DateTimeConverters.DATE_SPACE_TIME;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVMapper.DateTimeConverters.MONTH3_DAY_TIME_AM_PM;
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVMapper.PrimitiveConvertors.DOUBLE;
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVMapper.PrimitiveConvertors.INT;
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVMapper.PrimitiveConvertors.STRING;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVMapper.PrimitiveConvertors.*;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueExists;
 
@@ -41,7 +41,7 @@ public class AdminFeed extends AbstractFeed {
         // Add mappings with CSV indices analogous to line of execution
 
         CLIENT_STATISTICS_CSV_MAPPER = new CSVMapper<>(ClientStatistics::new);
-        CLIENT_STATISTICS_CSV_MAPPER.addMapping(ClientStatistics::setType, ClientStatistics.Type::fromValue);
+        CLIENT_STATISTICS_CSV_MAPPER.addMapping(ClientStatistics::setType, Type::fromValue);
         CLIENT_STATISTICS_CSV_MAPPER.addMapping(ClientStatistics::setClientID, INT);
         CLIENT_STATISTICS_CSV_MAPPER.addMapping(ClientStatistics::setClientName, STRING);
         CLIENT_STATISTICS_CSV_MAPPER.addMapping(ClientStatistics::setStartTime, DATE_SPACE_TIME);
@@ -62,7 +62,7 @@ public class AdminFeed extends AbstractFeed {
         FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setAttemptedReconnections, INT);
         FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setStartTime, MONTH3_DAY_TIME_AM_PM);
         FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setMarketTime, MONTH3_DAY_TIME_AM_PM);
-        FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setStatus, FeedStatistics.Status::fromValue);
+        FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setStatus, Status::fromValue);
         FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setIqFeedVersion, STRING);
         FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setLoginID, STRING);
         FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setTotalKiloBytesReceived, DOUBLE);
@@ -75,10 +75,10 @@ public class AdminFeed extends AbstractFeed {
 
     protected final Object messageReceivedLock;
     private final HashMap<Integer, ClientStatistics> clientStatisticsOfClientIDs;
-    private final HashMap<AdminMessageType, CompletableFuture<Void>> voidFutureOfAdminMessageTypes;
-    private final HashMap<AdminMessageType, CompletableFuture<String>> stringFutureOfAdminMessageTypes;
-    private CompletableFuture<FeedStatistics> feedStatisticsFuture;
-    private CompletableFuture<ClientStatistics> clientStatisticsFuture;
+    private final HashMap<AdminMessageType, SingleMessageFuture<Void>> voidFutureOfAdminMessageTypes;
+    private final HashMap<AdminMessageType, SingleMessageFuture<String>> stringFutureOfAdminMessageTypes;
+    private SingleMessageFuture<FeedStatistics> feedStatisticsFuture;
+    private SingleMessageFuture<ClientStatistics> clientStatisticsFuture;
     private FeedStatistics lastFeedStatistics;
 
     /**
@@ -125,7 +125,8 @@ public class AdminFeed extends AbstractFeed {
                     case LOGIN_INFO_NOT_SAVED:
                     case AUTOCONNECT_ON:
                     case AUTOCONNECT_OFF:
-                        CompletableFuture<Void> voidFuture = voidFutureOfAdminMessageTypes.get(parsedAdminMessageType);
+                        SingleMessageFuture<Void> voidFuture =
+                                voidFutureOfAdminMessageTypes.get(parsedAdminMessageType);
                         if (voidFuture != null) {
                             voidFuture.complete(null);
                         }
@@ -135,7 +136,7 @@ public class AdminFeed extends AbstractFeed {
                     case CURRENT_LOGINID:
                     case CURRENT_PASSWORD:
                         if (valueExists(csv, 2)) {
-                            CompletableFuture<String> stringFuture =
+                            SingleMessageFuture<String> stringFuture =
                                     stringFutureOfAdminMessageTypes.get(parsedAdminMessageType);
                             if (stringFuture != null) {
                                 stringFuture.complete(csv[2]);
@@ -146,23 +147,35 @@ public class AdminFeed extends AbstractFeed {
                         }
                         break;
                     case STATS:
-                        FeedStatistics feedStatistics = FEED_STATISTICS_CSV_MAPPER.map(csv, 2);
-                        if (feedStatistics != null) {
+                        try {
+                            FeedStatistics feedStatistics = FEED_STATISTICS_CSV_MAPPER.map(csv, 2);
                             lastFeedStatistics = feedStatistics;
 
                             if (feedStatisticsFuture != null) {
                                 feedStatisticsFuture.complete(feedStatistics);
                                 feedStatisticsFuture = null;
                             }
+                        } catch (Exception exception) {
+                            LOGGER.error("Could not map {}!", parsedAdminMessageType, exception);
+                            if (feedStatisticsFuture != null) {
+                                feedStatisticsFuture.completeExceptionally(exception);
+                                feedStatisticsFuture = null;
+                            }
                         }
                         break;
                     case CLIENTSTATS:
-                        ClientStatistics clientStatistics = CLIENT_STATISTICS_CSV_MAPPER.map(csv, 2);
-                        if (clientStatistics != null) {
+                        try {
+                            ClientStatistics clientStatistics = CLIENT_STATISTICS_CSV_MAPPER.map(csv, 2);
                             clientStatisticsOfClientIDs.put(clientStatistics.getClientID(), clientStatistics);
 
                             if (clientStatisticsFuture != null) {
                                 clientStatisticsFuture.complete(clientStatistics);
+                                clientStatisticsFuture = null;
+                            }
+                        } catch (Exception exception) {
+                            LOGGER.error("Could not map {}!", parsedAdminMessageType, exception);
+                            if (clientStatisticsFuture != null) {
+                                clientStatisticsFuture.completeExceptionally(exception);
                                 clientStatisticsFuture = null;
                             }
                         }
@@ -209,31 +222,31 @@ public class AdminFeed extends AbstractFeed {
     //
 
     /**
-     * Gets the {@link AdminCommand} {@link CompletableFuture} or calls {@link #sendAdminCommand(AdminCommand,
-     * String...)} and creates/puts a new {@link CompletableFuture}. This method is synchronized with {@link
+     * Gets the {@link AdminCommand} {@link SingleMessageFuture} or calls {@link #sendAdminCommand(AdminCommand,
+     * String...)} and creates/puts a new {@link SingleMessageFuture}. This method is synchronized with {@link
      * #messageReceivedLock}.
      *
-     * @param <T>                       the {@link CompletableFuture} type
-     * @param futureOfAdminMessageTypes the {@link CompletableFuture}s of {@link AdminMessageType}s
+     * @param <T>                       the {@link SingleMessageFuture} type
+     * @param futureOfAdminMessageTypes the {@link SingleMessageFuture}s of {@link AdminMessageType}s
      * @param adminMessageType          the {@link AdminMessageType}
      * @param adminCommand              the {@link AdminCommand} for the {@link AdminMessageType}
      * @param arguments                 the arguments
      *
-     * @return a {@link CompletableFuture}
+     * @return a {@link SingleMessageFuture}
      *
      * @throws IOException thrown for {@link IOException}s
      */
-    private <T> CompletableFuture<T> getOrSendAdminCommandFuture(
-            Map<AdminMessageType, CompletableFuture<T>> futureOfAdminMessageTypes, AdminMessageType adminMessageType,
+    private <T> SingleMessageFuture<T> getOrSendAdminCommandFuture(
+            Map<AdminMessageType, SingleMessageFuture<T>> futureOfAdminMessageTypes, AdminMessageType adminMessageType,
             AdminCommand adminCommand, String... arguments) throws IOException {
         synchronized (messageReceivedLock) {
-            CompletableFuture<T> messageFuture = futureOfAdminMessageTypes.get(adminMessageType);
+            SingleMessageFuture<T> messageFuture = futureOfAdminMessageTypes.get(adminMessageType);
             if (messageFuture != null) {
                 return messageFuture;
             }
 
             sendAdminCommand(adminCommand, arguments);
-            messageFuture = new CompletableFuture<>();
+            messageFuture = new SingleMessageFuture<>();
             futureOfAdminMessageTypes.put(adminMessageType, messageFuture);
             return messageFuture;
         }
@@ -247,11 +260,11 @@ public class AdminFeed extends AbstractFeed {
      *                       account.
      * @param productVersion the version of YOUR application.
      *
-     * @return a {@link CompletableFuture} completed upon command response
+     * @return a {@link SingleMessageFuture} completed upon command response
      *
      * @throws Exception thrown for {@link Exception}s
      */
-    public CompletableFuture<Void> registerClientApp(String productID, String productVersion) throws Exception {
+    public SingleMessageFuture<Void> registerClientApp(String productID, String productVersion) throws Exception {
         return getOrSendAdminCommandFuture(voidFutureOfAdminMessageTypes,
                 AdminMessageType.REGISTER_CLIENT_APP_COMPLETED,
                 AdminCommand.REGISTER_CLIENT_APP, productID, productVersion);
@@ -264,11 +277,11 @@ public class AdminFeed extends AbstractFeed {
      *                       account.
      * @param productVersion the version of YOUR application.
      *
-     * @return a {@link CompletableFuture} completed upon command response
+     * @return a {@link SingleMessageFuture} completed upon command response
      *
      * @throws Exception thrown for {@link Exception}s
      */
-    public CompletableFuture<Void> removeClientApp(String productID, String productVersion) throws Exception {
+    public SingleMessageFuture<Void> removeClientApp(String productID, String productVersion) throws Exception {
         return getOrSendAdminCommandFuture(voidFutureOfAdminMessageTypes,
                 AdminMessageType.REMOVE_CLIENT_APP_COMPLETED,
                 AdminCommand.REMOVE_CLIENT_APP, productID, productVersion);
@@ -279,11 +292,11 @@ public class AdminFeed extends AbstractFeed {
      *
      * @param loginID the loginID that was assigned to the user when they created their datafeed account.
      *
-     * @return a {@link CompletableFuture} completed upon command response
+     * @return a {@link SingleMessageFuture} completed upon command response
      *
      * @throws Exception thrown for {@link Exception}s
      */
-    public CompletableFuture<String> setLoginID(String loginID) throws Exception {
+    public SingleMessageFuture<String> setLoginID(String loginID) throws Exception {
         return getOrSendAdminCommandFuture(stringFutureOfAdminMessageTypes,
                 AdminMessageType.CURRENT_LOGINID,
                 AdminCommand.SET_LOGINID, loginID);
@@ -294,11 +307,11 @@ public class AdminFeed extends AbstractFeed {
      *
      * @param loginID the password that was assigned to the user when they created their datafeed account.
      *
-     * @return a {@link CompletableFuture} completed upon command response
+     * @return a {@link SingleMessageFuture} completed upon command response
      *
      * @throws Exception thrown for {@link Exception}s
      */
-    public CompletableFuture<String> setPassword(String loginID) throws Exception {
+    public SingleMessageFuture<String> setPassword(String loginID) throws Exception {
         return getOrSendAdminCommandFuture(stringFutureOfAdminMessageTypes,
                 AdminMessageType.CURRENT_PASSWORD,
                 AdminCommand.SET_PASSWORD, loginID);
@@ -311,11 +324,11 @@ public class AdminFeed extends AbstractFeed {
      * @param onOffOption {@link OnOffOption#ON} if you want IQConnect to save the user's loginID and password or {@link
      *                    OnOffOption#OFF} if you do not want IQConnect to save the user's loginID and password.
      *
-     * @return a {@link CompletableFuture} completed upon command response
+     * @return a {@link SingleMessageFuture} completed upon command response
      *
      * @throws Exception thrown for {@link Exception}s
      */
-    public CompletableFuture<Void> setSaveLoginInfo(OnOffOption onOffOption) throws Exception {
+    public SingleMessageFuture<Void> setSaveLoginInfo(OnOffOption onOffOption) throws Exception {
         switch (onOffOption) {
             case ON:
                 return getOrSendAdminCommandFuture(voidFutureOfAdminMessageTypes,
@@ -337,11 +350,11 @@ public class AdminFeed extends AbstractFeed {
      * @param onOffOption {@link OnOffOption#ON} if you want IQConnect to automatically connect to the servers or {@link
      *                    OnOffOption#OFF} if you do not want IQConnect to automatically connect.
      *
-     * @return a {@link CompletableFuture} completed upon command response
+     * @return a {@link SingleMessageFuture} completed upon command response
      *
      * @throws Exception thrown for {@link Exception}s
      */
-    public CompletableFuture<Void> setAutoconnect(OnOffOption onOffOption) throws Exception {
+    public SingleMessageFuture<Void> setAutoconnect(OnOffOption onOffOption) throws Exception {
         switch (onOffOption) {
             case ON:
                 return getOrSendAdminCommandFuture(voidFutureOfAdminMessageTypes,
@@ -421,48 +434,58 @@ public class AdminFeed extends AbstractFeed {
     //
 
     /**
-     * Gets a {@link CompletableFuture} for the next {@link FeedStatistics} message.
+     * Gets a {@link SingleMessageFuture} for the next {@link FeedStatistics} message. This method is synchronized with
+     * {@link #messageReceivedLock}.
      *
-     * @return a {@link CompletableFuture} of {@link FeedStatistics}
+     * @return a {@link SingleMessageFuture} of {@link FeedStatistics}
      */
-    public CompletableFuture<FeedStatistics> getNextFeedStatistics() {
-        if (feedStatisticsFuture != null) {
+    public SingleMessageFuture<FeedStatistics> getNextFeedStatistics() {
+        synchronized (messageReceivedLock) {
+            if (feedStatisticsFuture != null) {
+                return feedStatisticsFuture;
+            }
+
+            feedStatisticsFuture = new SingleMessageFuture<>();
             return feedStatisticsFuture;
         }
-
-        feedStatisticsFuture = new CompletableFuture<>();
-        return feedStatisticsFuture;
     }
 
     /**
-     * Gets a {@link CompletableFuture} for the next {@link ClientStatistics} message.
+     * Gets a {@link SingleMessageFuture} for the next {@link ClientStatistics} message. This method is synchronized
+     * with {@link #messageReceivedLock}.
      *
-     * @return a {@link CompletableFuture} of {@link ClientStatistics}
+     * @return a {@link SingleMessageFuture} of {@link ClientStatistics}
      */
-    public CompletableFuture<ClientStatistics> getNextClientStatistics() {
-        if (clientStatisticsFuture != null) {
+    public SingleMessageFuture<ClientStatistics> getNextClientStatistics() {
+        synchronized (messageReceivedLock) {
+            if (clientStatisticsFuture != null) {
+                return clientStatisticsFuture;
+            }
+
+            clientStatisticsFuture = new SingleMessageFuture<>();
             return clientStatisticsFuture;
         }
-
-        clientStatisticsFuture = new CompletableFuture<>();
-        return clientStatisticsFuture;
     }
 
     /**
-     * Gets {@link #clientStatisticsOfClientIDs}.
+     * Gets {@link #clientStatisticsOfClientIDs}. This method is synchronized with {@link #messageReceivedLock}.
      *
      * @return a {@link HashMap}
      */
     public HashMap<Integer, ClientStatistics> getClientStatisticsOfClientIDs() {
-        return clientStatisticsOfClientIDs;
+        synchronized (messageReceivedLock) {
+            return clientStatisticsOfClientIDs;
+        }
     }
 
     /**
-     * Gets {@link #lastFeedStatistics}.
+     * Gets {@link #lastFeedStatistics}. This method is synchronized with {@link #messageReceivedLock}.
      *
      * @return the last {@link FeedStatistics}
      */
     public FeedStatistics getLastFeedStatistics() {
-        return lastFeedStatistics;
+        synchronized (messageReceivedLock) {
+            return lastFeedStatistics;
+        }
     }
 }

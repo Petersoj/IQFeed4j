@@ -131,36 +131,32 @@ public final class CSVMapper<T> {
     }
 
     /**
-     * Maps the given CSV to a POJO, or null if unsuccessful. Note this will attempt to map all mappings added via
-     * {@link #addMapping(BiConsumer, Function)}.
+     * Maps the given CSV to a POJO. Note this will map all mappings added via {@link #addMapping(BiConsumer,
+     * Function)}.
      *
      * @param csv    the CSV
      * @param offset offset to add to CSV indices when applying {@link MappingFunctions}
      *
-     * @return the POJO, or null if unsuccessful
+     * @return the POJO
+     *
+     * @throws Exception thrown for a variety of {@link Exception}s
      */
-    public T map(String[] csv, int offset) {
-        try {
-            T instance = pojoInstantiator.call();
+    public T map(String[] csv, int offset) throws Exception {
+        T instance = pojoInstantiator.call();
 
-            // Loop through all added 'MappingFunctions' and apply them
-            for (int csvIndex : mappingFunctionsOfCSVIndices.keySet()) {
-                if (!valueExists(csv, csvIndex + offset)) {
-                    LOGGER.debug("Mapping at index {} with added offset {} doesn't exist in the given CSV: {}",
-                            csvIndex, offset, csv);
-                    continue;
-                }
-
-                try {
-                    mappingFunctionsOfCSVIndices.get(csvIndex).apply(instance, csv[csvIndex + offset]);
-                } catch (Exception exception) {
-                    LOGGER.error("Could not map at index {} with added offset {}!", csvIndex, offset, exception);
-                }
+        // Loop through all added 'MappingFunctions' and apply them
+        for (int csvIndex : mappingFunctionsOfCSVIndices.keySet()) {
+            if (!valueExists(csv, csvIndex + offset)) {
+                LOGGER.debug("Mapping at index {} with added offset {} doesn't exist in the given CSV: {}",
+                        csvIndex, offset, csv);
+                continue;
             }
-            return instance;
-        } catch (Exception exception) {
-            return null;
+
+            // apply() could throw a variety of exceptions
+            mappingFunctionsOfCSVIndices.get(csvIndex).apply(instance, csv[csvIndex + offset]);
         }
+
+        return instance;
     }
 
     /**
