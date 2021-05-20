@@ -13,10 +13,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
 
@@ -33,41 +29,6 @@ public abstract class AbstractFeed implements Runnable {
      * A comma (,).
      */
     public static final String COMMA_DELIMITER = ",";
-
-    /**
-     * This is an {@link ExecutorService} thread pool with the minimum number of threads being the available processors,
-     * the maximum number of thread being <code>5 IQFeed feeds * 2 average simultaneous message handlers</code>, and the
-     * idle thread keep alive time being 5 minutes.
-     */
-    protected static final ExecutorService MESSAGE_HANDLING_THREADS = new ThreadPoolExecutor(
-            Runtime.getRuntime().availableProcessors(), 5 * 2,
-            5, TimeUnit.MINUTES,
-            new LinkedBlockingQueue<>()); // Unbounded capacity
-
-    /**
-     * Completes a {@link SingleMessageFuture} with the given 'message' asynchronously using {@link
-     * #MESSAGE_HANDLING_THREADS}.
-     *
-     * @param <T>                 the type of the {@link SingleMessageFuture}
-     * @param singleMessageFuture the {@link SingleMessageFuture}
-     * @param message             the message
-     */
-    protected static <T> void completeAsync(SingleMessageFuture<T> singleMessageFuture, T message) {
-        MESSAGE_HANDLING_THREADS.submit(() -> singleMessageFuture.complete(message));
-    }
-
-    /**
-     * Exceptionally completes a {@link SingleMessageFuture} with the given {@link Throwable} asynchronously using
-     * {@link #MESSAGE_HANDLING_THREADS}.
-     *
-     * @param <T>                 the type of the {@link SingleMessageFuture}
-     * @param singleMessageFuture the {@link SingleMessageFuture}
-     * @param throwable           the {@link Throwable}
-     */
-    protected static <T> void completeExceptionallyAsync(SingleMessageFuture<T> singleMessageFuture,
-            Throwable throwable) {
-        MESSAGE_HANDLING_THREADS.submit(() -> singleMessageFuture.completeExceptionally(throwable));
-    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFeed.class);
     private static final int SOCKET_THREAD_JOIN_WAIT_MILLIS = 5000;
@@ -245,10 +206,10 @@ public abstract class AbstractFeed implements Runnable {
     /**
      * Called when the protocol version has been validated.
      */
-    protected abstract void onProtocolVersionValidated();
+    protected void onProtocolVersionValidated() {}
 
     /**
-     * Called when a message is received. Note: This method should NEVER block and should NEVER throw an exception.
+     * Called when a message is received. Note: This method should NEVER block and should NEVER throw an exception!
      *
      * @param csv the CSV
      */

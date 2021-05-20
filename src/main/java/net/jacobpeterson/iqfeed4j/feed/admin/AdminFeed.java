@@ -98,9 +98,6 @@ public class AdminFeed extends AbstractFeed {
     }
 
     @Override
-    protected void onProtocolVersionValidated() {}
-
-    @Override
     protected void onMessageReceived(String[] csv) {
         if (valueEquals(csv, 0, FeedMessageType.ERROR.value())) {
             LOGGER.error("Received error message! {}", (Object) csv);
@@ -196,6 +193,12 @@ public class AdminFeed extends AbstractFeed {
     @Override
     protected void onAsyncException(String message, Exception exception) {
         LOGGER.error(message, exception);
+        LOGGER.info("Attempting to close {}...", feedName);
+        try {
+            stop();
+        } catch (Exception stopException) {
+            LOGGER.error("Could not close {}!", feedName, stopException);
+        }
     }
 
     /**

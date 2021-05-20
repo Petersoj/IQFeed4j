@@ -1,7 +1,7 @@
-package net.jacobpeterson.iqfeed4j.feed.lookup;
+package net.jacobpeterson.iqfeed4j.feed.lookup.historical;
 
-import net.jacobpeterson.iqfeed4j.feed.AbstractFeed;
-import net.jacobpeterson.iqfeed4j.model.feedenums.FeedMessageType;
+import net.jacobpeterson.iqfeed4j.feed.MultiMessageListener;
+import net.jacobpeterson.iqfeed4j.feed.lookup.AbstractLookupFeed;
 import net.jacobpeterson.iqfeed4j.model.lookup.historical.DatedInterval;
 import net.jacobpeterson.iqfeed4j.model.lookup.historical.Interval;
 import net.jacobpeterson.iqfeed4j.model.lookup.historical.Tick;
@@ -9,7 +9,7 @@ import net.jacobpeterson.iqfeed4j.util.csv.CSVMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
+import java.util.HashMap;
 
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVMapper.DateTimeConverters.DASHED_DATE;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVMapper.DateTimeConverters.DASHED_DATE_SPACE_TIME;
@@ -19,15 +19,15 @@ import static net.jacobpeterson.iqfeed4j.util.csv.CSVMapper.PrimitiveConvertors.
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVMapper.PrimitiveConvertors.LONG;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVMapper.PrimitiveConvertors.SHORT;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVMapper.PrimitiveConvertors.STRING;
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
 
 /**
- * {@link LookupFeed} represents the Lookup {@link AbstractFeed}. Methods in this class are not synchronized.
+ * {@link HistoricalFeed} is an {@link AbstractLookupFeed} for historical data.
  */
-public class LookupFeed extends AbstractFeed {
+public class HistoricalFeed extends AbstractLookupFeed {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LookupFeed.class);
-    private static final String FEED_NAME_SUFFIX = " Lookup Feed";
+    private static final Logger LOGGER = LoggerFactory.getLogger(HistoricalFeed.class);
+    private static final String FEED_NAME_SUFFIX = " Historical";
+
     private static final CSVMapper<Tick> TICK_CSV_MAPPER;
     private static final CSVMapper<Interval> INTERVAL_CSV_MAPPER;
     private static final CSVMapper<DatedInterval> DATED_INTERVAL_CSV_MAPPER;
@@ -69,73 +69,38 @@ public class LookupFeed extends AbstractFeed {
         DATED_INTERVAL_CSV_MAPPER.addMapping(DatedInterval::setOpenInterest, INT);
     }
 
-    protected final Object messageReceivedLock;
-    private final HashSet<Integer> requestIDs;
+    private final HashMap<String, MultiMessageListener<Tick>> tickListenersOfRequestIDs;
+    private final HashMap<String, MultiMessageListener<Interval>> intervalListenersOfRequestIDs;
+    private final HashMap<String, MultiMessageListener<DatedInterval>> datedIntervalListenersOfRequestIDs;
 
     /**
-     * Instantiates a new {@link LookupFeed}.
+     * Instantiates a new {@link HistoricalFeed}.
      *
-     * @param lookupFeedName the lookup feed name
-     * @param hostname       the host name
-     * @param port           the port
+     * @param historicalFeedName the historical feed name
+     * @param hostname           the hostname
+     * @param port               the port
      */
-    public LookupFeed(String lookupFeedName, String hostname, int port) {
-        super(lookupFeedName + FEED_NAME_SUFFIX, hostname, port);
+    public HistoricalFeed(String historicalFeedName, String hostname, int port) {
+        super(historicalFeedName + FEED_NAME_SUFFIX, hostname, port);
 
-        messageReceivedLock = new Object();
-        requestIDs = new HashSet<>();
+        tickListenersOfRequestIDs = new HashMap<>();
+        intervalListenersOfRequestIDs = new HashMap<>();
+        datedIntervalListenersOfRequestIDs = new HashMap<>();
     }
 
     @Override
-    protected void onProtocolVersionValidated() {}
-
-    @Override
     protected void onMessageReceived(String[] csv) {
-        if (valueEquals(csv, 0, FeedMessageType.ERROR.value())) {
-            LOGGER.error("Received error message! {}", (Object) csv);
-            return;
-        }
+
     }
 
     @Override
     protected void onAsyncException(String message, Exception exception) {
         LOGGER.error(message, exception);
-    }
-
-    /**
-     * Checks for a request ID error message format.
-     * <br>
-     * e.g. <code>[Request ID], E, &lt;Error Text&gt;</code>
-     *
-     * @param csv the CSV
-     *
-     * @return true if the CSV represents an error message
-     */
-    protected boolean isRequestIDErrorMessage(String[] csv) {
-        return valueEquals(csv, 1, FeedMessageType.ERROR.value());
-    }
-
-    /**
-     * Gets a new Request ID. This method is synchronized.
-     *
-     * @return a new request ID
-     */
-    private int getNewRequestID() {
-        synchronized (requestIDs) {
-            int maxRequestID = requestIDs.stream().max(Integer::compareTo).orElse(-1) + 1;
-            requestIDs.add(maxRequestID);
-            return maxRequestID;
-        }
-    }
-
-    /**
-     * Removes a Request ID. This method is synchronized.
-     *
-     * @param requestID the request ID
-     */
-    private void removeRequestID(String requestID) {
-        synchronized (requestIDs) {
-            requestIDs.remove(Integer.parseInt(requestID));
+        LOGGER.info("Attempting to close {}...", feedName);
+        try {
+            stop();
+        } catch (Exception stopException) {
+            LOGGER.error("Could not close {}!", feedName, stopException);
         }
     }
 }
