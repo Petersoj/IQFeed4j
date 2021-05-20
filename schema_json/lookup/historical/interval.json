@@ -1,6 +1,6 @@
 {
   "type": "object",
-  "title": "Interval POJO for HIX, HID, and HIT requests.\nSee <a href=\"https://www.iqfeed.net/dev/api/docs//HistoricalviaTCPIP.cfm\">HistoricalViaTCPIP</a>",
+  "title": "Interval POJO for HIX, HID, and HIT requests.\nSee <a href=\"https://www.iqfeed.net/dev/api/docs//HistoricalviaTCPIP.cfm\">Historical via TCP/IP</a>",
   "properties": {
     "timestamp": {
       "existingJavaType": "java.time.LocalDateTime",

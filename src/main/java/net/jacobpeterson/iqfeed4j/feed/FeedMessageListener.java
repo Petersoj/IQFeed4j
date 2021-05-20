@@ -6,7 +6,7 @@ package net.jacobpeterson.iqfeed4j.feed;
 public interface FeedMessageListener {
 
     /**
-     * Called when a CSV message is received.
+     * Called when a CSV message is received. Note: This method should never block!
      *
      * @param csv the CSV
      */

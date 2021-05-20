@@ -129,21 +129,25 @@ public class AdminFeed extends AbstractFeed {
                                 voidFutureOfAdminMessageTypes.get(parsedAdminMessageType);
                         if (voidFuture != null) {
                             voidFuture.complete(null);
+                            voidFutureOfAdminMessageTypes.put(parsedAdminMessageType, null);
+                        } else {
+                            LOGGER.error("Could not complete {} future!", parsedAdminMessageType);
                         }
-                        voidFutureOfAdminMessageTypes.put(parsedAdminMessageType, null);
                         break;
                     // Complete String Futures
                     case CURRENT_LOGINID:
                     case CURRENT_PASSWORD:
-                        if (valueExists(csv, 2)) {
-                            SingleMessageFuture<String> stringFuture =
-                                    stringFutureOfAdminMessageTypes.get(parsedAdminMessageType);
-                            if (stringFuture != null) {
+                        SingleMessageFuture<String> stringFuture =
+                                stringFutureOfAdminMessageTypes.get(parsedAdminMessageType);
+                        if (stringFuture != null) {
+                            if (valueExists(csv, 2)) {
                                 stringFuture.complete(csv[2]);
+                            } else {
+                                stringFuture.completeExceptionally(new RuntimeException("CSV response value missing!"));
                             }
                             stringFutureOfAdminMessageTypes.put(parsedAdminMessageType, null);
                         } else {
-                            LOGGER.error("Received unknown message format: {}", (Object) csv);
+                            LOGGER.error("Could not complete {} future!", parsedAdminMessageType);
                         }
                         break;
                     case STATS:

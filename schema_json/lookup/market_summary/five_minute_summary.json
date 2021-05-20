@@ -1,0 +1,6 @@
+{
+  "type": "object",
+  "title": "POJO for 5MS requests. See <a href=\"https://www.iqfeed.net/dev/api/docs//MarketSummaryviaTCPIP.cfm\">Market Summary via TCP/IP</a>",
+  "properties": {
+  }
+}
