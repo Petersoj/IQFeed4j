@@ -1,5 +1,6 @@
 package net.jacobpeterson.iqfeed4j.feed.lookup;
 
+import com.google.common.base.Splitter;
 import net.jacobpeterson.iqfeed4j.feed.AbstractFeed;
 import net.jacobpeterson.iqfeed4j.model.feedenums.FeedMessageType;
 import net.jacobpeterson.iqfeed4j.model.feedenums.FeedSpecialMessage;
@@ -23,9 +24,10 @@ public abstract class AbstractLookupFeed extends AbstractFeed {
      * @param lookupFeedName the lookup feed name
      * @param hostname       the host name
      * @param port           the port
+     * @param csvSplitter    the CSV {@link Splitter}
      */
-    public AbstractLookupFeed(String lookupFeedName, String hostname, int port) {
-        super(lookupFeedName + FEED_NAME_SUFFIX, hostname, port);
+    public AbstractLookupFeed(String lookupFeedName, String hostname, int port, Splitter csvSplitter) {
+        super(lookupFeedName + FEED_NAME_SUFFIX, hostname, port, csvSplitter);
 
         requestIDs = new HashSet<>();
     }
@@ -78,9 +80,9 @@ public abstract class AbstractLookupFeed extends AbstractFeed {
      */
     protected String getNewRequestID() {
         synchronized (requestIDs) {
-            int maxRequestID = requestIDs.stream().max(Integer::compareTo).orElse(-1) + 1;
+            int maxRequestID = requestIDs.stream().max(Integer::compareTo).orElse(0) + 1;
             requestIDs.add(maxRequestID);
-            return String.valueOf(requestIDs);
+            return String.valueOf(maxRequestID);
         }
     }
 

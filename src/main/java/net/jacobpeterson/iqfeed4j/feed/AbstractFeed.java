@@ -1,5 +1,6 @@
 package net.jacobpeterson.iqfeed4j.feed;
 
+import com.google.common.base.Splitter;
 import net.jacobpeterson.iqfeed4j.model.feedenums.FeedCommand;
 import net.jacobpeterson.iqfeed4j.model.feedenums.FeedMessageType;
 import net.jacobpeterson.iqfeed4j.util.string.LineEnding;
@@ -13,6 +14,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.regex.Pattern;
 
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
 
@@ -25,10 +27,18 @@ public abstract class AbstractFeed implements Runnable {
      * Protocol versions are managed by the version control branches.
      */
     public static final String CURRENTLY_SUPPORTED_PROTOCOL_VERSION = "6.1";
+
     /**
-     * A comma (,).
+     * A comma (,) delimiter {@link Splitter} that ignores commas in quotes using a Regex {@link Pattern}.
+     *
+     * @see <a href="https://stackoverflow.com/a/1757107">"Java: splitting a comma-separated string" reference</a>
      */
-    public static final String COMMA_DELIMITER = ",";
+    public static final Splitter QUOTE_ESCAPED_COMMA_DELIMITED_SPLITTER =
+            Splitter.on(Pattern.compile(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)"));
+    /**
+     * A comma (,) delimiter {@link Splitter}. This avoids slow Regex splitting.
+     */
+    public static final Splitter COMMA_DELIMITED_SPLITTER = Splitter.on(',');
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFeed.class);
     private static final int SOCKET_THREAD_JOIN_WAIT_MILLIS = 5000;
@@ -36,6 +46,7 @@ public abstract class AbstractFeed implements Runnable {
     protected final String feedName;
     protected final String hostname;
     protected final int port;
+    protected final Splitter csvSplitter;
     private final Object startStopLock;
 
     private Thread socketThread;
@@ -49,14 +60,16 @@ public abstract class AbstractFeed implements Runnable {
     /**
      * Instantiates a new {@link AbstractFeed}.
      *
-     * @param feedName the feed name
-     * @param hostname the host name
-     * @param port     the port
+     * @param feedName    the feed name
+     * @param hostname    the host name
+     * @param port        the port
+     * @param csvSplitter the CSV {@link Splitter}
      */
-    public AbstractFeed(String feedName, String hostname, int port) {
+    public AbstractFeed(String feedName, String hostname, int port, Splitter csvSplitter) {
         this.feedName = feedName;
         this.hostname = hostname;
         this.port = port;
+        this.csvSplitter = csvSplitter;
 
         startStopLock = new Object();
 
@@ -153,6 +166,7 @@ public abstract class AbstractFeed implements Runnable {
     }
 
     @Override
+    @SuppressWarnings("UnstableApiUsage")
     public void run() {
         // Confirm #start() method has released 'startStopLock' and exited synchronized scope
         synchronized (startStopLock) {}
@@ -169,9 +183,7 @@ public abstract class AbstractFeed implements Runnable {
                     // TODO remove in production
                     LOGGER.trace("Received message line: {}", line);
 
-                    // Note that comma-separated values that have a comma will be treated like two individual
-                    // comma-separated values.
-                    String[] csv = line.split(COMMA_DELIMITER); // Splitting by one char doesn't use slow Regex
+                    String[] csv = csvSplitter.splitToList(line).toArray(new String[0]);
 
                     // Confirm protocol version valid
                     if (protocolVersionValidated) {

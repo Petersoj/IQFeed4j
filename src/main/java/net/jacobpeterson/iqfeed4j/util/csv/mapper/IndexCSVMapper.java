@@ -33,12 +33,12 @@ public class IndexCSVMapper<T> extends CSVMapper<T> {
     }
 
     /**
-     * Adds a CSV to POJO field mapping as the CSV index being the largest {@link #setMapping(int, BiConsumer,
+     * Adds a CSV index to POJO field mapping as the CSV index being the largest {@link #setMapping(int, BiConsumer,
      * Function)} CSV index + 1.
      *
      * @param <P>                    the type of the POJO field
-     * @param fieldSetter            see {@link MappingFunctions} constructor doc
-     * @param stringToFieldConverter see {@link MappingFunctions} constructor doc
+     * @param fieldSetter            see {@link CSVMapper.MappingFunctions} constructor doc
+     * @param stringToFieldConverter see {@link CSVMapper.MappingFunctions} constructor doc
      */
     public <P> void addMapping(BiConsumer<T, P> fieldSetter, Function<String, P> stringToFieldConverter) {
         int nextCSVIndex = mappingFunctionsOfCSVIndices.keySet().stream().max(Integer::compareTo).orElse(-1) + 1;
@@ -46,12 +46,12 @@ public class IndexCSVMapper<T> extends CSVMapper<T> {
     }
 
     /**
-     * Sets a CSV to POJO field mapping.
+     * Sets a CSV index to POJO field mapping.
      *
      * @param <P>                    the type of the POJO field
      * @param csvIndex               the CSV index
-     * @param fieldSetter            see {@link MappingFunctions} constructor doc
-     * @param stringToFieldConverter see {@link MappingFunctions} constructor doc
+     * @param fieldSetter            see {@link CSVMapper.MappingFunctions} constructor doc
+     * @param stringToFieldConverter see {@link CSVMapper.MappingFunctions} constructor doc
      */
     public <P> void setMapping(int csvIndex, BiConsumer<T, P> fieldSetter, Function<String, P> stringToFieldConverter) {
         mappingFunctionsOfCSVIndices.put(csvIndex, new MappingFunctions<P>(fieldSetter, stringToFieldConverter));
@@ -67,23 +67,31 @@ public class IndexCSVMapper<T> extends CSVMapper<T> {
     }
 
     /**
-     * {@inheritDoc}
-     * <br>
-     * Note this will map all mappings added via {@link #setMapping(int, BiConsumer, Function)}.
+     * Maps the given CSV to a POJO. Note this will map with the mappings added via {@link #setMapping(int, BiConsumer,
+     * Function)}.
+     *
+     * @param csv    the CSV
+     * @param offset offset to add to CSV indices when applying {@link CSVMapper.MappingFunctions}
+     *
+     * @return a new POJO
+     *
+     * @throws Exception thrown for a variety of {@link Exception}s
      */
     public T map(String[] csv, int offset) throws Exception {
         T instance = pojoInstantiator.call();
 
         // Loop through all added 'MappingFunctions' and apply them
         for (int csvIndex : mappingFunctionsOfCSVIndices.keySet()) {
-            if (!valueExists(csv, csvIndex + offset)) {
-                LOGGER.debug("Mapping at index {} with added offset {} doesn't exist in the given CSV: {}",
-                        csvIndex, offset, csv);
+            if (!valueExists(csv, csvIndex + offset)) { // Don't map empty CSV values
                 continue;
             }
 
             // apply() could throw a variety of exceptions
-            mappingFunctionsOfCSVIndices.get(csvIndex).apply(instance, csv[csvIndex + offset]);
+            try {
+                mappingFunctionsOfCSVIndices.get(csvIndex).apply(instance, csv[csvIndex + offset]);
+            } catch (Exception exception) {
+                throw new Exception("Error mapping at index " + csvIndex + " with offset " + offset, exception);
+            }
         }
 
         return instance;

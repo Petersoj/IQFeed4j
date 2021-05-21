@@ -1,0 +1,147 @@
+{
+  "type": "object",
+  "title": "POJO for FDS (Fundamental Summary) requests. See <a href=\"https://www.iqfeed.net/dev/api/docs//MarketSummaryviaTCPIP.cfm\">Market Summary via TCP/IP</a>",
+  "properties": {
+    "Symbol": {
+      "existingJavaType": "java.lang.String"
+    },
+    "Description": {
+      "existingJavaType": "java.lang.String"
+    },
+    "PeRatio": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "AvgVolume": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "DivYield": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "DivAmount": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "DivRate": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "PayDate": {
+      "existingJavaType": "java.time.LocalDate"
+    },
+    "ExDivDate": {
+      "existingJavaType": "java.time.LocalDate"
+    },
+    "CurrentEps": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "EstEps": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "SIC": {
+      "existingJavaType": "java.lang.Integer"
+    },
+    "Precision": {
+      "existingJavaType": "java.lang.Integer"
+    },
+    "Display": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "GrowthPercent": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "FiscalYearEnd": {
+      "existingJavaType": "java.time.LocalDate"
+    },
+    "Volatility": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "ListedMarket": {
+      "existingJavaType": "java.lang.Integer"
+    },
+    "MaturityDate": {
+      "existingJavaType": "java.time.LocalDate"
+    },
+    "OptionRoots": {
+      "existingJavaType": "java.lang.String"
+    },
+    "CouponRate": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "InstitutionalPercent": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "YearEndClose": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "Beta": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "LEAPs": {
+      "existingJavaType": "java.lang.String"
+    },
+    "WRAPs": {
+      "existingJavaType": "java.lang.String"
+    },
+    "Assets": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "Liabilities": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "BalanceSheetDate": {
+      "existingJavaType": "java.time.LocalDate"
+    },
+    "LongTermDebt": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "CommonSharesOutstanding": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "MarketCap": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "52WeekHigh": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "52WeekHighDate": {
+      "existingJavaType": "java.time.LocalDate"
+    },
+    "52WeekLow": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "52WeekLowDate": {
+      "existingJavaType": "java.time.LocalDate"
+    },
+    "CalHigh": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "CalHighDate": {
+      "existingJavaType": "java.time.LocalDate"
+    },
+    "CalLow": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "CalLowDate": {
+      "existingJavaType": "java.time.LocalDate"
+    },
+    "Expiration": {
+      "existingJavaType": "java.lang.String"
+    },
+    "LastSplit": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "LastSplitDate": {
+      "existingJavaType": "java.time.LocalDate"
+    },
+    "PrevSplit": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "PrevSplitDate": {
+      "existingJavaType": "java.time.LocalDate"
+    },
+    "NAICS": {
+      "existingJavaType": "java.lang.Integer"
+    },
+    "ShortInterest": {
+      "existingJavaType": "java.lang.Double"
+    }
+  }
+}

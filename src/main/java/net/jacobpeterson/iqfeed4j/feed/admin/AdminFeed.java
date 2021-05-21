@@ -1,5 +1,6 @@
 package net.jacobpeterson.iqfeed4j.feed.admin;
 
+import com.google.common.base.Preconditions;
 import net.jacobpeterson.iqfeed4j.feed.AbstractFeed;
 import net.jacobpeterson.iqfeed4j.feed.SingleMessageFuture;
 import net.jacobpeterson.iqfeed4j.model.feedenums.FeedCommand;
@@ -35,9 +36,9 @@ import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConv
 public class AdminFeed extends AbstractFeed {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AdminFeed.class);
-    private static final String FEED_NAME_SUFFIX = " Admin Feed";
-    private static final IndexCSVMapper<ClientStatistics> CLIENT_STATISTICS_CSV_MAPPER;
-    private static final IndexCSVMapper<FeedStatistics> FEED_STATISTICS_CSV_MAPPER;
+    protected static final String FEED_NAME_SUFFIX = " Admin Feed";
+    protected static final IndexCSVMapper<ClientStatistics> CLIENT_STATISTICS_CSV_MAPPER;
+    protected static final IndexCSVMapper<FeedStatistics> FEED_STATISTICS_CSV_MAPPER;
 
     static {
         // Add mappings with CSV indices analogous to line of execution
@@ -76,12 +77,12 @@ public class AdminFeed extends AbstractFeed {
     }
 
     protected final Object messageReceivedLock;
-    private final HashMap<Integer, ClientStatistics> clientStatisticsOfClientIDs;
-    private final HashMap<AdminMessageType, SingleMessageFuture<Void>> voidFutureOfAdminMessageTypes;
-    private final HashMap<AdminMessageType, SingleMessageFuture<String>> stringFutureOfAdminMessageTypes;
-    private SingleMessageFuture<FeedStatistics> feedStatisticsFuture;
-    private SingleMessageFuture<ClientStatistics> clientStatisticsFuture;
-    private FeedStatistics lastFeedStatistics;
+    protected final HashMap<Integer, ClientStatistics> clientStatisticsOfClientIDs;
+    protected final HashMap<AdminMessageType, SingleMessageFuture<Void>> voidFutureOfAdminMessageTypes;
+    protected final HashMap<AdminMessageType, SingleMessageFuture<String>> stringFutureOfAdminMessageTypes;
+    protected SingleMessageFuture<FeedStatistics> feedStatisticsFuture;
+    protected SingleMessageFuture<ClientStatistics> clientStatisticsFuture;
+    protected FeedStatistics lastFeedStatistics;
 
     /**
      * Instantiates a new {@link AdminFeed}.
@@ -91,7 +92,7 @@ public class AdminFeed extends AbstractFeed {
      * @param port          the port
      */
     public AdminFeed(String adminFeedName, String hostname, int port) {
-        super(adminFeedName + FEED_NAME_SUFFIX, hostname, port);
+        super(adminFeedName + FEED_NAME_SUFFIX, hostname, port, COMMA_DELIMITED_SPLITTER);
 
         messageReceivedLock = new Object();
         clientStatisticsOfClientIDs = new HashMap<>();
@@ -274,6 +275,9 @@ public class AdminFeed extends AbstractFeed {
      * @throws Exception thrown for {@link Exception}s
      */
     public SingleMessageFuture<Void> registerClientApp(String productID, String productVersion) throws Exception {
+        Preconditions.checkNotNull(productID);
+        Preconditions.checkNotNull(productVersion);
+
         return getOrSendAdminCommandFuture(voidFutureOfAdminMessageTypes,
                 AdminMessageType.REGISTER_CLIENT_APP_COMPLETED,
                 AdminCommand.REGISTER_CLIENT_APP, productID, productVersion);
@@ -291,6 +295,9 @@ public class AdminFeed extends AbstractFeed {
      * @throws Exception thrown for {@link Exception}s
      */
     public SingleMessageFuture<Void> removeClientApp(String productID, String productVersion) throws Exception {
+        Preconditions.checkNotNull(productID);
+        Preconditions.checkNotNull(productVersion);
+
         return getOrSendAdminCommandFuture(voidFutureOfAdminMessageTypes,
                 AdminMessageType.REMOVE_CLIENT_APP_COMPLETED,
                 AdminCommand.REMOVE_CLIENT_APP, productID, productVersion);
@@ -306,6 +313,8 @@ public class AdminFeed extends AbstractFeed {
      * @throws Exception thrown for {@link Exception}s
      */
     public SingleMessageFuture<String> setLoginID(String loginID) throws Exception {
+        Preconditions.checkNotNull(loginID);
+
         return getOrSendAdminCommandFuture(stringFutureOfAdminMessageTypes,
                 AdminMessageType.CURRENT_LOGINID,
                 AdminCommand.SET_LOGINID, loginID);
@@ -314,16 +323,18 @@ public class AdminFeed extends AbstractFeed {
     /**
      * Sets the user password for IQFeed.
      *
-     * @param loginID the password that was assigned to the user when they created their datafeed account.
+     * @param password the password that was assigned to the user when they created their datafeed account.
      *
      * @return a {@link SingleMessageFuture} completed upon command response
      *
      * @throws Exception thrown for {@link Exception}s
      */
-    public SingleMessageFuture<String> setPassword(String loginID) throws Exception {
+    public SingleMessageFuture<String> setPassword(String password) throws Exception {
+        Preconditions.checkNotNull(password);
+
         return getOrSendAdminCommandFuture(stringFutureOfAdminMessageTypes,
                 AdminMessageType.CURRENT_PASSWORD,
-                AdminCommand.SET_PASSWORD, loginID);
+                AdminCommand.SET_PASSWORD, password);
     }
 
     /**
@@ -338,6 +349,8 @@ public class AdminFeed extends AbstractFeed {
      * @throws Exception thrown for {@link Exception}s
      */
     public SingleMessageFuture<Void> setSaveLoginInfo(OnOffOption onOffOption) throws Exception {
+        Preconditions.checkNotNull(onOffOption);
+
         switch (onOffOption) {
             case ON:
                 return getOrSendAdminCommandFuture(voidFutureOfAdminMessageTypes,
@@ -364,6 +377,8 @@ public class AdminFeed extends AbstractFeed {
      * @throws Exception thrown for {@link Exception}s
      */
     public SingleMessageFuture<Void> setAutoconnect(OnOffOption onOffOption) throws Exception {
+        Preconditions.checkNotNull(onOffOption);
+
         switch (onOffOption) {
             case ON:
                 return getOrSendAdminCommandFuture(voidFutureOfAdminMessageTypes,

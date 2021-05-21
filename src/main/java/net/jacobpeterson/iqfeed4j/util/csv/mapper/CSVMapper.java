@@ -2,6 +2,7 @@ package net.jacobpeterson.iqfeed4j.util.csv.mapper;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
@@ -75,6 +76,14 @@ public abstract class CSVMapper<T> {
      */
     public static class DateTimeConverters {
 
+        /** Convertor using {@link DateTimeFormatters#TIME} */
+        public static final Function<String, LocalTime> TIME =
+                (value) -> LocalTime.parse(value, DateTimeFormatters.TIME);
+
+        /** Convertor using {@link DateTimeFormatters#DATE} */
+        public static final Function<String, LocalDate> DATE =
+                (value) -> LocalDate.parse(value, DateTimeFormatters.DATE);
+
         /** Convertor using {@link DateTimeFormatters#DATE_SPACE_TIME} */
         public static final Function<String, LocalDateTime> DATE_SPACE_TIME =
                 (value) -> LocalDateTime.parse(value, DateTimeFormatters.DATE_SPACE_TIME);
@@ -105,18 +114,6 @@ public abstract class CSVMapper<T> {
     public CSVMapper(Callable<T> pojoInstantiator) {
         this.pojoInstantiator = pojoInstantiator;
     }
-
-    /**
-     * Maps the given CSV to a POJO.
-     *
-     * @param csv    the CSV
-     * @param offset offset to add to CSV indices when applying {@link MappingFunctions}
-     *
-     * @return the POJO
-     *
-     * @throws Exception thrown for a variety of {@link Exception}s
-     */
-    public abstract T map(String[] csv, int offset) throws Exception;
 
     /**
      * {@link MappingFunctions} holds functions for CSV to field mapping.

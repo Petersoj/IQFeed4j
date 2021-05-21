@@ -11,7 +11,6 @@ import net.jacobpeterson.iqfeed4j.model.feedenums.misc.DataDirection;
 import net.jacobpeterson.iqfeed4j.model.lookup.historical.DatedInterval;
 import net.jacobpeterson.iqfeed4j.model.lookup.historical.Interval;
 import net.jacobpeterson.iqfeed4j.model.lookup.historical.Tick;
-import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeFormatters;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.IndexCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.exception.IQFeedException;
@@ -24,6 +23,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
@@ -49,11 +49,11 @@ public class HistoricalFeed extends AbstractLookupFeed {
     public static int DATAPOINTS_PER_SEND = 150;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HistoricalFeed.class);
-    private static final String FEED_NAME_SUFFIX = " Historical";
+    protected static final String FEED_NAME_SUFFIX = " Historical";
 
-    private static final IndexCSVMapper<Tick> TICK_CSV_MAPPER;
-    private static final IndexCSVMapper<Interval> INTERVAL_CSV_MAPPER;
-    private static final IndexCSVMapper<DatedInterval> DATED_INTERVAL_CSV_MAPPER;
+    protected static final IndexCSVMapper<Tick> TICK_CSV_MAPPER;
+    protected static final IndexCSVMapper<Interval> INTERVAL_CSV_MAPPER;
+    protected static final IndexCSVMapper<DatedInterval> DATED_INTERVAL_CSV_MAPPER;
 
     static {
         // Add mappings with CSV indices analogous to line of execution
@@ -93,9 +93,9 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     protected final Object messageReceivedLock;
-    private final HashMap<String, MultiMessageListener<Tick>> tickListenersOfRequestIDs;
-    private final HashMap<String, MultiMessageListener<Interval>> intervalListenersOfRequestIDs;
-    private final HashMap<String, MultiMessageListener<DatedInterval>> datedIntervalListenersOfRequestIDs;
+    protected final HashMap<String, MultiMessageListener<Tick>> tickListenersOfRequestIDs;
+    protected final HashMap<String, MultiMessageListener<Interval>> intervalListenersOfRequestIDs;
+    protected final HashMap<String, MultiMessageListener<DatedInterval>> datedIntervalListenersOfRequestIDs;
 
     /**
      * Instantiates a new {@link HistoricalFeed}.
@@ -105,7 +105,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
      * @param port               the port
      */
     public HistoricalFeed(String historicalFeedName, String hostname, int port) {
-        super(historicalFeedName + FEED_NAME_SUFFIX, hostname, port);
+        super(historicalFeedName + FEED_NAME_SUFFIX, hostname, port, COMMA_DELIMITED_SPLITTER);
 
         messageReceivedLock = new Object();
         tickListenersOfRequestIDs = new HashMap<>();
@@ -144,7 +144,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     private <T> boolean handleMultiMessage(String[] csv, String requestID,
-            HashMap<String, MultiMessageListener<T>> listenersOfRequestIDs, CSVMapper<T> csvMapper) {
+            HashMap<String, MultiMessageListener<T>> listenersOfRequestIDs, IndexCSVMapper<T> csvMapper) {
         MultiMessageListener<T> listener = listenersOfRequestIDs.get(requestID);
 
         if (listener == null) {
@@ -156,7 +156,9 @@ public class HistoricalFeed extends AbstractLookupFeed {
                 listener.onMessageException(new NoDataException());
             } else {
                 listener.onMessageException(new IQFeedException(
-                        valueExists(csv, 2) ? csv[2] : "Error message not present."));
+                        valueExists(csv, 2) ?
+                                String.join(",", Arrays.copyOfRange(csv, 2, csv.length)) :
+                                "Error message not present."));
             }
         } else if (isRequestEndOfMessage(csv, requestID)) {
             listenersOfRequestIDs.remove(requestID);
@@ -203,28 +205,31 @@ public class HistoricalFeed extends AbstractLookupFeed {
     public void requestTicks(String symbol, int maxDataPoints, DataDirection dataDirection,
             MultiMessageListener<Tick> ticksListener) throws IOException {
         Preconditions.checkNotNull(symbol);
+        Preconditions.checkNotNull(ticksListener);
 
         String requestID = getNewRequestID();
-        StringBuilder requestString = new StringBuilder();
+        StringBuilder requestBuilder = new StringBuilder();
 
-        requestString.append("HTX").append(",");
-        requestString.append(symbol).append(",");
-        requestString.append(maxDataPoints).append(",");
+        requestBuilder.append("HTX").append(",");
+        requestBuilder.append(symbol).append(",");
+        requestBuilder.append(maxDataPoints).append(",");
 
         if (dataDirection != null) {
-            requestString.append(dataDirection.value());
+            requestBuilder.append(dataDirection.value());
         }
-        requestString.append(",");
+        requestBuilder.append(",");
 
-        requestString.append(requestID).append(",");
-        requestString.append(DATAPOINTS_PER_SEND);
+        requestBuilder.append(requestID).append(",");
+        requestBuilder.append(DATAPOINTS_PER_SEND);
 
-        requestString.append(LineEnding.CR_LF.getASCIIString());
+        requestBuilder.append(LineEnding.CR_LF.getASCIIString());
 
         synchronized (messageReceivedLock) {
             tickListenersOfRequestIDs.put(requestID, ticksListener);
         }
-        sendMessage(requestString.toString());
+        String requestString = requestBuilder.toString();
+        LOGGER.debug("Sending request: {}", requestString);
+        sendMessage(requestString);
     }
 
     /**
@@ -247,43 +252,46 @@ public class HistoricalFeed extends AbstractLookupFeed {
             LocalTime endFilterTime, DataDirection dataDirection, MultiMessageListener<Tick> ticksListener)
             throws IOException {
         Preconditions.checkNotNull(symbol);
+        Preconditions.checkNotNull(ticksListener);
 
         String requestID = getNewRequestID();
-        StringBuilder requestString = new StringBuilder();
+        StringBuilder requestBuilder = new StringBuilder();
 
-        requestString.append("HTD").append(",");
-        requestString.append(symbol).append(",");
-        requestString.append(maxDays).append(",");
+        requestBuilder.append("HTD").append(",");
+        requestBuilder.append(symbol).append(",");
+        requestBuilder.append(maxDays).append(",");
 
         if (maxDataPoints != null) {
-            requestString.append(maxDataPoints);
+            requestBuilder.append(maxDataPoints);
         }
-        requestString.append(",");
+        requestBuilder.append(",");
 
         if (beginFilterTime != null) {
-            requestString.append(beginFilterTime.format(DateTimeFormatters.TIME));
+            requestBuilder.append(beginFilterTime.format(DateTimeFormatters.TIME));
         }
-        requestString.append(",");
+        requestBuilder.append(",");
 
         if (endFilterTime != null) {
-            requestString.append(endFilterTime.format(DateTimeFormatters.TIME));
+            requestBuilder.append(endFilterTime.format(DateTimeFormatters.TIME));
         }
-        requestString.append(",");
+        requestBuilder.append(",");
 
         if (dataDirection != null) {
-            requestString.append(dataDirection.value());
+            requestBuilder.append(dataDirection.value());
         }
-        requestString.append(",");
+        requestBuilder.append(",");
 
-        requestString.append(requestID).append(",");
-        requestString.append(DATAPOINTS_PER_SEND);
+        requestBuilder.append(requestID).append(",");
+        requestBuilder.append(DATAPOINTS_PER_SEND);
 
-        requestString.append(LineEnding.CR_LF.getASCIIString());
+        requestBuilder.append(LineEnding.CR_LF.getASCIIString());
 
         synchronized (messageReceivedLock) {
             tickListenersOfRequestIDs.put(requestID, ticksListener);
         }
-        sendMessage(requestString.toString());
+        String requestString = requestBuilder.toString();
+        LOGGER.debug("Sending request: {}", requestString);
+        sendMessage(requestString);
     }
 
     /**
@@ -308,52 +316,55 @@ public class HistoricalFeed extends AbstractLookupFeed {
             MultiMessageListener<Tick> ticksListener) throws IOException {
         Preconditions.checkNotNull(symbol);
         Preconditions.checkArgument(beginDateTime != null || endDateTime != null);
+        Preconditions.checkNotNull(ticksListener);
 
         String requestID = getNewRequestID();
-        StringBuilder requestString = new StringBuilder();
+        StringBuilder requestBuilder = new StringBuilder();
 
-        requestString.append("HTT").append(",");
-        requestString.append(symbol).append(",");
+        requestBuilder.append("HTT").append(",");
+        requestBuilder.append(symbol).append(",");
 
         if (beginDateTime != null) {
-            requestString.append(beginDateTime.format(DateTimeFormatters.DATE_SPACE_TIME));
+            requestBuilder.append(beginDateTime.format(DateTimeFormatters.DATE_SPACE_TIME));
         }
-        requestString.append(",");
+        requestBuilder.append(",");
 
         if (endDateTime != null) {
-            requestString.append(endDateTime.format(DateTimeFormatters.DATE_SPACE_TIME));
+            requestBuilder.append(endDateTime.format(DateTimeFormatters.DATE_SPACE_TIME));
         }
-        requestString.append(",");
+        requestBuilder.append(",");
 
         if (maxDataPoints != null) {
-            requestString.append(maxDataPoints);
+            requestBuilder.append(maxDataPoints);
         }
-        requestString.append(",");
+        requestBuilder.append(",");
 
         if (beginFilterTime != null) {
-            requestString.append(beginFilterTime.format(DateTimeFormatters.TIME));
+            requestBuilder.append(beginFilterTime.format(DateTimeFormatters.TIME));
         }
-        requestString.append(",");
+        requestBuilder.append(",");
 
         if (endFilterTime != null) {
-            requestString.append(endFilterTime.format(DateTimeFormatters.TIME));
+            requestBuilder.append(endFilterTime.format(DateTimeFormatters.TIME));
         }
-        requestString.append(",");
+        requestBuilder.append(",");
 
         if (dataDirection != null) {
-            requestString.append(dataDirection.value());
+            requestBuilder.append(dataDirection.value());
         }
-        requestString.append(",");
+        requestBuilder.append(",");
 
-        requestString.append(requestID).append(",");
-        requestString.append(DATAPOINTS_PER_SEND);
+        requestBuilder.append(requestID).append(",");
+        requestBuilder.append(DATAPOINTS_PER_SEND);
 
-        requestString.append(LineEnding.CR_LF.getASCIIString());
+        requestBuilder.append(LineEnding.CR_LF.getASCIIString());
 
         synchronized (messageReceivedLock) {
             tickListenersOfRequestIDs.put(requestID, ticksListener);
         }
-        sendMessage(requestString.toString());
+        String requestString = requestBuilder.toString();
+        LOGGER.debug("Sending request: {}", requestString);
+        sendMessage(requestString);
     }
 
     /**
@@ -373,35 +384,38 @@ public class HistoricalFeed extends AbstractLookupFeed {
             IntervalType intervalType, MultiMessageListener<Interval> intervalsListener) throws IOException {
         Preconditions.checkNotNull(symbol);
         Preconditions.checkNotNull(maxDataPoints);
+        Preconditions.checkNotNull(intervalsListener);
 
         String requestID = getNewRequestID();
-        StringBuilder requestString = new StringBuilder();
+        StringBuilder requestBuilder = new StringBuilder();
 
-        requestString.append("HIX").append(",");
-        requestString.append(symbol).append(",");
-        requestString.append(intervalLength).append(",");
-        requestString.append(maxDataPoints).append(",");
+        requestBuilder.append("HIX").append(",");
+        requestBuilder.append(symbol).append(",");
+        requestBuilder.append(intervalLength).append(",");
+        requestBuilder.append(maxDataPoints).append(",");
 
         if (dataDirection != null) {
-            requestString.append(dataDirection.value());
+            requestBuilder.append(dataDirection.value());
         }
-        requestString.append(",");
+        requestBuilder.append(",");
 
-        requestString.append(requestID).append(",");
-        requestString.append(DATAPOINTS_PER_SEND).append(",");
+        requestBuilder.append(requestID).append(",");
+        requestBuilder.append(DATAPOINTS_PER_SEND).append(",");
 
         if (intervalType != null) {
-            requestString.append(intervalType.value());
+            requestBuilder.append(intervalType.value());
         }
-        requestString.append(",");
+        requestBuilder.append(",");
 
-        requestString.append(TimeLabelPlacement.BEGINNING);
-        requestString.append(LineEnding.CR_LF.getASCIIString());
+        requestBuilder.append(TimeLabelPlacement.BEGINNING);
+        requestBuilder.append(LineEnding.CR_LF.getASCIIString());
 
         synchronized (messageReceivedLock) {
             intervalListenersOfRequestIDs.put(requestID, intervalsListener);
         }
-        sendMessage(requestString.toString());
+        String requestString = requestBuilder.toString();
+        LOGGER.debug("Sending request: {}", requestString);
+        sendMessage(requestString);
     }
 
     /**
@@ -426,50 +440,53 @@ public class HistoricalFeed extends AbstractLookupFeed {
             LocalTime beginFilterTime, LocalTime endFilterTime, DataDirection dataDirection, IntervalType intervalType,
             MultiMessageListener<Interval> intervalsListener) throws IOException {
         Preconditions.checkNotNull(symbol);
+        Preconditions.checkNotNull(intervalsListener);
 
         String requestID = getNewRequestID();
-        StringBuilder requestString = new StringBuilder();
+        StringBuilder requestBuilder = new StringBuilder();
 
-        requestString.append("HID").append(",");
-        requestString.append(symbol).append(",");
-        requestString.append(intervalLength).append(",");
-        requestString.append(maxDays).append(",");
+        requestBuilder.append("HID").append(",");
+        requestBuilder.append(symbol).append(",");
+        requestBuilder.append(intervalLength).append(",");
+        requestBuilder.append(maxDays).append(",");
 
         if (maxDataPoints != null) {
-            requestString.append(maxDataPoints);
+            requestBuilder.append(maxDataPoints);
         }
-        requestString.append(",");
+        requestBuilder.append(",");
 
         if (beginFilterTime != null) {
-            requestString.append(beginFilterTime.format(DateTimeFormatters.TIME));
+            requestBuilder.append(beginFilterTime.format(DateTimeFormatters.TIME));
         }
-        requestString.append(",");
+        requestBuilder.append(",");
 
         if (endFilterTime != null) {
-            requestString.append(endFilterTime.format(DateTimeFormatters.TIME));
+            requestBuilder.append(endFilterTime.format(DateTimeFormatters.TIME));
         }
-        requestString.append(",");
+        requestBuilder.append(",");
 
         if (dataDirection != null) {
-            requestString.append(dataDirection.value());
+            requestBuilder.append(dataDirection.value());
         }
-        requestString.append(",");
+        requestBuilder.append(",");
 
-        requestString.append(requestID).append(",");
-        requestString.append(DATAPOINTS_PER_SEND).append(",");
+        requestBuilder.append(requestID).append(",");
+        requestBuilder.append(DATAPOINTS_PER_SEND).append(",");
 
         if (intervalType != null) {
-            requestString.append(intervalType.value());
+            requestBuilder.append(intervalType.value());
         }
-        requestString.append(",");
+        requestBuilder.append(",");
 
-        requestString.append(TimeLabelPlacement.BEGINNING);
-        requestString.append(LineEnding.CR_LF.getASCIIString());
+        requestBuilder.append(TimeLabelPlacement.BEGINNING);
+        requestBuilder.append(LineEnding.CR_LF.getASCIIString());
 
         synchronized (messageReceivedLock) {
             intervalListenersOfRequestIDs.put(requestID, intervalsListener);
         }
-        sendMessage(requestString.toString());
+        String requestString = requestBuilder.toString();
+        LOGGER.debug("Sending request: {}", requestString);
+        sendMessage(requestString);
     }
 
     /**
@@ -497,59 +514,62 @@ public class HistoricalFeed extends AbstractLookupFeed {
             throws IOException {
         Preconditions.checkNotNull(symbol);
         Preconditions.checkArgument(beginDateTime != null || endDateTime != null);
+        Preconditions.checkNotNull(intervalsListener);
 
         String requestID = getNewRequestID();
-        StringBuilder requestString = new StringBuilder();
+        StringBuilder requestBuilder = new StringBuilder();
 
-        requestString.append("HIT").append(",");
-        requestString.append(symbol).append(",");
-        requestString.append(intervalLength).append(",");
+        requestBuilder.append("HIT").append(",");
+        requestBuilder.append(symbol).append(",");
+        requestBuilder.append(intervalLength).append(",");
 
         if (beginDateTime != null) {
-            requestString.append(beginDateTime.format(DateTimeFormatters.DATE_SPACE_TIME));
+            requestBuilder.append(beginDateTime.format(DateTimeFormatters.DATE_SPACE_TIME));
         }
-        requestString.append(",");
+        requestBuilder.append(",");
 
         if (endDateTime != null) {
-            requestString.append(endDateTime.format(DateTimeFormatters.DATE_SPACE_TIME));
+            requestBuilder.append(endDateTime.format(DateTimeFormatters.DATE_SPACE_TIME));
         }
-        requestString.append(",");
+        requestBuilder.append(",");
 
         if (maxDataPoints != null) {
-            requestString.append(maxDataPoints);
+            requestBuilder.append(maxDataPoints);
         }
-        requestString.append(",");
+        requestBuilder.append(",");
 
         if (beginFilterTime != null) {
-            requestString.append(beginFilterTime.format(DateTimeFormatters.TIME));
+            requestBuilder.append(beginFilterTime.format(DateTimeFormatters.TIME));
         }
-        requestString.append(",");
+        requestBuilder.append(",");
 
         if (endFilterTime != null) {
-            requestString.append(endFilterTime.format(DateTimeFormatters.TIME));
+            requestBuilder.append(endFilterTime.format(DateTimeFormatters.TIME));
         }
-        requestString.append(",");
+        requestBuilder.append(",");
 
         if (dataDirection != null) {
-            requestString.append(dataDirection.value());
+            requestBuilder.append(dataDirection.value());
         }
-        requestString.append(",");
+        requestBuilder.append(",");
 
-        requestString.append(requestID).append(",");
-        requestString.append(DATAPOINTS_PER_SEND).append(",");
+        requestBuilder.append(requestID).append(",");
+        requestBuilder.append(DATAPOINTS_PER_SEND).append(",");
 
         if (intervalType != null) {
-            requestString.append(intervalType.value());
+            requestBuilder.append(intervalType.value());
         }
-        requestString.append(",");
+        requestBuilder.append(",");
 
-        requestString.append(TimeLabelPlacement.BEGINNING);
-        requestString.append(LineEnding.CR_LF.getASCIIString());
+        requestBuilder.append(TimeLabelPlacement.BEGINNING);
+        requestBuilder.append(LineEnding.CR_LF.getASCIIString());
 
         synchronized (messageReceivedLock) {
             intervalListenersOfRequestIDs.put(requestID, intervalsListener);
         }
-        sendMessage(requestString.toString());
+        String requestString = requestBuilder.toString();
+        LOGGER.debug("Sending request: {}", requestString);
+        sendMessage(requestString);
     }
 
     /**
@@ -570,32 +590,35 @@ public class HistoricalFeed extends AbstractLookupFeed {
             PartialDatapoint partialDatapoint, MultiMessageListener<DatedInterval> datedIntervalsListener)
             throws IOException {
         Preconditions.checkNotNull(symbol);
+        Preconditions.checkNotNull(datedIntervalsListener);
 
         String requestID = getNewRequestID();
-        StringBuilder requestString = new StringBuilder();
+        StringBuilder requestBuilder = new StringBuilder();
 
-        requestString.append("HDX").append(",");
-        requestString.append(symbol).append(",");
-        requestString.append(maxDays).append(",");
+        requestBuilder.append("HDX").append(",");
+        requestBuilder.append(symbol).append(",");
+        requestBuilder.append(maxDays).append(",");
 
         if (dataDirection != null) {
-            requestString.append(dataDirection.value());
+            requestBuilder.append(dataDirection.value());
         }
-        requestString.append(",");
+        requestBuilder.append(",");
 
-        requestString.append(requestID).append(",");
-        requestString.append(DATAPOINTS_PER_SEND).append(",");
+        requestBuilder.append(requestID).append(",");
+        requestBuilder.append(DATAPOINTS_PER_SEND).append(",");
 
         if (partialDatapoint != null) {
-            requestString.append(partialDatapoint.value());
+            requestBuilder.append(partialDatapoint.value());
         }
 
-        requestString.append(LineEnding.CR_LF.getASCIIString());
+        requestBuilder.append(LineEnding.CR_LF.getASCIIString());
 
         synchronized (messageReceivedLock) {
             datedIntervalListenersOfRequestIDs.put(requestID, datedIntervalsListener);
         }
-        sendMessage(requestString.toString());
+        String requestString = requestBuilder.toString();
+        LOGGER.debug("Sending request: {}", requestString);
+        sendMessage(requestString);
     }
 
     /**
@@ -619,46 +642,49 @@ public class HistoricalFeed extends AbstractLookupFeed {
             MultiMessageListener<DatedInterval> datedIntervalsListener) throws IOException {
         Preconditions.checkNotNull(symbol);
         Preconditions.checkArgument(beginDate != null || endDate != null);
+        Preconditions.checkNotNull(datedIntervalsListener);
 
         String requestID = getNewRequestID();
-        StringBuilder requestString = new StringBuilder();
+        StringBuilder requestBuilder = new StringBuilder();
 
-        requestString.append("HDT").append(",");
-        requestString.append(symbol).append(",");
+        requestBuilder.append("HDT").append(",");
+        requestBuilder.append(symbol).append(",");
 
         if (beginDate != null) {
-            requestString.append(beginDate.format(DateTimeFormatters.DATE));
+            requestBuilder.append(beginDate.format(DateTimeFormatters.DATE));
         }
-        requestString.append(",");
+        requestBuilder.append(",");
 
         if (endDate != null) {
-            requestString.append(endDate.format(DateTimeFormatters.DATE));
+            requestBuilder.append(endDate.format(DateTimeFormatters.DATE));
         }
-        requestString.append(",");
+        requestBuilder.append(",");
 
         if (maxDataPoints != null) {
-            requestString.append(maxDataPoints);
+            requestBuilder.append(maxDataPoints);
         }
-        requestString.append(",");
+        requestBuilder.append(",");
 
         if (dataDirection != null) {
-            requestString.append(dataDirection.value());
+            requestBuilder.append(dataDirection.value());
         }
-        requestString.append(",");
+        requestBuilder.append(",");
 
-        requestString.append(requestID).append(",");
-        requestString.append(DATAPOINTS_PER_SEND).append(",");
+        requestBuilder.append(requestID).append(",");
+        requestBuilder.append(DATAPOINTS_PER_SEND).append(",");
 
         if (partialDatapoint != null) {
-            requestString.append(partialDatapoint.value());
+            requestBuilder.append(partialDatapoint.value());
         }
 
-        requestString.append(LineEnding.CR_LF.getASCIIString());
+        requestBuilder.append(LineEnding.CR_LF.getASCIIString());
 
         synchronized (messageReceivedLock) {
             datedIntervalListenersOfRequestIDs.put(requestID, datedIntervalsListener);
         }
-        sendMessage(requestString.toString());
+        String requestString = requestBuilder.toString();
+        LOGGER.debug("Sending request: {}", requestString);
+        sendMessage(requestString);
     }
 
     /**
@@ -679,32 +705,35 @@ public class HistoricalFeed extends AbstractLookupFeed {
             PartialDatapoint partialDatapoint, MultiMessageListener<DatedInterval> datedIntervalsListener)
             throws IOException {
         Preconditions.checkNotNull(symbol);
+        Preconditions.checkNotNull(datedIntervalsListener);
 
         String requestID = getNewRequestID();
-        StringBuilder requestString = new StringBuilder();
+        StringBuilder requestBuilder = new StringBuilder();
 
-        requestString.append("HWX").append(",");
-        requestString.append(symbol).append(",");
-        requestString.append(maxWeeks).append(",");
+        requestBuilder.append("HWX").append(",");
+        requestBuilder.append(symbol).append(",");
+        requestBuilder.append(maxWeeks).append(",");
 
         if (dataDirection != null) {
-            requestString.append(dataDirection.value());
+            requestBuilder.append(dataDirection.value());
         }
-        requestString.append(",");
+        requestBuilder.append(",");
 
-        requestString.append(requestID).append(",");
-        requestString.append(DATAPOINTS_PER_SEND).append(",");
+        requestBuilder.append(requestID).append(",");
+        requestBuilder.append(DATAPOINTS_PER_SEND).append(",");
 
         if (partialDatapoint != null) {
-            requestString.append(partialDatapoint.value());
+            requestBuilder.append(partialDatapoint.value());
         }
 
-        requestString.append(LineEnding.CR_LF.getASCIIString());
+        requestBuilder.append(LineEnding.CR_LF.getASCIIString());
 
         synchronized (messageReceivedLock) {
             datedIntervalListenersOfRequestIDs.put(requestID, datedIntervalsListener);
         }
-        sendMessage(requestString.toString());
+        String requestString = requestBuilder.toString();
+        LOGGER.debug("Sending request: {}", requestString);
+        sendMessage(requestString);
     }
 
     /**
@@ -725,32 +754,35 @@ public class HistoricalFeed extends AbstractLookupFeed {
             PartialDatapoint partialDatapoint, MultiMessageListener<DatedInterval> datedIntervalsListener)
             throws IOException {
         Preconditions.checkNotNull(symbol);
+        Preconditions.checkNotNull(datedIntervalsListener);
 
         String requestID = getNewRequestID();
-        StringBuilder requestString = new StringBuilder();
+        StringBuilder requestBuilder = new StringBuilder();
 
-        requestString.append("HMX").append(",");
-        requestString.append(symbol).append(",");
-        requestString.append(maxMonths).append(",");
+        requestBuilder.append("HMX").append(",");
+        requestBuilder.append(symbol).append(",");
+        requestBuilder.append(maxMonths).append(",");
 
         if (dataDirection != null) {
-            requestString.append(dataDirection.value());
+            requestBuilder.append(dataDirection.value());
         }
-        requestString.append(",");
+        requestBuilder.append(",");
 
-        requestString.append(requestID).append(",");
-        requestString.append(DATAPOINTS_PER_SEND).append(",");
+        requestBuilder.append(requestID).append(",");
+        requestBuilder.append(DATAPOINTS_PER_SEND).append(",");
 
         if (partialDatapoint != null) {
-            requestString.append(partialDatapoint.value());
+            requestBuilder.append(partialDatapoint.value());
         }
 
-        requestString.append(LineEnding.CR_LF.getASCIIString());
+        requestBuilder.append(LineEnding.CR_LF.getASCIIString());
 
         synchronized (messageReceivedLock) {
             datedIntervalListenersOfRequestIDs.put(requestID, datedIntervalsListener);
         }
-        sendMessage(requestString.toString());
+        String requestString = requestBuilder.toString();
+        LOGGER.debug("Sending request: {}", requestString);
+        sendMessage(requestString);
     }
 
     //

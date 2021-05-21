@@ -1,0 +1,111 @@
+{
+  "type": "object",
+  "title": "POJO for EDS (End of Day Summary) requests. See <a href=\"https://www.iqfeed.net/dev/api/docs//MarketSummaryviaTCPIP.cfm\">Market Summary via TCP/IP</a>",
+  "properties": {
+    "Symbol": {
+      "existingJavaType": "java.lang.String"
+    },
+    "Exchange": {
+      "existingJavaType": "java.lang.Integer"
+    },
+    "Type": {
+      "existingJavaType": "java.lang.Integer"
+    },
+    "Last": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "TradeSize": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "TradedMarket": {
+      "existingJavaType": "java.lang.Integer"
+    },
+    "TradeDate": {
+      "existingJavaType": "java.time.LocalDate"
+    },
+    "TradeTime": {
+      "existingJavaType": "java.time.LocalTime"
+    },
+    "Open": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "High": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "Low": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "Close": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "Bid": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "BidMarket": {
+      "existingJavaType": "java.lang.Integer"
+    },
+    "BidSize": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "Ask": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "AskMarket": {
+      "existingJavaType": "java.lang.Integer"
+    },
+    "AskSize": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "Volume": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "PDayVolume": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "UpVolume": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "DownVolume": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "NeutralVolume": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "TradeCount": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "UpTrades": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "DownTrades": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "NeutralTrades": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "VWAP": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "MutualDiv": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "SevenDayYield": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "OpenInterest": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "Settlement": {
+      "existingJavaType": "java.lang.Double"
+    },
+    "SettlementDate": {
+      "existingJavaType": "java.time.LocalDate"
+    },
+    "ExpirationDate": {
+      "existingJavaType": "java.time.LocalDate"
+    },
+    "Strike": {
+      "existingJavaType": "java.lang.Double"
+    }
+  }
+}
