@@ -263,7 +263,8 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
                 csvIndicesOfIndexNamesOfRequestIDs.put(requestID, csvIndicesOfIndexNames);
             } else {
                 try {
-                    T messageType = namedCSVMapper.map(csv, 1, csvIndicesOfIndexNames);
+                    // Offset = 0 since above 'if' block accounts for Request ID offset
+                    T messageType = namedCSVMapper.map(csv, 0, csvIndicesOfIndexNames);
                     listener.onMessageReceived(messageType);
                 } catch (Exception exception) {
                     listener.onMessageException(exception);

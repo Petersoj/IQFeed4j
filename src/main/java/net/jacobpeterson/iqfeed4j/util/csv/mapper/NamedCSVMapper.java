@@ -82,7 +82,8 @@ public class NamedCSVMapper<T> extends CSVMapper<T> {
             try {
                 csvMappingFunctions.apply(instance, csv[csvNamedIndex + offset]);
             } catch (Exception exception) {
-                throw new Exception("Error mapping at index " + csvNamedIndex + " with offset " + offset, exception);
+                throw new Exception("Error mapping at index " + csvNamedIndex + " with offset " + offset +
+                        " with index name " + csvIndexOfIndexName.getKey(), exception);
             }
         }
 
