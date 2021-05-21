@@ -216,7 +216,7 @@ public abstract class AbstractFeed implements Runnable {
     protected abstract void onMessageReceived(String[] csv);
 
     /**
-     * Called when an asynchronous {@link Exception} has occurred.
+     * Called when an asynchronous {@link Exception} relating to the feed connection has occurred.
      *
      * @param message   the message
      * @param exception the {@link Exception}

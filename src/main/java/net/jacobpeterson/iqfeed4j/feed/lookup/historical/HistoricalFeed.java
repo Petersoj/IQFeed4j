@@ -11,8 +11,9 @@ import net.jacobpeterson.iqfeed4j.model.feedenums.misc.DataDirection;
 import net.jacobpeterson.iqfeed4j.model.lookup.historical.DatedInterval;
 import net.jacobpeterson.iqfeed4j.model.lookup.historical.Interval;
 import net.jacobpeterson.iqfeed4j.model.lookup.historical.Tick;
-import net.jacobpeterson.iqfeed4j.util.csv.CSVMapper;
-import net.jacobpeterson.iqfeed4j.util.csv.CSVMapper.DateTimeFormatters;
+import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper;
+import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeFormatters;
+import net.jacobpeterson.iqfeed4j.util.csv.mapper.IndexCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.exception.IQFeedException;
 import net.jacobpeterson.iqfeed4j.util.exception.NoDataException;
 import net.jacobpeterson.iqfeed4j.util.string.LineEnding;
@@ -25,10 +26,10 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashMap;
 
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVMapper.DateTimeConverters.*;
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVMapper.PrimitiveConvertors.*;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueExists;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.*;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.*;
 
 /**
  * {@link HistoricalFeed} is an {@link AbstractLookupFeed} for historical data.
@@ -50,14 +51,14 @@ public class HistoricalFeed extends AbstractLookupFeed {
     private static final Logger LOGGER = LoggerFactory.getLogger(HistoricalFeed.class);
     private static final String FEED_NAME_SUFFIX = " Historical";
 
-    private static final CSVMapper<Tick> TICK_CSV_MAPPER;
-    private static final CSVMapper<Interval> INTERVAL_CSV_MAPPER;
-    private static final CSVMapper<DatedInterval> DATED_INTERVAL_CSV_MAPPER;
+    private static final IndexCSVMapper<Tick> TICK_CSV_MAPPER;
+    private static final IndexCSVMapper<Interval> INTERVAL_CSV_MAPPER;
+    private static final IndexCSVMapper<DatedInterval> DATED_INTERVAL_CSV_MAPPER;
 
     static {
         // Add mappings with CSV indices analogous to line of execution
 
-        TICK_CSV_MAPPER = new CSVMapper<>(Tick::new);
+        TICK_CSV_MAPPER = new IndexCSVMapper<>(Tick::new);
         TICK_CSV_MAPPER.addMapping(Tick::setTimestamp, DASHED_DATE_SPACE_TIME_FRACTIONAL);
         TICK_CSV_MAPPER.addMapping(Tick::setLast, DOUBLE);
         TICK_CSV_MAPPER.addMapping(Tick::setLastSize, INT);
@@ -71,7 +72,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         TICK_CSV_MAPPER.addMapping(Tick::setTradeAggressor, Tick.TradeAggressor::fromValue);
         TICK_CSV_MAPPER.addMapping(Tick::setDayCode, INT);
 
-        INTERVAL_CSV_MAPPER = new CSVMapper<>(Interval::new);
+        INTERVAL_CSV_MAPPER = new IndexCSVMapper<>(Interval::new);
         INTERVAL_CSV_MAPPER.addMapping(Interval::setTimestamp, DASHED_DATE_SPACE_TIME);
         INTERVAL_CSV_MAPPER.addMapping(Interval::setHigh, DOUBLE);
         INTERVAL_CSV_MAPPER.addMapping(Interval::setLow, DOUBLE);
@@ -81,7 +82,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         INTERVAL_CSV_MAPPER.addMapping(Interval::setPeriodVolume, INT);
         INTERVAL_CSV_MAPPER.addMapping(Interval::setNumberOfTrades, INT);
 
-        DATED_INTERVAL_CSV_MAPPER = new CSVMapper<>(DatedInterval::new);
+        DATED_INTERVAL_CSV_MAPPER = new IndexCSVMapper<>(DatedInterval::new);
         DATED_INTERVAL_CSV_MAPPER.addMapping(DatedInterval::setDate, DASHED_DATE);
         DATED_INTERVAL_CSV_MAPPER.addMapping(DatedInterval::setHigh, DOUBLE);
         DATED_INTERVAL_CSV_MAPPER.addMapping(DatedInterval::setLow, DOUBLE);
@@ -99,7 +100,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
     /**
      * Instantiates a new {@link HistoricalFeed}.
      *
-     * @param historicalFeedName the historical feed name
+     * @param historicalFeedName the Historical feed name
      * @param hostname           the hostname
      * @param port               the port
      */

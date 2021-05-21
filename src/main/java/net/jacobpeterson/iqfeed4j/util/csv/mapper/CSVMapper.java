@@ -1,27 +1,21 @@
-package net.jacobpeterson.iqfeed4j.util.csv;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package net.jacobpeterson.iqfeed4j.util.csv.mapper;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.concurrent.Callable;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
-
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueExists;
 
 /**
  * {@link CSVMapper} maps CSV {@link String} values to POJO fields.
  *
  * @param <T> the type of the POJO
  */
-public final class CSVMapper<T> {
+public abstract class CSVMapper<T> {
 
     /**
      * {@link PrimitiveConvertors} contains common {@link Function}s with the argument being the CSV {@link String}
@@ -101,10 +95,7 @@ public final class CSVMapper<T> {
                 (value) -> LocalDate.parse(value, DateTimeFormatters.DASHED_DATE);
     }
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CSVMapper.class);
-
-    private final Callable<T> pojoInstantiator;
-    private final HashMap<Integer, MappingFunctions<?>> mappingFunctionsOfCSVIndices;
+    protected final Callable<T> pojoInstantiator;
 
     /**
      * Instantiates a new {@link CSVMapper}.
@@ -113,47 +104,10 @@ public final class CSVMapper<T> {
      */
     public CSVMapper(Callable<T> pojoInstantiator) {
         this.pojoInstantiator = pojoInstantiator;
-
-        mappingFunctionsOfCSVIndices = new HashMap<>();
     }
 
     /**
-     * Adds a CSV to POJO field mapping as the CSV index being the largest {@link #setMapping(int, BiConsumer,
-     * Function)} CSV index + 1.
-     *
-     * @param <P>                    the type of the POJO field
-     * @param fieldSetter            see {@link MappingFunctions} constructor doc
-     * @param stringToFieldConverter see {@link MappingFunctions} constructor doc
-     */
-    public <P> void addMapping(BiConsumer<T, P> fieldSetter, Function<String, P> stringToFieldConverter) {
-        int nextCSVIndex = mappingFunctionsOfCSVIndices.keySet().stream().max(Integer::compareTo).orElse(-1) + 1;
-        setMapping(nextCSVIndex, fieldSetter, stringToFieldConverter);
-    }
-
-    /**
-     * Sets a CSV to POJO field mapping.
-     *
-     * @param <P>                    the type of the POJO field
-     * @param csvIndex               the CSV index
-     * @param fieldSetter            see {@link MappingFunctions} constructor doc
-     * @param stringToFieldConverter see {@link MappingFunctions} constructor doc
-     */
-    public <P> void setMapping(int csvIndex, BiConsumer<T, P> fieldSetter, Function<String, P> stringToFieldConverter) {
-        mappingFunctionsOfCSVIndices.put(csvIndex, new MappingFunctions<>(fieldSetter, stringToFieldConverter));
-    }
-
-    /**
-     * Removes a CSV mapping, if it exists.
-     *
-     * @param csvIndex the CSV index
-     */
-    public void removeMapping(int csvIndex) {
-        mappingFunctionsOfCSVIndices.remove(csvIndex);
-    }
-
-    /**
-     * Maps the given CSV to a POJO. Note this will map all mappings added via {@link #addMapping(BiConsumer,
-     * Function)}.
+     * Maps the given CSV to a POJO.
      *
      * @param csv    the CSV
      * @param offset offset to add to CSV indices when applying {@link MappingFunctions}
@@ -162,23 +116,7 @@ public final class CSVMapper<T> {
      *
      * @throws Exception thrown for a variety of {@link Exception}s
      */
-    public T map(String[] csv, int offset) throws Exception {
-        T instance = pojoInstantiator.call();
-
-        // Loop through all added 'MappingFunctions' and apply them
-        for (int csvIndex : mappingFunctionsOfCSVIndices.keySet()) {
-            if (!valueExists(csv, csvIndex + offset)) {
-                LOGGER.debug("Mapping at index {} with added offset {} doesn't exist in the given CSV: {}",
-                        csvIndex, offset, csv);
-                continue;
-            }
-
-            // apply() could throw a variety of exceptions
-            mappingFunctionsOfCSVIndices.get(csvIndex).apply(instance, csv[csvIndex + offset]);
-        }
-
-        return instance;
-    }
+    public abstract T map(String[] csv, int offset) throws Exception;
 
     /**
      * {@link MappingFunctions} holds functions for CSV to field mapping.
