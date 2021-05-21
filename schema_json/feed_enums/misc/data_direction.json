@@ -7,10 +7,10 @@
   ],
   "javaEnums": [
     {
-      "name": "ASCENDING"
+      "name": "NEWEST_TO_OLDEST"
     },
     {
-      "name": "DESCENDING"
+      "name": "OLDEST_TO_NEWEST"
     }
   ]
 }

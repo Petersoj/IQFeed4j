@@ -1,0 +1,20 @@
+{
+  "type": "string",
+  "title": "Defines enums for Interval types.",
+  "enum": [
+    "s",
+    "v",
+    "t"
+  ],
+  "javaEnums": [
+    {
+      "name": "SECONDS"
+    },
+    {
+      "name": "VOLUME"
+    },
+    {
+      "name": "TICKS"
+    }
+  ]
+}

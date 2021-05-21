@@ -1,0 +1,16 @@
+{
+  "type": "string",
+  "title": "Defines enums for the placement of the time label.",
+  "enum": [
+    "0",
+    "1"
+  ],
+  "javaEnums": [
+    {
+      "name": "END"
+    },
+    {
+      "name": "BEGINNING"
+    }
+  ]
+}

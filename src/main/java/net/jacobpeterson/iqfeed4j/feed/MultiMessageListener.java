@@ -7,29 +7,29 @@ package net.jacobpeterson.iqfeed4j.feed;
  */
 public abstract class MultiMessageListener<T> {
 
-    private boolean endOfMessages;
+    private boolean endOfMultiMessage;
 
     /**
      * Called when a message is received. Note: This method should never block!
      *
      * @param message the message
      */
-    protected abstract void onMessageReceived(T message);
+    public abstract void onMessageReceived(T message);
 
     /**
      * Called when a message {@link Exception} has occurred.
      *
      * @param exception the {@link Exception}
      */
-    protected abstract void onMessageException(Exception exception);
+    public abstract void onMessageException(Exception exception);
 
     /**
      * Called when all messages have been received.
      * <br>
      * Note: be sure to call this <code>super</code> method in subclasses overriding this method.
      */
-    protected void onEndOfMessages() {
-        endOfMessages = true;
+    public void onEndOfMultiMessage() {
+        endOfMultiMessage = true;
     }
 
     /**
@@ -37,7 +37,7 @@ public abstract class MultiMessageListener<T> {
      *
      * @return a boolean
      */
-    public boolean isEndOfMessages() {
-        return endOfMessages;
+    public boolean isEndOfMultiMessage() {
+        return endOfMultiMessage;
     }
 }

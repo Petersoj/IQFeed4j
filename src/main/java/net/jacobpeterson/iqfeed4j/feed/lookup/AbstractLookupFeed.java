@@ -2,6 +2,7 @@ package net.jacobpeterson.iqfeed4j.feed.lookup;
 
 import net.jacobpeterson.iqfeed4j.feed.AbstractFeed;
 import net.jacobpeterson.iqfeed4j.model.feedenums.FeedMessageType;
+import net.jacobpeterson.iqfeed4j.model.feedenums.FeedSpecialMessage;
 
 import java.util.HashSet;
 
@@ -34,12 +35,40 @@ public abstract class AbstractLookupFeed extends AbstractFeed {
      * <br>
      * e.g. <code>[Request ID], E, &lt;Error Text&gt;</code>
      *
+     * @param csv       the CSV
+     * @param requestID the request ID
+     *
+     * @return true if the CSV represents an {@link FeedMessageType#ERROR} message
+     */
+    protected boolean isRequestErrorMessage(String[] csv, String requestID) {
+        return valueEquals(csv, 0, requestID) && valueEquals(csv, 1, FeedMessageType.ERROR.value());
+    }
+
+    /**
+     * Check if a message matches the following format:
+     * <br>
+     * <code>[Request ID], {@link FeedSpecialMessage#END_OF_MESSAGE}</code>
+     *
+     * @param csv       the CSV
+     * @param requestID the request ID
+     *
+     * @return true if the message represents an {@link FeedSpecialMessage#END_OF_MESSAGE} message
+     */
+    public boolean isRequestEndOfMessage(String[] csv, String requestID) {
+        return valueEquals(csv, 0, requestID) && valueEquals(csv, 1, FeedSpecialMessage.END_OF_MESSAGE.value());
+    }
+
+    /**
+     * Check if a message matches the following format:
+     * <br>
+     * <code>[Request ID], {@link FeedSpecialMessage#END_OF_MESSAGE}</code>
+     *
      * @param csv the CSV
      *
-     * @return true if the CSV represents an error message
+     * @return true if the message represents an {@link FeedSpecialMessage#END_OF_MESSAGE} message
      */
-    protected boolean isRequestIDErrorMessage(String[] csv) {
-        return valueEquals(csv, 1, FeedMessageType.ERROR.value());
+    public boolean isRequestNoDataError(String[] csv) {
+        return valueEquals(csv, 1, FeedSpecialMessage.END_OF_MESSAGE.value());
     }
 
     /**

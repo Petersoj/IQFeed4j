@@ -1,0 +1,16 @@
+{
+  "type": "string",
+  "title": "Defines enums for partial datapoint inclusion.",
+  "enum": [
+    "0",
+    "1"
+  ],
+  "javaEnums": [
+    {
+      "name": "EXCLUDE"
+    },
+    {
+      "name": "INCLUDE"
+    }
+  ]
+}
