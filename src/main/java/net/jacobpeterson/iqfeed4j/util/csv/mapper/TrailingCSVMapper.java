@@ -104,9 +104,9 @@ public class TrailingCSVMapper<T> extends CSVMapper<T> {
         }
 
         // Now apply 'trailingMappingFunction' on trailing CSV values
-        if (valueExists(csv, trailingCSVIndex)) {
+        if (valueExists(csv, trailingCSVIndex + offset)) {
             StringBuilder trailingCSVBuilder = new StringBuilder();
-            for (int csvIndex = trailingCSVIndex; csvIndex < csv.length; csvIndex++) {
+            for (int csvIndex = trailingCSVIndex + offset; csvIndex < csv.length; csvIndex++) {
                 trailingCSVBuilder.append(csv[csvIndex]);
 
                 if (csvIndex < csv.length - 1) { // Don't append comma on last CSV value
