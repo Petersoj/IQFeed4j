@@ -1,6 +1,6 @@
 {
   "type": "string",
-  "title": "Defines enums for filter types.",
+  "title": "Defines enums for symbol filter types.",
   "enum": [
     "e",
     "t"

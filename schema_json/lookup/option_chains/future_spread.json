@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "title": "POJO for a Future spread. See <a href=\"https://www.iqfeed.net/dev/api/docs//OptionChainsviaTCPIP.cfm\">Option Chains via TCP/IP</a>",
+  "properties": {
+    "From": {
+      "existingJavaType": "net.jacobpeterson.iqfeed4j.model.lookup.optionchains.FutureContract",
+      "title": "The 'From' Future."
+    },
+    "To": {
+      "existingJavaType": "net.jacobpeterson.iqfeed4j.model.lookup.optionchains.FutureContract",
+      "title": "The 'To' Future."
+    }
+  }
+}

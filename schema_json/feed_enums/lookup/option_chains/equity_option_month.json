@@ -1,0 +1,104 @@
+{
+  "type": "string",
+  "title": "Defines enums for month codes for Equity Call Option chains.",
+  "enum": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K",
+    "L",
+    "M",
+    "N",
+    "O",
+    "P",
+    "Q",
+    "R",
+    "S",
+    "T",
+    "U",
+    "V",
+    "W",
+    "X"
+  ],
+  "javaEnums": [
+    {
+      "name": "JANUARY_CALL"
+    },
+    {
+      "name": "FEBRUARY_CALL"
+    },
+    {
+      "name": "MARCH_CALL"
+    },
+    {
+      "name": "APRIL_CALL"
+    },
+    {
+      "name": "MAY_CALL"
+    },
+    {
+      "name": "JUNE_CALL"
+    },
+    {
+      "name": "JULY_CALL"
+    },
+    {
+      "name": "AUGUST_CALL"
+    },
+    {
+      "name": "SEPTEMBER_CALL"
+    },
+    {
+      "name": "OCTOBER_CALL"
+    },
+    {
+      "name": "NOVEMBER_CALL"
+    },
+    {
+      "name": "DECEMBER_CALL"
+    },
+    {
+      "name": "JANUARY_PUT"
+    },
+    {
+      "name": "FEBRUARY_PUT"
+    },
+    {
+      "name": "MARCH_PUT"
+    },
+    {
+      "name": "APRIL_PUT"
+    },
+    {
+      "name": "MAY_PUT"
+    },
+    {
+      "name": "JUNE_PUT"
+    },
+    {
+      "name": "JULY_PUT"
+    },
+    {
+      "name": "AUGUST_PUT"
+    },
+    {
+      "name": "SEPTEMBER_PUT"
+    },
+    {
+      "name": "OCTOBER_PUT"
+    },
+    {
+      "name": "NOVEMBER_PUT"
+    },
+    {
+      "name": "DECEMBER_PUT"
+    }
+  ]
+}

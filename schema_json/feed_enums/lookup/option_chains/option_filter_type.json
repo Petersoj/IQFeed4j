@@ -1,0 +1,20 @@
+{
+  "type": "string",
+  "title": "Defines enums for Option contract filter types.",
+  "enum": [
+    "0",
+    "1",
+    "2"
+  ],
+  "javaEnums": [
+    {
+      "name": "NONE"
+    },
+    {
+      "name": "STRIKE_RANGE"
+    },
+    {
+      "name": "IN_OR_OUT_OF_THE_MONEY"
+    }
+  ]
+}

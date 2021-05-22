@@ -1,0 +1,56 @@
+{
+  "type": "string",
+  "title": "Defines enums for month codes for Future Option chains.",
+  "enum": [
+    "F",
+    "G",
+    "H",
+    "J",
+    "K",
+    "M",
+    "N",
+    "Q",
+    "U",
+    "V",
+    "X",
+    "Z"
+  ],
+  "javaEnums": [
+    {
+      "name": "JANUARY"
+    },
+    {
+      "name": "FEBRUARY"
+    },
+    {
+      "name": "MARCH"
+    },
+    {
+      "name": "APRIL"
+    },
+    {
+      "name": "MAY"
+    },
+    {
+      "name": "JUNE"
+    },
+    {
+      "name": "JULY"
+    },
+    {
+      "name": "AUGUST"
+    },
+    {
+      "name": "SEPTEMBER"
+    },
+    {
+      "name": "OCTOBER"
+    },
+    {
+      "name": "NOVEMBER"
+    },
+    {
+      "name": "DECEMBER"
+    }
+  ]
+}

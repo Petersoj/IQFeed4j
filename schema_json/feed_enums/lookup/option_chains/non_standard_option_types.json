@@ -1,0 +1,16 @@
+{
+  "type": "string",
+  "title": "Defines enums for inclusion of non-standard Option contract types.",
+  "enum": [
+    "0",
+    "1"
+  ],
+  "javaEnums": [
+    {
+      "name": "EXCLUDE"
+    },
+    {
+      "name": "INCLUDE"
+    }
+  ]
+}

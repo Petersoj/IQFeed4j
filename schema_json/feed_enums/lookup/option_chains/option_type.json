@@ -1,0 +1,16 @@
+{
+  "type": "string",
+  "title": "Defines enums for Option contract types.",
+  "enum": [
+    "P",
+    "C"
+  ],
+  "javaEnums": [
+    {
+      "name": "PUT"
+    },
+    {
+      "name": "CALL"
+    }
+  ]
+}

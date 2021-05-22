@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "title": "POJO for Option contracts. See <a href=\"https://www.iqfeed.net/dev/api/docs//OptionChainsviaTCPIP.cfm\">Option Chains via TCP/IP</a>",
+  "properties": {
+    "Symbol": {
+      "existingJavaType": "java.lang.String",
+      "title": "The symbol."
+    },
+    "ExpirationDate": {
+      "existingJavaType": "java.time.LocalDate",
+      "title": "The expiration date."
+    },
+    "OptionType": {
+      "existingJavaType": "net.jacobpeterson.iqfeed4j.model.feedenums.lookup.optionchains.OptionType",
+      "title": "The type of Option contract."
+    },
+    "StrikePrice": {
+      "existingJavaType": "java.lang.Double",
+      "title": "The strike price."
+    }
+  }
+}

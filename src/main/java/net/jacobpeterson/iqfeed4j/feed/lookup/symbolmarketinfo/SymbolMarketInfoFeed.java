@@ -4,9 +4,9 @@ import com.google.common.base.Preconditions;
 import net.jacobpeterson.iqfeed4j.feed.MultiMessageListener;
 import net.jacobpeterson.iqfeed4j.feed.lookup.AbstractLookupFeed;
 import net.jacobpeterson.iqfeed4j.model.feedenums.FeedMessageType;
-import net.jacobpeterson.iqfeed4j.model.feedenums.lookup.symbolmarketinfo.FilterType;
 import net.jacobpeterson.iqfeed4j.model.feedenums.lookup.symbolmarketinfo.SearchCodeType;
 import net.jacobpeterson.iqfeed4j.model.feedenums.lookup.symbolmarketinfo.SearchField;
+import net.jacobpeterson.iqfeed4j.model.feedenums.lookup.symbolmarketinfo.SymbolFilterType;
 import net.jacobpeterson.iqfeed4j.model.lookup.symbolmarketinfo.ListedMarket;
 import net.jacobpeterson.iqfeed4j.model.lookup.symbolmarketinfo.NIACCode;
 import net.jacobpeterson.iqfeed4j.model.lookup.symbolmarketinfo.SICCode;
@@ -196,18 +196,18 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
      *
      * @param searchField                the {@link SearchField}
      * @param searchString               the string to search for
-     * @param filterType                 the {@link FilterType}
-     * @param filterValues               the {@link FilterType} values
+     * @param symbolFilterType           the {@link SymbolFilterType}
+     * @param filterValues               the {@link SymbolFilterType} values
      * @param symbolSearchResultListener the {@link MultiMessageListener} for the requested {@link SymbolSearchResult}s
      *
      * @throws IOException thrown for {@link IOException}s
      */
-    public void searchSymbols(SearchField searchField, String searchString, FilterType filterType,
+    public void searchSymbols(SearchField searchField, String searchString, SymbolFilterType symbolFilterType,
             List<Integer> filterValues, MultiMessageListener<SymbolSearchResult> symbolSearchResultListener)
             throws IOException {
         Preconditions.checkNotNull(searchField);
         Preconditions.checkNotNull(searchString);
-        Preconditions.checkNotNull(filterType);
+        Preconditions.checkNotNull(symbolFilterType);
         Preconditions.checkNotNull(filterValues);
         Preconditions.checkNotNull(symbolSearchResultListener);
 
@@ -217,7 +217,7 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
         requestBuilder.append("SBF").append(",");
         requestBuilder.append(searchField.value()).append(",");
         requestBuilder.append(searchString).append(",");
-        requestBuilder.append(filterType.value()).append(",");
+        requestBuilder.append(symbolFilterType.value()).append(",");
         // Create a space delimited list
         requestBuilder.append(filterValues.stream().map(String::valueOf).collect(Collectors.joining(" "))).append(",");
         requestBuilder.append(requestID);

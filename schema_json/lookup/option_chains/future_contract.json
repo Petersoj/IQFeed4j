@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "title": "POJO for Future contracts. See <a href=\"https://www.iqfeed.net/dev/api/docs//OptionChainsviaTCPIP.cfm\">Option Chains via TCP/IP</a>",
+  "properties": {
+    "Symbol": {
+      "existingJavaType": "java.lang.String",
+      "title": "The symbol."
+    },
+    "Date": {
+      "existingJavaType": "java.time.LocalDate",
+      "title": "The date."
+    }
+  }
+}

@@ -51,7 +51,7 @@ public class NamedCSVMapper<T> extends CSVMapper<T> {
     }
 
     /**
-     * Use {@link #map(String[], int, Map)} instead.
+     * Use {@link #map(String[], int, Map)}.
      */
     @Override
     public T map(String[] csv, int offset) throws Exception {
