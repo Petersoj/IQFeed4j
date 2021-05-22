@@ -5,23 +5,27 @@ import java.util.concurrent.Callable;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueExists;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
 
 /**
  * {@inheritDoc}
  * <br>
- * {@link IndexCSVMapper} mappings are based off of predefined CSV indices.
+ * {@link TrailingCSVMapper} mappings are based off of predefined CSV indices, but with the ability to add a CSV mapping
+ * that accumulates all CSV values after a certain index into one mapping.
  */
-public class IndexCSVMapper<T> extends CSVMapper<T> {
+public class TrailingCSVMapper<T> extends CSVMapper<T> {
 
     protected final HashMap<Integer, MappingFunctions<?>> mappingFunctionsOfCSVIndices;
+    protected int trailingCSVIndex;
+    protected MappingFunctions<?> trailingMappingFunction;
 
     /**
-     * Instantiates a new {@link IndexCSVMapper}.
+     * Instantiates a new {@link TrailingCSVMapper}.
      *
      * @param pojoInstantiator a {@link Callable} to instantiate a new POJO
      */
-    public IndexCSVMapper(Callable<T> pojoInstantiator) {
+    public TrailingCSVMapper(Callable<T> pojoInstantiator) {
         super(pojoInstantiator);
 
         mappingFunctionsOfCSVIndices = new HashMap<>();
@@ -48,8 +52,10 @@ public class IndexCSVMapper<T> extends CSVMapper<T> {
      * @param fieldSetter            see {@link CSVMapper.MappingFunctions} constructor doc
      * @param stringToFieldConverter see {@link CSVMapper.MappingFunctions} constructor doc
      */
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // Optional will always be present here
     public <P> void setMapping(int csvIndex, BiConsumer<T, P> fieldSetter, Function<String, P> stringToFieldConverter) {
         mappingFunctionsOfCSVIndices.put(csvIndex, new MappingFunctions<P>(fieldSetter, stringToFieldConverter));
+        trailingCSVIndex = mappingFunctionsOfCSVIndices.keySet().stream().max(Integer::compareTo).get() + 1;
     }
 
     /**
@@ -62,9 +68,22 @@ public class IndexCSVMapper<T> extends CSVMapper<T> {
     }
 
     /**
+     * Sets the trailing CSV mapping that accumulates/maps all CSV values after the being the largest {@link
+     * #setMapping(int, BiConsumer, Function)} CSV index + 1.
+     *
+     * @param <P>                    the type of the POJO field
+     * @param fieldSetter            see {@link CSVMapper.MappingFunctions} constructor doc
+     * @param stringToFieldConverter see {@link CSVMapper.MappingFunctions} constructor doc
+     */
+    public <P> void setTrailingMapping(BiConsumer<T, P> fieldSetter, Function<String, P> stringToFieldConverter) {
+        this.trailingMappingFunction = new MappingFunctions<P>(fieldSetter, stringToFieldConverter);
+    }
+
+    /**
      * {@inheritDoc}
      * <br>
-     * Note this will map with the mappings added via {@link #setMapping(int, BiConsumer, Function)}.
+     * Note this will map with the mappings added via {@link #setMapping(int, BiConsumer, Function)} and {@link
+     * #setTrailingMapping(BiConsumer, Function)}.
      */
     @Override
     public T map(String[] csv, int offset) throws Exception {
@@ -81,6 +100,29 @@ public class IndexCSVMapper<T> extends CSVMapper<T> {
                 mappingFunctionsOfCSVIndices.get(csvIndex).apply(instance, csv[csvIndex + offset]);
             } catch (Exception exception) {
                 throw new Exception("Error mapping at index " + csvIndex + " with offset " + offset, exception);
+            }
+        }
+
+        // Now apply 'trailingMappingFunction' on trailing CSV values
+        if (valueExists(csv, trailingCSVIndex)) {
+            StringBuilder trailingCSVBuilder = new StringBuilder();
+            for (int csvIndex = trailingCSVIndex; csvIndex < csv.length; csvIndex++) {
+                trailingCSVBuilder.append(csv[csvIndex]);
+
+                if (csvIndex < csv.length - 1) { // Don't append comma on last CSV value
+                    trailingCSVBuilder.append(",");
+                }
+            }
+
+            String trailingCSVString = trailingCSVBuilder.toString();
+            if (!trailingCSVString.isEmpty()) {
+                // apply() could throw a variety of exceptions
+                try {
+                    trailingMappingFunction.apply(instance, trailingCSVString);
+                } catch (Exception exception) {
+                    throw new Exception("Error mapping trailing CSV values at index " +
+                            trailingCSVIndex + " with offset " + offset, exception);
+                }
             }
         }
 

@@ -1,0 +1,16 @@
+{
+  "type": "string",
+  "title": "Defines enums for request types of search codes.",
+  "enum": [
+    "SBS",
+    "SBN"
+  ],
+  "javaEnums": [
+    {
+      "name": "SIC"
+    },
+    {
+      "name": "NIAC"
+    }
+  ]
+}

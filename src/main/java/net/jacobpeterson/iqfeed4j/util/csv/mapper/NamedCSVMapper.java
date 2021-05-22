@@ -6,7 +6,7 @@ import java.util.concurrent.Callable;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueExists;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
 
 /**
  * {@inheritDoc}
@@ -51,6 +51,14 @@ public class NamedCSVMapper<T> extends CSVMapper<T> {
     }
 
     /**
+     * Use {@link #map(String[], int, Map)} instead.
+     */
+    @Override
+    public T map(String[] csv, int offset) throws Exception {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
      * Maps the given CSV to a POJO.
      *
      * @param csv                    the CSV
@@ -76,7 +84,7 @@ public class NamedCSVMapper<T> extends CSVMapper<T> {
             }
 
             int csvNamedIndex = csvIndexOfIndexName.getValue();
-            if (!valueExists(csv, csvNamedIndex + offset)) { // Don't map empty CSV values
+            if (!valuePresent(csv, csvNamedIndex + offset)) { // Don't map empty CSV values
                 continue;
             }
             try {

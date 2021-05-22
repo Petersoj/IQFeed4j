@@ -1,6 +1,6 @@
 {
   "type": "string",
-  "title": "Admin messages that are received from IQFeed. See <a href=\"http://www.iqfeed.net/dev/api/docs/AdminSystemMessages.cfm\">Admin Port System Messages</a>",
+  "title": "Admin messages that are received from IQFeed. See <a href=\"https://www.iqfeed.net/dev/api/docs/AdminSystemMessages.cfm\">Admin Port System Messages</a>",
   "enum": [
     "REGISTER CLIENT APP COMPLETED",
     "REMOVE CLIENT APP COMPLETED",

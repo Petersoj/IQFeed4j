@@ -1,0 +1,16 @@
+{
+  "type": "string",
+  "title": "Defines enums for filter types.",
+  "enum": [
+    "e",
+    "t"
+  ],
+  "javaEnums": [
+    {
+      "name": "LISTED_MARKETS"
+    },
+    {
+      "name": "SECURITY_TYPES"
+    }
+  ]
+}

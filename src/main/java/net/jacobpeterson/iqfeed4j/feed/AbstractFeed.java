@@ -173,7 +173,7 @@ public abstract class AbstractFeed implements Runnable {
 
         while (!Thread.currentThread().isInterrupted()) { // Check if thread has been closed/interrupted
             try {
-                String line = feedReader.readLine();
+                String line = feedReader.readLine(); // Uses any line ending: CR, LF, or CRLF
 
                 if (line == null) { // The socket was closed (EOF was sent)
                     closeSocket();

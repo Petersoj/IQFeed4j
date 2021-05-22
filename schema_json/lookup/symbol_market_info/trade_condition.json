@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "title": "Trade condition POJO for STC requests. See <a href=\"https://www.iqfeed.net/dev/api/docs/SymbolLookupviaTCPIP.cfm\">Symbol Lookup via TCP/IP</a>",
+  "properties": {
+    "TradeConditionID": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "The trade condition ID in decimal."
+    },
+    "ShortName": {
+      "existingJavaType": "java.lang.String",
+      "title": "The short name."
+    },
+    "LongName": {
+      "existingJavaType": "java.lang.String",
+      "title": "The long name."
+    }
+  }
+}

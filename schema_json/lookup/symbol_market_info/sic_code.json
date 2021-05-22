@@ -1,0 +1,15 @@
+{
+  "type": "object",
+  "title": "SIC code POJO for SSC requests. See <a href=\"https://www.iqfeed.net/dev/api/docs/SymbolLookupviaTCPIP.cfm\">Symbol Lookup via TCP/IP</a>",
+  "javaName": "SICCode",
+  "properties": {
+    "SICCode": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "Numeric Whole number referencing which SIC code the symbol is listed under."
+    },
+    "Description": {
+      "existingJavaType": "java.lang.String",
+      "title": "The description."
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "title": "Security types POJO for SST requests. See <a href=\"https://www.iqfeed.net/dev/api/docs/SymbolLookupviaTCPIP.cfm\">Symbol Lookup via TCP/IP</a>",
+  "properties": {
+    "SecurityTypeID": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "Numeric whole number referencing which security type the symbol falls under."
+    },
+    "ShortName": {
+      "existingJavaType": "java.lang.String",
+      "title": "The short name."
+    },
+    "LongName": {
+      "existingJavaType": "java.lang.String",
+      "title": "The long name."
+    }
+  }
+}

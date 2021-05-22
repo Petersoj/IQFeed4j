@@ -1,6 +1,6 @@
 {
   "type": "object",
-  "title": "Status message that gives information about each client connected to IQFeed and is received once per second after being turned on. See <a href=\"http://www.iqfeed.net/dev/api/docs/AdminSystemMessages.cfm\">Admin Port System Messages</a>",
+  "title": "Status message that gives information about each client connected to IQFeed and is received once per second after being turned on. See <a href=\"https://www.iqfeed.net/dev/api/docs/AdminSystemMessages.cfm\">Admin Port System Messages</a>",
   "properties": {
     "type": {
       "type": "string",

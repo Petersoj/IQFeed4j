@@ -116,6 +116,18 @@ public abstract class CSVMapper<T> {
     }
 
     /**
+     * Maps the given CSV to a POJO.
+     *
+     * @param csv    the CSV
+     * @param offset offset to add to CSV indices when applying {@link CSVMapper.MappingFunctions}
+     *
+     * @return a new POJO
+     *
+     * @throws Exception thrown for a variety of {@link Exception}s
+     */
+    public abstract T map(String[] csv, int offset) throws Exception;
+
+    /**
      * {@link MappingFunctions} holds functions for CSV to field mapping.
      *
      * @param <P> the type of the POJO field

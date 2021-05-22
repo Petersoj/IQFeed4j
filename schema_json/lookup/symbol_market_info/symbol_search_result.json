@@ -1,0 +1,30 @@
+{
+  "type": "object",
+  "title": "Symbol search result POJO for SBF, SBS, and SBN requests. See <a href=\"https://www.iqfeed.net/dev/api/docs/SymbolLookupviaTCPIP.cfm\">Symbol Lookup via TCP/IP</a>",
+  "properties": {
+    "Symbol": {
+      "existingJavaType": "java.lang.String",
+      "title": "All characters uppercase. Can include Symbols such as (but not limited to) @+-=.# or spaces."
+    },
+    "ListedMarketID": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "Numeric whole number referencing which market the symbol is listed on. Valid values can be acquired from the SLM command."
+    },
+    "SecurityTypeID": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "Numeric whole number referencing which security type the symbol falls under. Valid values can be acquired from the SST command."
+    },
+    "Description": {
+      "existingJavaType": "java.lang.String",
+      "title": "The name of the company or a description of what the symbol represents."
+    },
+    "SICCode": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "Numeric Whole number referencing which SIC code the symbol is listed under. Valid values can be acquired from the SSC command. Note: this value is only present for SBS request."
+    },
+    "NIACCode": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "Numeric Whole number referencing which NIAC code the symbol is listed under. Valid values can be acquired from the SNC command. Note: this value is only present for SBN request."
+    }
+  }
+}

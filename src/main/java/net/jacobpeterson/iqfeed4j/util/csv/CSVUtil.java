@@ -6,7 +6,7 @@ package net.jacobpeterson.iqfeed4j.util.csv;
 public final class CSVUtil {
 
     /**
-     * Tests if the 'csv' array has 'index' and if the value at 'index' is not empty.
+     * Tests if the 'csv' array has 'index'.
      *
      * @param csv   the CSV
      * @param index the index
@@ -14,6 +14,18 @@ public final class CSVUtil {
      * @return a boolean
      */
     public static boolean valueExists(String[] csv, int index) {
+        return index < csv.length;
+    }
+
+    /**
+     * Tests if the 'csv' array has 'index' and if the value at 'index' is not empty.
+     *
+     * @param csv   the CSV
+     * @param index the index
+     *
+     * @return a boolean
+     */
+    public static boolean valuePresent(String[] csv, int index) {
         return index < csv.length && !csv[index].isEmpty();
     }
 

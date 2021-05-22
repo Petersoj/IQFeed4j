@@ -22,10 +22,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueExists;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.DATE;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.TIME;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.*;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.DOUBLE;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.INT;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.STRING;
 
 /**
  * {@link MarketSummaryFeed} is an {@link AbstractLookupFeed} for market summary (snapshot) data.
@@ -174,7 +176,7 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
     /**
      * Instantiates a new {@link MarketSummaryFeed}.
      *
-     * @param marketSummaryFeedName the Market Summary feed name
+     * @param marketSummaryFeedName the {@link MarketSummaryFeed} name
      * @param hostname              the hostname
      * @param port                  the port
      */
@@ -196,7 +198,7 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
         }
 
         // All messages sent on this feed must have a Request ID first
-        if (!valueExists(csv, 0)) {
+        if (!valuePresent(csv, 0)) {
             LOGGER.error("Received unknown message format: {}", (Object) csv);
             return;
         }
@@ -221,6 +223,21 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
         }
     }
 
+    /**
+     * Handles a message for a {@link MultiMessageListener} by: checking for request error messages, handling 'End of
+     * Message' messages, populating {@link #csvIndicesOfIndexNamesOfRequestIDs} as needed, and performing {@link
+     * NamedCSVMapper#map(String[], int, Map)} on the 'CSV' to call
+     * {@link MultiMessageListener#onMessageReceived(Object)}.
+     *
+     * @param <T>                   the type of {@link MultiMessageListener}
+     * @param csv                   the CSV
+     * @param requestID             the Request ID
+     * @param listenersOfRequestIDs the {@link Map} with the keys being the Request IDs and the values being the
+     *                              corresponding {@link MultiMessageListener}s
+     * @param namedCSVMapper        the {@link NamedCSVMapper} for the message
+     *
+     * @return true if the 'requestID' was a key inside 'listenersOfRequestIDs', false otherwise
+     */
     private <T> boolean handleMultiMessage(String[] csv, String requestID,
             HashMap<String, MultiMessageListener<T>> listenersOfRequestIDs, NamedCSVMapper<T> namedCSVMapper) {
         MultiMessageListener<T> listener = listenersOfRequestIDs.get(requestID);
@@ -234,7 +251,7 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
                 listener.onMessageException(new NoDataException());
             } else {
                 listener.onMessageException(new IQFeedException(
-                        valueExists(csv, 2) ?
+                        valuePresent(csv, 2) ?
                                 String.join(",", Arrays.copyOfRange(csv, 2, csv.length)) :
                                 "Error message not present."));
             }
@@ -252,7 +269,7 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
                 csvIndicesOfIndexNames = new HashMap<>();
                 // Start at 1 to exclude Request ID
                 for (int csvIndex = 1; csvIndex < csv.length; csvIndex++) {
-                    if (!valueExists(csv, csvIndex)) {
+                    if (!valuePresent(csv, csvIndex)) {
                         LOGGER.error("CSV Field Names should always contain a String value, but " +
                                 "none exists at index {}!", csvIndex);
                         continue;
@@ -298,7 +315,7 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
      *                                 etc... Values can be found using the SST command). // TODO add SST reference
      * @param groupID                  a number representing the desired exchange group.
      * @param date                     the date of data being requested
-     * @param endOfDaySnapshotListener the {@link MultiMessageListener} of {@link EndOfDaySnapshot}s
+     * @param endOfDaySnapshotListener the {@link MultiMessageListener} for the requested {@link EndOfDaySnapshot}s
      *
      * @throws IOException thrown for {@link IOException}s
      */
@@ -335,7 +352,8 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
      *                                    etc... Values can be found using the SST command). // TODO add SST reference
      * @param groupID                     a number representing the desired exchange group.
      * @param date                        the date of data being requested
-     * @param fundamentalSnapshotListener the {@link MultiMessageListener} of {@link FundamentalSnapshot}s
+     * @param fundamentalSnapshotListener the {@link MultiMessageListener} for the requested {@link
+     *                                    FundamentalSnapshot}s
      *
      * @throws IOException thrown for {@link IOException}s
      */
@@ -372,7 +390,7 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
      * @param securityType               a number representing the desired security type. (Futures, equities, spots,
      *                                   etc... Values can be found using the SST command). // TODO add SST reference
      * @param groupID                    a number representing the desired exchange group.
-     * @param fiveMinuteSnapshotListener the {@link MultiMessageListener} of {@link FiveMinuteSnapshot}s
+     * @param fiveMinuteSnapshotListener the {@link MultiMessageListener} for the requested {@link FiveMinuteSnapshot}s
      *
      * @throws IOException thrown for {@link IOException}s
      */

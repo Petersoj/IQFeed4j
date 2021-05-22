@@ -2,35 +2,35 @@
   "type": "object",
   "title": "Interval POJO for HIX, HID, and HIT requests.\nSee <a href=\"https://www.iqfeed.net/dev/api/docs//HistoricalviaTCPIP.cfm\">Historical via TCP/IP</a>",
   "properties": {
-    "timestamp": {
+    "Timestamp": {
       "existingJavaType": "java.time.LocalDateTime",
       "title": "The timestamp."
     },
-    "high": {
+    "High": {
       "existingJavaType": "java.lang.Double",
       "title": "The high."
     },
-    "low": {
+    "Low": {
       "existingJavaType": "java.lang.Double",
       "title": "The low."
     },
-    "open": {
+    "Open": {
       "existingJavaType": "java.lang.Double",
       "title": "The open."
     },
-    "close": {
+    "Close": {
       "existingJavaType": "java.lang.Double",
       "title": "The close."
     },
-    "totalVolume": {
+    "TotalVolume": {
       "existingJavaType": "java.lang.Long",
       "title": "The total volume."
     },
-    "periodVolume": {
+    "PeriodVolume": {
       "existingJavaType": "java.lang.Integer",
       "title": "The volume in the period."
     },
-    "numberOfTrades": {
+    "NumberOfTrades": {
       "existingJavaType": "java.lang.Integer",
       "title": "The number of trades. Will be zero for all requests other than tick interval requests."
     }

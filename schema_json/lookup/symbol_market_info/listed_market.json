@@ -1,0 +1,26 @@
+{
+  "type": "object",
+  "title": "Listed market POJO for SLM requests. See <a href=\"https://www.iqfeed.net/dev/api/docs/SymbolLookupviaTCPIP.cfm\">Symbol Lookup via TCP/IP</a>",
+  "properties": {
+    "ListedMarketID": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "Numeric whole number referencing which market the symbol is listed on."
+    },
+    "ShortName": {
+      "existingJavaType": "java.lang.String",
+      "title": "The short name."
+    },
+    "LongName": {
+      "existingJavaType": "java.lang.String",
+      "title": "The long name."
+    },
+    "GroupID": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "The group ID."
+    },
+    "ShortGroupName": {
+      "existingJavaType": "java.lang.String",
+      "title": "The short group name."
+    }
+  }
+}

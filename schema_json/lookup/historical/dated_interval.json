@@ -2,31 +2,31 @@
   "type": "object",
   "title": "Interval POJO for HDX, HDT, HWX, and HMX requests. See <a href=\"https://www.iqfeed.net/dev/api/docs//HistoricalviaTCPIP.cfm\">Historical via TCP/IP</a>",
   "properties": {
-    "date": {
+    "Date": {
       "existingJavaType": "java.time.LocalDate",
       "title": "The date."
     },
-    "high": {
+    "High": {
       "existingJavaType": "java.lang.Double",
       "title": "The high."
     },
-    "low": {
+    "Low": {
       "existingJavaType": "java.lang.Double",
       "title": "The low."
     },
-    "open": {
+    "Open": {
       "existingJavaType": "java.lang.Double",
       "title": "The open."
     },
-    "close": {
+    "Close": {
       "existingJavaType": "java.lang.Double",
       "title": "The close."
     },
-    "periodVolume": {
+    "PeriodVolume": {
       "existingJavaType": "java.lang.Integer",
       "title": "The volume in the period."
     },
-    "openInterest": {
+    "OpenInterest": {
       "existingJavaType": "java.lang.Integer",
       "title": "The open interest."
     }

@@ -24,6 +24,7 @@ import java.util.StringJoiner;
 
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueExists;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.DATE_SPACE_TIME;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.MONTH3_DAY_TIME_AM_PM;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.DOUBLE;
@@ -87,7 +88,7 @@ public class AdminFeed extends AbstractFeed {
     /**
      * Instantiates a new {@link AdminFeed}.
      *
-     * @param adminFeedName the Admin feed name
+     * @param adminFeedName the {@link AdminFeed} name
      * @param hostname      the host name
      * @param port          the port
      */
@@ -108,7 +109,7 @@ public class AdminFeed extends AbstractFeed {
         }
 
         // Confirm message format
-        if (!valueEquals(csv, 0, FeedMessageType.SYSTEM.value()) || !valueExists(csv, 1)) {
+        if (!valueEquals(csv, 0, FeedMessageType.SYSTEM.value()) || !valuePresent(csv, 1)) {
             LOGGER.error("Received unknown message format: {}", (Object) csv);
             return;
         }
@@ -212,7 +213,7 @@ public class AdminFeed extends AbstractFeed {
      *
      * @throws IOException thrown for {@link IOException}s
      */
-    public void sendAdminCommand(AdminCommand adminCommand, String... arguments) throws IOException {
+    private void sendAdminCommand(AdminCommand adminCommand, String... arguments) throws IOException {
         StringJoiner joiner = new StringJoiner(",", "", LineEnding.CR_LF.getASCIIString());
         joiner.add(FeedCommand.SYSTEM.value());
         joiner.add(adminCommand.value());
@@ -226,10 +227,6 @@ public class AdminFeed extends AbstractFeed {
         LOGGER.debug("Sending Admin command message: {}", command);
         sendMessage(command);
     }
-
-    //
-    // START Feed commands
-    //
 
     /**
      * Gets the {@link AdminCommand} {@link SingleMessageFuture} or calls {@link #sendAdminCommand(AdminCommand,
@@ -261,6 +258,10 @@ public class AdminFeed extends AbstractFeed {
             return messageFuture;
         }
     }
+
+    //
+    // START Feed commands
+    //
 
     /**
      * Registers your application with the feed. Users will not be able to login to the feed until an application is

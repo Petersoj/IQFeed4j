@@ -1,6 +1,6 @@
 {
   "type": "object",
-  "title": "Status message that gives information about the feed operation and is received once per second. See <a href=\"http://www.iqfeed.net/dev/api/docs/AdminSystemMessages.cfm\">Admin Port System Messages</a>",
+  "title": "Status message that gives information about the feed operation and is received once per second. See <a href=\"https://www.iqfeed.net/dev/api/docs/AdminSystemMessages.cfm\">Admin Port System Messages</a>",
   "properties": {
     "serverIP": {
       "existingJavaType": "java.lang.String",

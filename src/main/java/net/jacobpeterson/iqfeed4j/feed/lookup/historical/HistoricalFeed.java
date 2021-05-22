@@ -13,8 +13,6 @@ import net.jacobpeterson.iqfeed4j.model.lookup.historical.Interval;
 import net.jacobpeterson.iqfeed4j.model.lookup.historical.Tick;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeFormatters;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.IndexCSVMapper;
-import net.jacobpeterson.iqfeed4j.util.exception.IQFeedException;
-import net.jacobpeterson.iqfeed4j.util.exception.NoDataException;
 import net.jacobpeterson.iqfeed4j.util.string.LineEnding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,11 +21,10 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Arrays;
 import java.util.HashMap;
 
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueExists;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.*;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.*;
 
@@ -100,7 +97,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
     /**
      * Instantiates a new {@link HistoricalFeed}.
      *
-     * @param historicalFeedName the Historical feed name
+     * @param historicalFeedName the {@link HistoricalFeed} name
      * @param hostname           the hostname
      * @param port               the port
      */
@@ -121,7 +118,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         }
 
         // All messages sent on this feed must have a Request ID first
-        if (!valueExists(csv, 0)) {
+        if (!valuePresent(csv, 0)) {
             LOGGER.error("Received unknown message format: {}", (Object) csv);
             return;
         }
@@ -141,39 +138,6 @@ public class HistoricalFeed extends AbstractLookupFeed {
                 return;
             }
         }
-    }
-
-    private <T> boolean handleMultiMessage(String[] csv, String requestID,
-            HashMap<String, MultiMessageListener<T>> listenersOfRequestIDs, IndexCSVMapper<T> csvMapper) {
-        MultiMessageListener<T> listener = listenersOfRequestIDs.get(requestID);
-
-        if (listener == null) {
-            return false;
-        }
-
-        if (isRequestErrorMessage(csv, requestID)) {
-            if (isRequestNoDataError(csv)) {
-                listener.onMessageException(new NoDataException());
-            } else {
-                listener.onMessageException(new IQFeedException(
-                        valueExists(csv, 2) ?
-                                String.join(",", Arrays.copyOfRange(csv, 2, csv.length)) :
-                                "Error message not present."));
-            }
-        } else if (isRequestEndOfMessage(csv, requestID)) {
-            listenersOfRequestIDs.remove(requestID);
-            removeRequestID(requestID);
-            listener.onEndOfMultiMessage();
-        } else {
-            try {
-                T messageType = csvMapper.map(csv, 1);
-                listener.onMessageReceived(messageType);
-            } catch (Exception exception) {
-                listener.onMessageException(exception);
-            }
-        }
-
-        return true;
     }
 
     @Override

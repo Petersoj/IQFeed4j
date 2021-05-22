@@ -1,0 +1,16 @@
+{
+  "type": "string",
+  "title": "Defines enums for search fields.",
+  "enum": [
+    "s",
+    "d"
+  ],
+  "javaEnums": [
+    {
+      "name": "SYMBOLS"
+    },
+    {
+      "name": "DESCRIPTIONS"
+    }
+  ]
+}

@@ -2,35 +2,35 @@
   "type": "object",
   "title": "POJO for HTX, HTD, and HTT requests. See <a href=\"https://www.iqfeed.net/dev/api/docs//HistoricalviaTCPIP.cfm\">HistoricalViaTCPIP</a>",
   "properties": {
-    "timestamp": {
+    "Timestamp": {
       "existingJavaType": "java.time.LocalDateTime",
       "title": "The timestamp."
     },
-    "last": {
+    "Last": {
       "existingJavaType": "java.lang.Double",
       "title": "The last price."
     },
-    "lastSize": {
+    "LastSize": {
       "existingJavaType": "java.lang.Integer",
       "title": "The last size."
     },
-    "totalVolume": {
+    "TotalVolume": {
       "existingJavaType": "java.lang.Long",
       "title": "The total volume."
     },
-    "bid": {
+    "Bid": {
       "existingJavaType": "java.lang.Double",
       "title": "The bid price."
     },
-    "ask": {
+    "Ask": {
       "existingJavaType": "java.lang.Double",
       "title": "The ask price."
     },
-    "tickID": {
+    "TickID": {
       "existingJavaType": "java.lang.Integer",
       "title": "The tick ID."
     },
-    "basisForLast": {
+    "BasisForLast": {
       "type": "string",
       "enum": [
         "C",
@@ -54,15 +54,15 @@
       ],
       "title": "The basis for last trade."
     },
-    "tradeMarketCenter": {
+    "TradeMarketCenter": {
       "existingJavaType": "java.lang.Short",
       "title": "The Market Center the trade occurred at."
     },
-    "tradeConditions": {
+    "TradeConditions": {
       "existingJavaType": "java.lang.String",
       "title": "The trade conditions. Format: One to four, 2 digit hex numbers."
     },
-    "tradeAggressor": {
+    "TradeAggressor": {
       "type": "string",
       "enum": [
         "0",
@@ -86,7 +86,7 @@
       ],
       "title": "The trade aggressor."
     },
-    "dayCode": {
+    "DayCode": {
       "existingJavaType": "java.lang.Integer",
       "title": "The day of month the trade applies to."
     }
