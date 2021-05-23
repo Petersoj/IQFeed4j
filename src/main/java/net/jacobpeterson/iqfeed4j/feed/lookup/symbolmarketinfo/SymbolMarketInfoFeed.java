@@ -221,7 +221,6 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
         // Create a space delimited list
         requestBuilder.append(filterValues.stream().map(String::valueOf).collect(Collectors.joining(" "))).append(",");
         requestBuilder.append(requestID);
-
         requestBuilder.append(LineEnding.CR_LF.getASCIIString());
 
         synchronized (messageReceivedLock) {
@@ -256,7 +255,6 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
         requestBuilder.append(searchCodeType.value()).append(",");
         requestBuilder.append(searchString).append(",");
         requestBuilder.append(requestID);
-
         requestBuilder.append(LineEnding.CR_LF.getASCIIString());
 
         synchronized (messageReceivedLock) {
@@ -288,7 +286,6 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
 
         requestBuilder.append(requestCode).append(",");
         requestBuilder.append(requestID);
-
         requestBuilder.append(LineEnding.CR_LF.getASCIIString());
 
         synchronized (messageReceivedLock) {

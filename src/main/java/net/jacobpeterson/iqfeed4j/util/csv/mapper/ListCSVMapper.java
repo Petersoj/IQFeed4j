@@ -61,7 +61,7 @@ public class ListCSVMapper<T> extends CSVMapper<T> {
             }
 
             T instance = pojoInstantiator.call();
-            // apply() could throw a variety of exceptions
+            // accept() could throw a variety of exceptions
             try {
                 csvValueConsumer.accept(instance, csv[csvIndex]);
                 mappedList.add(instance);

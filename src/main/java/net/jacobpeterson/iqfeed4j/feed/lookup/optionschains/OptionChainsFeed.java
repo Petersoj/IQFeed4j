@@ -1,25 +1,37 @@
 package net.jacobpeterson.iqfeed4j.feed.lookup.optionschains;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import net.jacobpeterson.iqfeed4j.feed.SingleMessageFuture;
 import net.jacobpeterson.iqfeed4j.feed.lookup.AbstractLookupFeed;
 import net.jacobpeterson.iqfeed4j.model.feedenums.FeedMessageType;
 import net.jacobpeterson.iqfeed4j.model.feedenums.lookup.optionchains.EquityOptionMonth;
 import net.jacobpeterson.iqfeed4j.model.feedenums.lookup.optionchains.FutureMonth;
+import net.jacobpeterson.iqfeed4j.model.feedenums.lookup.optionchains.NonStandardOptionTypes;
+import net.jacobpeterson.iqfeed4j.model.feedenums.lookup.optionchains.OptionFilterType;
 import net.jacobpeterson.iqfeed4j.model.feedenums.lookup.optionchains.OptionType;
+import net.jacobpeterson.iqfeed4j.model.feedenums.lookup.optionchains.PutsCallsOption;
 import net.jacobpeterson.iqfeed4j.model.lookup.optionchains.FutureContract;
 import net.jacobpeterson.iqfeed4j.model.lookup.optionchains.FutureSpread;
 import net.jacobpeterson.iqfeed4j.model.lookup.optionchains.OptionContract;
 import net.jacobpeterson.iqfeed4j.util.chars.CharUtil;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.ListCSVMapper;
+import net.jacobpeterson.iqfeed4j.util.exception.IQFeedException;
+import net.jacobpeterson.iqfeed4j.util.exception.NoDataException;
+import net.jacobpeterson.iqfeed4j.util.exception.SyntaxException;
+import net.jacobpeterson.iqfeed4j.util.string.LineEnding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
@@ -317,6 +329,9 @@ public class OptionChainsFeed extends AbstractLookupFeed {
 
     protected final Object messageReceivedLock;
     protected final HashMap<String, SingleMessageFuture<List<FutureContract>>> futureContractListFuturesOfRequestIDs;
+    protected final HashMap<String, SingleMessageFuture<List<FutureSpread>>> futureSpreadListFuturesOfRequestIDs;
+    protected final HashMap<String, SingleMessageFuture<List<OptionContract>>> futureOptionListFuturesOfRequestIDs;
+    protected final HashMap<String, SingleMessageFuture<List<OptionContract>>> equityOptionListFuturesOfRequestIDs;
 
     /**
      * Instantiates a new {@link OptionChainsFeed}.
@@ -330,6 +345,9 @@ public class OptionChainsFeed extends AbstractLookupFeed {
 
         messageReceivedLock = new Object();
         futureContractListFuturesOfRequestIDs = new HashMap<>();
+        futureSpreadListFuturesOfRequestIDs = new HashMap<>();
+        futureOptionListFuturesOfRequestIDs = new HashMap<>();
+        equityOptionListFuturesOfRequestIDs = new HashMap<>();
     }
 
     @Override
@@ -348,8 +366,74 @@ public class OptionChainsFeed extends AbstractLookupFeed {
         String requestID = csv[0];
 
         synchronized (messageReceivedLock) {
+            if (handleRequestIDSingleMessageList(csv, requestID, futureContractListFuturesOfRequestIDs,
+                    FUTURE_CONTRACT_CSV_MAPPER)) {
+                return;
+            }
 
+            if (handleRequestIDSingleMessageList(csv, requestID, futureSpreadListFuturesOfRequestIDs,
+                    FUTURE_SPREAD_CSV_MAPPER)) {
+                return;
+            }
+
+            if (handleRequestIDSingleMessageList(csv, requestID, futureOptionListFuturesOfRequestIDs,
+                    FUTURE_OPTION_CSV_MAPPER)) {
+                return;
+            }
+
+            if (handleRequestIDSingleMessageList(csv, requestID, equityOptionListFuturesOfRequestIDs,
+                    EQUITY_OPTION_CSV_MAPPER)) {
+                return;
+            }
         }
+    }
+
+    /**
+     * Handles a message for a {@link SingleMessageFuture} {@link List} by: checking for request error messages, and
+     * performing {@link ListCSVMapper#mapToList(String[], int)} on the 'CSV' to complete the {@link
+     * SingleMessageFuture}.
+     *
+     * @param <T>                   the type of {@link SingleMessageFuture} {@link List}
+     * @param csv                   the CSV
+     * @param requestID             the Request ID
+     * @param listenersOfRequestIDs the {@link Map} with the keys being the Request IDs and the values being the
+     *                              corresponding {@link SingleMessageFuture}'s {@link List}
+     * @param listCSVMapper         the {@link ListCSVMapper} for the message
+     *
+     * @return true if the 'requestID' was a key inside 'listenersOfRequestIDs', false otherwise
+     */
+    protected <T> boolean handleRequestIDSingleMessageList(String[] csv, String requestID,
+            HashMap<String, SingleMessageFuture<List<T>>> listenersOfRequestIDs, ListCSVMapper<T> listCSVMapper) {
+        SingleMessageFuture<List<T>> future = listenersOfRequestIDs.get(requestID);
+
+        if (future == null) {
+            return false;
+        }
+
+        if (isRequestErrorMessage(csv, requestID)) {
+            if (isRequestNoDataError(csv)) {
+                future.completeExceptionally(new NoDataException());
+            } else if (isRequestSyntaxError(csv)) {
+                future.completeExceptionally(new SyntaxException());
+            } else {
+                future.completeExceptionally(new IQFeedException(
+                        valuePresent(csv, 2) ?
+                                String.join(",", Arrays.copyOfRange(csv, 2, csv.length)) :
+                                "Error message not present."));
+            }
+        } else if (isRequestEndOfMessage(csv, requestID)) {
+            listenersOfRequestIDs.remove(requestID);
+            removeRequestID(requestID);
+        } else {
+            try {
+                List<T> message = listCSVMapper.mapToList(csv, 1);
+                future.complete(message);
+            } catch (Exception exception) {
+                future.completeExceptionally(exception);
+            }
+        }
+
+        return true;
     }
 
     @Override
@@ -367,7 +451,326 @@ public class OptionChainsFeed extends AbstractLookupFeed {
     // START Feed commands
     //
 
-    // TODO
+    /**
+     * Gets a {@link FutureContract} chain. This sends an CFU request. This method is thread-safe.
+     *
+     * @param symbol     the symbol. Max Length 30 characters.
+     * @param months     the {@link FutureMonth}s of the chain
+     * @param years      the years of the chain
+     * @param nearMonths the number of near contracts to display: values 0 through 4
+     *
+     * @return a {@link SingleMessageFuture} of {@link FutureContract}s
+     *
+     * @throws IOException thrown for {@link IOException}s
+     */
+    public SingleMessageFuture<List<FutureContract>> getFutureChain(String symbol, List<FutureMonth> months,
+            List<Integer> years, Integer nearMonths) throws IOException {
+        Preconditions.checkNotNull(symbol);
+        Preconditions.checkArgument(months == null || !months.isEmpty());
+        Preconditions.checkNotNull(years);
+        Preconditions.checkArgument(years.size() > 0);
+
+        String requestID = getNewRequestID();
+        StringBuilder requestBuilder = new StringBuilder();
+
+        requestBuilder.append("CFU").append(",");
+        requestBuilder.append(symbol).append(",");
+
+        if (months != null) {
+            requestBuilder.append(months.stream().map(FutureMonth::value).collect(Collectors.joining()));
+        }
+        requestBuilder.append(",");
+
+        // The years argument the last digit of all the years without delimiters.
+        // e.g.: 2005 - 2014 would be "5678901234"
+        requestBuilder.append(years.stream()
+                .map(Object::toString) // Convert ints to strings
+                .map(s -> s.substring(s.length() - 1)) // Get last digit of year string
+                .distinct() // Remove duplicates
+                .collect(Collectors.joining())) // Collect digits back-to-back
+                .append(",");
+
+        if (nearMonths != null) {
+            requestBuilder.append(nearMonths);
+        }
+        requestBuilder.append(",");
+
+        requestBuilder.append(requestID);
+        requestBuilder.append(LineEnding.CR_LF.getASCIIString());
+
+        SingleMessageFuture<List<FutureContract>> future = new SingleMessageFuture<>();
+        synchronized (messageReceivedLock) {
+            futureContractListFuturesOfRequestIDs.put(requestID, future);
+        }
+
+        String requestString = requestBuilder.toString();
+        LOGGER.debug("Sending request: {}", requestString);
+        sendMessage(requestString);
+
+        return future;
+    }
+
+    /**
+     * Gets a {@link FutureSpread} chain. This sends an CFS request. This method is thread-safe.
+     *
+     * @param symbol     the symbol. Max Length 30 characters.
+     * @param months     the {@link FutureMonth}s of the chain
+     * @param years      the years of the chain
+     * @param nearMonths the number of near contracts to display: values 0 through 4
+     *
+     * @return a {@link SingleMessageFuture} of {@link FutureSpread}s
+     *
+     * @throws IOException thrown for {@link IOException}s
+     */
+    public SingleMessageFuture<List<FutureSpread>> getFutureSpreadChain(String symbol, List<FutureMonth> months,
+            List<Integer> years, Integer nearMonths) throws IOException {
+        Preconditions.checkNotNull(symbol);
+        Preconditions.checkArgument(months == null || !months.isEmpty());
+        Preconditions.checkNotNull(years);
+        Preconditions.checkArgument(years.size() > 0);
+
+        String requestID = getNewRequestID();
+        StringBuilder requestBuilder = new StringBuilder();
+
+        requestBuilder.append("CFS").append(",");
+        requestBuilder.append(symbol).append(",");
+
+        if (months != null) {
+            requestBuilder.append(months.stream().map(FutureMonth::value).collect(Collectors.joining()));
+        }
+        requestBuilder.append(",");
+
+        // The years argument the last digit of all the years without delimiters.
+        // e.g.: 2005 - 2014 would be "5678901234"
+        requestBuilder.append(years.stream()
+                .map(Object::toString) // Convert ints to strings
+                .map(s -> s.substring(s.length() - 1)) // Get last digit of year string
+                .distinct() // Remove duplicates
+                .collect(Collectors.joining())) // Collect digits back-to-back
+                .append(",");
+
+        if (nearMonths != null) {
+            requestBuilder.append(nearMonths);
+        }
+        requestBuilder.append(",");
+
+        requestBuilder.append(requestID);
+        requestBuilder.append(LineEnding.CR_LF.getASCIIString());
+
+        SingleMessageFuture<List<FutureSpread>> future = new SingleMessageFuture<>();
+        synchronized (messageReceivedLock) {
+            futureSpreadListFuturesOfRequestIDs.put(requestID, future);
+        }
+
+        String requestString = requestBuilder.toString();
+        LOGGER.debug("Sending request: {}", requestString);
+        sendMessage(requestString);
+
+        return future;
+    }
+
+    /**
+     * Gets a Future {@link OptionContract} chain. This sends an CFO request. This method is thread-safe.
+     *
+     * @param symbol          the symbol. Max Length 30 characters.
+     * @param putsCallsOption the {@link PutsCallsOption}
+     * @param months          the {@link FutureMonth}s of the chain
+     * @param years           the years of the chain
+     * @param nearMonths      the number of near contracts to display: values 0 through 4
+     *
+     * @return a {@link SingleMessageFuture} of {@link FutureSpread}s
+     *
+     * @throws IOException thrown for {@link IOException}s
+     */
+    public SingleMessageFuture<List<OptionContract>> getFutureOptionChain(String symbol,
+            PutsCallsOption putsCallsOption, List<FutureMonth> months, List<Integer> years, Integer nearMonths)
+            throws IOException {
+        Preconditions.checkNotNull(symbol);
+        Preconditions.checkNotNull(putsCallsOption);
+        Preconditions.checkArgument(months == null || !months.isEmpty());
+        Preconditions.checkNotNull(years);
+        Preconditions.checkArgument(years.size() > 0);
+
+        String requestID = getNewRequestID();
+        StringBuilder requestBuilder = new StringBuilder();
+
+        requestBuilder.append("CFO").append(",");
+        requestBuilder.append(symbol).append(",");
+        requestBuilder.append(putsCallsOption.value()).append(",");
+
+        if (months != null) {
+            requestBuilder.append(months.stream().map(FutureMonth::value).collect(Collectors.joining()));
+        }
+        requestBuilder.append(",");
+
+        // The years argument the last digit of all the years without delimiters.
+        // e.g.: 2005 - 2014 would be "5678901234"
+        requestBuilder.append(years.stream()
+                .map(Object::toString) // Convert ints to strings
+                .map(s -> s.substring(s.length() - 1)) // Get last digit of year string
+                .distinct() // Remove duplicates
+                .collect(Collectors.joining())) // Collect digits back-to-back
+                .append(",");
+
+        if (nearMonths != null) {
+            requestBuilder.append(nearMonths);
+        }
+        requestBuilder.append(",");
+
+        requestBuilder.append(requestID);
+        requestBuilder.append(LineEnding.CR_LF.getASCIIString());
+
+        SingleMessageFuture<List<OptionContract>> future = new SingleMessageFuture<>();
+        synchronized (messageReceivedLock) {
+            futureOptionListFuturesOfRequestIDs.put(requestID, future);
+        }
+
+        String requestString = requestBuilder.toString();
+        LOGGER.debug("Sending request: {}", requestString);
+        sendMessage(requestString);
+
+        return future;
+    }
+
+    /**
+     * Gets an Equity {@link OptionContract} chain. This sends an CEO request. This method is thread-safe.
+     *
+     * @param symbol                 the symbol. Max Length 30 characters.
+     * @param putsCallsOption        the {@link PutsCallsOption}
+     * @param months                 the {@link FutureMonth}s of the chain
+     * @param nearMonths             the number of near contracts to display: values 0 through 4
+     * @param nonStandardOptionTypes {@link NonStandardOptionTypes}
+     *
+     * @return a {@link SingleMessageFuture} of {@link FutureSpread}s
+     *
+     * @throws IOException thrown for {@link IOException}s
+     */
+    private SingleMessageFuture<List<OptionContract>> getEquityOptionChain(String symbol,
+            PutsCallsOption putsCallsOption, List<FutureMonth> months, Integer nearMonths,
+            NonStandardOptionTypes nonStandardOptionTypes) throws IOException {
+        return getEquityOptionChainWithFilter(symbol, putsCallsOption, months, nearMonths, OptionFilterType.NONE, null,
+                null, nonStandardOptionTypes);
+    }
+
+    /**
+     * Gets an Equity {@link OptionContract} chain using a Strike price filter. This sends an CEO request. This method
+     * is thread-safe.
+     *
+     * @param symbol                 the symbol. Max Length 30 characters.
+     * @param putsCallsOption        the {@link PutsCallsOption}
+     * @param months                 the {@link FutureMonth}s of the chain
+     * @param nearMonths             the number of near contracts to display: values 0 through 4
+     * @param beginningStrikePrice   the beginning strike price
+     * @param endingStrikePrice      the ending strike price
+     * @param nonStandardOptionTypes {@link NonStandardOptionTypes}
+     *
+     * @return a {@link SingleMessageFuture} of {@link FutureSpread}s
+     *
+     * @throws IOException thrown for {@link IOException}s
+     */
+    private SingleMessageFuture<List<OptionContract>> getEquityOptionChainWithStrikeFilter(String symbol,
+            PutsCallsOption putsCallsOption, List<FutureMonth> months, Integer nearMonths, Double beginningStrikePrice,
+            Double endingStrikePrice, NonStandardOptionTypes nonStandardOptionTypes) throws IOException {
+        return getEquityOptionChainWithFilter(symbol, putsCallsOption, months, nearMonths,
+                OptionFilterType.STRIKE_RANGE, beginningStrikePrice.toString(), endingStrikePrice.toString(),
+                nonStandardOptionTypes);
+    }
+
+    /**
+     * Gets an Equity {@link OptionContract} chain using the number of contracts In-The-Money or Out-Of-The-Money as a
+     * filter. This sends an CEO request. This method is thread-safe.
+     *
+     * @param symbol                 the symbol. Max Length 30 characters.
+     * @param putsCallsOption        the {@link PutsCallsOption}
+     * @param months                 the {@link FutureMonth}s of the chain
+     * @param nearMonths             the number of near contracts to display: values 0 through 4
+     * @param itmCount               the number of contracts In-The-Money
+     * @param otmCount               the number of contracts Out-Of-The-Money
+     * @param nonStandardOptionTypes {@link NonStandardOptionTypes}
+     *
+     * @return a {@link SingleMessageFuture} of {@link FutureSpread}s
+     *
+     * @throws IOException thrown for {@link IOException}s
+     */
+    private SingleMessageFuture<List<OptionContract>> getEquityOptionChainWithITMOTMFilter(String symbol,
+            PutsCallsOption putsCallsOption, List<FutureMonth> months, Integer nearMonths, Integer itmCount,
+            Integer otmCount, NonStandardOptionTypes nonStandardOptionTypes) throws IOException {
+        return getEquityOptionChainWithFilter(symbol, putsCallsOption, months, nearMonths,
+                OptionFilterType.IN_OR_OUT_OF_THE_MONEY, itmCount.toString(), otmCount.toString(),
+                nonStandardOptionTypes);
+    }
+
+    /**
+     * Gets an Equity {@link OptionContract} chain. This sends an CEO request. This method is thread-safe.
+     *
+     * @param symbol                 the symbol. Max Length 30 characters.
+     * @param putsCallsOption        the {@link PutsCallsOption}
+     * @param months                 the {@link FutureMonth}s of the chain
+     * @param nearMonths             the number of near contracts to display: values 0 through 4
+     * @param optionFilterType       the {@link OptionFilterType}
+     * @param filter1                ignored if [Filter Type] is "0". If [Filter Type] = "1" then beginning strike price
+     *                               or if [Filter Type] = "2" then the number of contracts in the money
+     * @param filter2                ignored if [Filter Type] is "0". If [Filter Type] = "1" then ending strike price or
+     *                               if [Filter Type] = "2" then the number of contracts out of the money
+     * @param nonStandardOptionTypes {@link NonStandardOptionTypes}
+     *
+     * @return a {@link SingleMessageFuture} of {@link FutureSpread}s
+     *
+     * @throws IOException thrown for {@link IOException}s
+     */
+    private SingleMessageFuture<List<OptionContract>> getEquityOptionChainWithFilter(String symbol,
+            PutsCallsOption putsCallsOption, List<FutureMonth> months, Integer nearMonths,
+            OptionFilterType optionFilterType, String filter1, String filter2,
+            NonStandardOptionTypes nonStandardOptionTypes) throws IOException {
+        Preconditions.checkNotNull(symbol);
+        Preconditions.checkNotNull(putsCallsOption);
+        Preconditions.checkArgument(months == null || !months.isEmpty());
+        Preconditions.checkNotNull(optionFilterType);
+        Preconditions.checkArgument(optionFilterType == OptionFilterType.NONE || (filter1 != null && filter2 != null));
+        Preconditions.checkNotNull(nonStandardOptionTypes);
+
+        String requestID = getNewRequestID();
+        StringBuilder requestBuilder = new StringBuilder();
+
+        requestBuilder.append("CEO").append(",");
+        requestBuilder.append(symbol).append(",");
+        requestBuilder.append(putsCallsOption.value()).append(",");
+
+        if (months != null) {
+            requestBuilder.append(months.stream().map(FutureMonth::value).collect(Collectors.joining()));
+        }
+        requestBuilder.append(",");
+
+        if (nearMonths != null) {
+            requestBuilder.append(nearMonths);
+        }
+        requestBuilder.append(",");
+
+        requestBuilder.append(optionFilterType.value()).append(",");
+        if (filter1 != null) {
+            requestBuilder.append(filter1);
+        }
+        requestBuilder.append(",");
+        if (filter2 != null) {
+            requestBuilder.append(filter2);
+        }
+        requestBuilder.append(",");
+
+        requestBuilder.append(requestID).append(",");
+        requestBuilder.append(nonStandardOptionTypes.value());
+        requestBuilder.append(LineEnding.CR_LF.getASCIIString());
+
+        SingleMessageFuture<List<OptionContract>> future = new SingleMessageFuture<>();
+        synchronized (messageReceivedLock) {
+            equityOptionListFuturesOfRequestIDs.put(requestID, future);
+        }
+
+        String requestString = requestBuilder.toString();
+        LOGGER.debug("Sending request: {}", requestString);
+        sendMessage(requestString);
+
+        return future;
+    }
 
     //
     // END Feed commands

@@ -8,6 +8,7 @@ import net.jacobpeterson.iqfeed4j.model.feedenums.FeedSpecialMessage;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper;
 import net.jacobpeterson.iqfeed4j.util.exception.IQFeedException;
 import net.jacobpeterson.iqfeed4j.util.exception.NoDataException;
+import net.jacobpeterson.iqfeed4j.util.exception.SyntaxException;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -64,6 +65,8 @@ public abstract class AbstractLookupFeed extends AbstractFeed {
         if (isRequestErrorMessage(csv, requestID)) {
             if (isRequestNoDataError(csv)) {
                 listener.onMessageException(new NoDataException());
+            } else if (isRequestSyntaxError(csv)) {
+                listener.onMessageException(new SyntaxException());
             } else {
                 listener.onMessageException(new IQFeedException(
                         valuePresent(csv, 2) ?
@@ -76,8 +79,8 @@ public abstract class AbstractLookupFeed extends AbstractFeed {
             listener.onEndOfMultiMessage();
         } else {
             try {
-                T messageType = csvMapper.map(csv, 1);
-                listener.onMessageReceived(messageType);
+                T message = csvMapper.map(csv, 1);
+                listener.onMessageReceived(message);
             } catch (Exception exception) {
                 listener.onMessageException(exception);
             }
@@ -117,14 +120,27 @@ public abstract class AbstractLookupFeed extends AbstractFeed {
     /**
      * Check if a message matches the following format:
      * <br>
-     * <code>[Request ID], {@link FeedSpecialMessage#END_OF_MESSAGE}</code>
+     * <code>[Request ID], {@link FeedSpecialMessage#NO_DATA_ERROR}</code>
      *
      * @param csv the CSV
      *
-     * @return true if the message represents an {@link FeedSpecialMessage#END_OF_MESSAGE} message
+     * @return true if the message represents a {@link FeedSpecialMessage#NO_DATA_ERROR} message
      */
     public boolean isRequestNoDataError(String[] csv) {
-        return valueEquals(csv, 1, FeedSpecialMessage.END_OF_MESSAGE.value());
+        return valueEquals(csv, 1, FeedSpecialMessage.NO_DATA_ERROR.value());
+    }
+
+    /**
+     * Check if a message matches the following format:
+     * <br>
+     * <code>[Request ID], {@link FeedSpecialMessage#SYNTAX_ERROR}</code>
+     *
+     * @param csv the CSV
+     *
+     * @return true if the message represents a {@link FeedSpecialMessage#SYNTAX_ERROR} message
+     */
+    public boolean isRequestSyntaxError(String[] csv) {
+        return valueEquals(csv, 1, FeedSpecialMessage.SYNTAX_ERROR.value());
     }
 
     /**

@@ -11,6 +11,7 @@ import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeFormatters;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.NamedCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.exception.IQFeedException;
 import net.jacobpeterson.iqfeed4j.util.exception.NoDataException;
+import net.jacobpeterson.iqfeed4j.util.exception.SyntaxException;
 import net.jacobpeterson.iqfeed4j.util.string.LineEnding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -249,6 +250,8 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
         if (isRequestErrorMessage(csv, requestID)) {
             if (isRequestNoDataError(csv)) {
                 listener.onMessageException(new NoDataException());
+            } else if (isRequestSyntaxError(csv)) {
+                listener.onMessageException(new SyntaxException());
             } else {
                 listener.onMessageException(new IQFeedException(
                         valuePresent(csv, 2) ?

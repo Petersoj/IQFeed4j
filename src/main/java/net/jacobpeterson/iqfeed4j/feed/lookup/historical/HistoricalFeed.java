@@ -185,7 +185,6 @@ public class HistoricalFeed extends AbstractLookupFeed {
 
         requestBuilder.append(requestID).append(",");
         requestBuilder.append(DATAPOINTS_PER_SEND);
-
         requestBuilder.append(LineEnding.CR_LF.getASCIIString());
 
         synchronized (messageReceivedLock) {
@@ -247,7 +246,6 @@ public class HistoricalFeed extends AbstractLookupFeed {
 
         requestBuilder.append(requestID).append(",");
         requestBuilder.append(DATAPOINTS_PER_SEND);
-
         requestBuilder.append(LineEnding.CR_LF.getASCIIString());
 
         synchronized (messageReceivedLock) {
@@ -320,7 +318,6 @@ public class HistoricalFeed extends AbstractLookupFeed {
 
         requestBuilder.append(requestID).append(",");
         requestBuilder.append(DATAPOINTS_PER_SEND);
-
         requestBuilder.append(LineEnding.CR_LF.getASCIIString());
 
         synchronized (messageReceivedLock) {
