@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "title": "See <a href=\"https://www.iqfeed.net/dev/api/docs//NewsLookupviaTCPIP.cfm\">News Lookup via TCP/IP</a>",
+  "properties": {
+    "Source": {
+      "existingJavaType": "java.lang.String"
+    },
+    "Description": {
+      "existingJavaType": "java.lang.String"
+    },
+    "AuthCode": {
+      "existingJavaType": "java.lang.String"
+    },
+    "IconID": {
+      "existingJavaType": "java.lang.String"
+    }
+  }
+}

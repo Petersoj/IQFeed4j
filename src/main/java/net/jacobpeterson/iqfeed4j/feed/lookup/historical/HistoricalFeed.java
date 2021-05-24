@@ -7,7 +7,7 @@ import net.jacobpeterson.iqfeed4j.model.feedenums.FeedMessageType;
 import net.jacobpeterson.iqfeed4j.model.feedenums.lookup.historical.IntervalType;
 import net.jacobpeterson.iqfeed4j.model.feedenums.lookup.historical.PartialDatapoint;
 import net.jacobpeterson.iqfeed4j.model.feedenums.lookup.historical.TimeLabelPlacement;
-import net.jacobpeterson.iqfeed4j.model.feedenums.misc.DataDirection;
+import net.jacobpeterson.iqfeed4j.model.feedenums.util.DataDirection;
 import net.jacobpeterson.iqfeed4j.model.lookup.historical.DatedInterval;
 import net.jacobpeterson.iqfeed4j.model.lookup.historical.Interval;
 import net.jacobpeterson.iqfeed4j.model.lookup.historical.Tick;
@@ -126,15 +126,15 @@ public class HistoricalFeed extends AbstractLookupFeed {
         String requestID = csv[0];
 
         synchronized (messageReceivedLock) {
-            if (handleMultiMessage(csv, requestID, tickListenersOfRequestIDs, TICK_CSV_MAPPER)) {
+            if (handleStandardMultiMessage(csv, requestID, tickListenersOfRequestIDs, TICK_CSV_MAPPER)) {
                 return;
             }
 
-            if (handleMultiMessage(csv, requestID, intervalListenersOfRequestIDs, INTERVAL_CSV_MAPPER)) {
+            if (handleStandardMultiMessage(csv, requestID, intervalListenersOfRequestIDs, INTERVAL_CSV_MAPPER)) {
                 return;
             }
 
-            if (handleMultiMessage(csv, requestID, datedIntervalListenersOfRequestIDs, DATED_INTERVAL_CSV_MAPPER)) {
+            if (handleStandardMultiMessage(csv, requestID, datedIntervalListenersOfRequestIDs, DATED_INTERVAL_CSV_MAPPER)) {
                 return;
             }
         }

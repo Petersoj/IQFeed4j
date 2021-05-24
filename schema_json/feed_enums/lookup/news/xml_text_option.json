@@ -1,0 +1,17 @@
+{
+  "type": "string",
+  "title": "Defines enums for XML or Text options.",
+  "javaName": "XMLTextOption",
+  "enum": [
+    "x",
+    "t"
+  ],
+  "javaEnums": [
+    {
+      "name": "XML"
+    },
+    {
+      "name": "TEXT"
+    }
+  ]
+}

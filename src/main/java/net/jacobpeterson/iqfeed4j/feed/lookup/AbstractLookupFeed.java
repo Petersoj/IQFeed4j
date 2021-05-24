@@ -41,8 +41,8 @@ public abstract class AbstractLookupFeed extends AbstractFeed {
     }
 
     /**
-     * Handles a message for a {@link MultiMessageListener} by: checking for request error messages, handling 'End of
-     * Message' messages, and performing {@link CSVMapper#map(String[], int)} on the 'CSV' to call {@link
+     * Handles a standard message for a {@link MultiMessageListener} by: checking for request error messages, handling
+     * 'End of Message' messages, and performing {@link CSVMapper#map(String[], int)} on the 'CSV' to call {@link
      * MultiMessageListener#onMessageReceived(Object)}.
      *
      * @param <T>                   the type of {@link MultiMessageListener}
@@ -54,7 +54,7 @@ public abstract class AbstractLookupFeed extends AbstractFeed {
      *
      * @return true if the 'requestID' was a key inside 'listenersOfRequestIDs', false otherwise
      */
-    protected <T> boolean handleMultiMessage(String[] csv, String requestID,
+    protected <T> boolean handleStandardMultiMessage(String[] csv, String requestID,
             Map<String, MultiMessageListener<T>> listenersOfRequestIDs, CSVMapper<T> csvMapper) {
         MultiMessageListener<T> listener = listenersOfRequestIDs.get(requestID);
 

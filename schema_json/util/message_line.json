@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "title": "Represents a message line.",
+  "properties": {
+    "Line": {
+      "existingJavaType": "java.lang.String"
+    }
+  }
+}

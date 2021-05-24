@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "title": "POJO for NCG (News Configuration) requests. See <a href=\"https://www.iqfeed.net/dev/api/docs//NewsLookupviaTCPIP.cfm\">News Lookup via TCP/IP</a>",
+  "properties": {
+    "Type": {
+      "existingJavaType": "net.jacobpeterson.iqfeed4j.model.feedenums.lookup.news.NewsConfigurationMessageType"
+    },
+    "Category": {
+      "existingJavaType": "java.lang.String",
+      "title": "Only present for {@link net.jacobpeterson.iqfeed4j.model.feedenums.lookup.news.NewsConfigurationMessageType#CATEGORY}."
+    },
+    "Source": {
+      "existingJavaType": "java.lang.String"
+    },
+    "Description": {
+      "existingJavaType": "java.lang.String"
+    },
+    "AuthCode": {
+      "existingJavaType": "java.lang.String"
+    },
+    "IconID": {
+      "existingJavaType": "java.lang.String"
+    }
+  }
+}

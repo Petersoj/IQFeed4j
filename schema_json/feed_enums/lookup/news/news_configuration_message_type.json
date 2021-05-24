@@ -1,0 +1,9 @@
+{
+  "type": "string",
+  "title": "Defines enums for news configuration types.",
+  "enum": [
+    "CATEGORY",
+    "MAJOR",
+    "MINOR"
+  ]
+}

@@ -138,38 +138,38 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
         String requestID = csv[0];
 
         synchronized (messageReceivedLock) {
-            if (handleMultiMessage(csv, requestID, symbolSearchResultListenersOfRequestIDs,
+            if (handleStandardMultiMessage(csv, requestID, symbolSearchResultListenersOfRequestIDs,
                     FILTER_SYMBOL_SEARCH_RESULT_CSV_MAPPER)) {
                 return;
             }
 
-            if (handleMultiMessage(csv, requestID, symbolSearchResultListenersOfRequestIDs,
+            if (handleStandardMultiMessage(csv, requestID, symbolSearchResultListenersOfRequestIDs,
                     SIC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER)) {
                 return;
             }
 
-            if (handleMultiMessage(csv, requestID, symbolSearchResultListenersOfRequestIDs,
+            if (handleStandardMultiMessage(csv, requestID, symbolSearchResultListenersOfRequestIDs,
                     NIAC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER)) {
                 return;
             }
 
-            if (handleMultiMessage(csv, requestID, listedMarketListenersOfRequestIDs, LISTED_MARKET_CSV_MAPPER)) {
+            if (handleStandardMultiMessage(csv, requestID, listedMarketListenersOfRequestIDs, LISTED_MARKET_CSV_MAPPER)) {
                 return;
             }
 
-            if (handleMultiMessage(csv, requestID, securityTypeListenersOfRequestIDs, SECURITY_TYPE_CSV_MAPPER)) {
+            if (handleStandardMultiMessage(csv, requestID, securityTypeListenersOfRequestIDs, SECURITY_TYPE_CSV_MAPPER)) {
                 return;
             }
 
-            if (handleMultiMessage(csv, requestID, tradeConditionListenersOfRequestIDs, TRADE_CONDITION_CSV_MAPPER)) {
+            if (handleStandardMultiMessage(csv, requestID, tradeConditionListenersOfRequestIDs, TRADE_CONDITION_CSV_MAPPER)) {
                 return;
             }
 
-            if (handleMultiMessage(csv, requestID, sicCodeListenersOfRequestIDs, SIC_CODE_CSV_MAPPER)) {
+            if (handleStandardMultiMessage(csv, requestID, sicCodeListenersOfRequestIDs, SIC_CODE_CSV_MAPPER)) {
                 return;
             }
 
-            if (handleMultiMessage(csv, requestID, niacCodeListenersOfRequestIDs, NIAC_CODE_CSV_MAPPER)) {
+            if (handleStandardMultiMessage(csv, requestID, niacCodeListenersOfRequestIDs, NIAC_CODE_CSV_MAPPER)) {
                 return;
             }
         }

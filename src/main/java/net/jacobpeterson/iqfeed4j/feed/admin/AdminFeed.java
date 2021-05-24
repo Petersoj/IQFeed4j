@@ -5,7 +5,7 @@ import net.jacobpeterson.iqfeed4j.feed.AbstractFeed;
 import net.jacobpeterson.iqfeed4j.feed.SingleMessageFuture;
 import net.jacobpeterson.iqfeed4j.model.feedenums.FeedCommand;
 import net.jacobpeterson.iqfeed4j.model.feedenums.FeedMessageType;
-import net.jacobpeterson.iqfeed4j.model.feedenums.misc.OnOffOption;
+import net.jacobpeterson.iqfeed4j.model.feedenums.util.OnOffOption;
 import net.jacobpeterson.iqfeed4j.model.feedenums.streaming.admin.AdminCommand;
 import net.jacobpeterson.iqfeed4j.model.feedenums.streaming.admin.AdminMessageType;
 import net.jacobpeterson.iqfeed4j.model.streaming.admin.ClientStatistics;
