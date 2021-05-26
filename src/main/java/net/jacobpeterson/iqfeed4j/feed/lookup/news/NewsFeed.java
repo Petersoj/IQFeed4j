@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueNotWhitespace;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeFormatters.DATE;
 
 /**
@@ -64,7 +64,7 @@ public class NewsFeed extends AbstractLookupFeed {
         }
 
         // All messages sent on this feed must have a Request ID first
-        if (!valuePresent(csv, 0)) {
+        if (!valueNotWhitespace(csv, 0)) {
             LOGGER.error("Received unknown message format: {}", (Object) csv);
             return;
         }

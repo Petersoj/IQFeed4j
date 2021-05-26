@@ -5,9 +5,9 @@ import net.jacobpeterson.iqfeed4j.feed.AbstractFeed;
 import net.jacobpeterson.iqfeed4j.feed.SingleMessageFuture;
 import net.jacobpeterson.iqfeed4j.model.feedenums.FeedCommand;
 import net.jacobpeterson.iqfeed4j.model.feedenums.FeedMessageType;
-import net.jacobpeterson.iqfeed4j.model.feedenums.util.OnOffOption;
 import net.jacobpeterson.iqfeed4j.model.feedenums.streaming.admin.AdminCommand;
 import net.jacobpeterson.iqfeed4j.model.feedenums.streaming.admin.AdminMessageType;
+import net.jacobpeterson.iqfeed4j.model.feedenums.util.OnOffOption;
 import net.jacobpeterson.iqfeed4j.model.streaming.admin.ClientStatistics;
 import net.jacobpeterson.iqfeed4j.model.streaming.admin.ClientStatistics.Type;
 import net.jacobpeterson.iqfeed4j.model.streaming.admin.FeedStatistics;
@@ -22,14 +22,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringJoiner;
 
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueExists;
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.*;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.DATE_SPACE_TIME;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.MONTH3_DAY_TIME_AM_PM;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.DOUBLE;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.INT;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.STRING;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.*;
 
 /**
  * {@link AdminFeed} represents the Admin {@link AbstractFeed}. Methods in this class are not synchronized.
@@ -109,7 +105,7 @@ public class AdminFeed extends AbstractFeed {
         }
 
         // Confirm message format
-        if (!valueEquals(csv, 0, FeedMessageType.SYSTEM.value()) || !valuePresent(csv, 1)) {
+        if (!valueEquals(csv, 0, FeedMessageType.SYSTEM.value()) || !valueNotWhitespace(csv, 1)) {
             LOGGER.error("Received unknown message format: {}", (Object) csv);
             return;
         }

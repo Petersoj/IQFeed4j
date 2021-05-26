@@ -31,10 +31,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.*;
 
 /**
  * {@link OptionChainsFeed} is an {@link AbstractLookupFeed} for Option chains data.
@@ -278,7 +278,7 @@ public class OptionChainsFeed extends AbstractLookupFeed {
          * @param csvValue             the CSV value
          */
         public static void equityOptionContract(OptionContract equityOptionContract, String csvValue) {
-            final int monthCodeCharIndex = CharUtil.lastIndexOfNonNumber(csvValue);
+            final int monthCodeCharIndex = CharUtil.lastIndexOfNonNumber(csvValue, true, false);
             if (monthCodeCharIndex == -1) {
                 throw new IllegalArgumentException("Option contract symbol must contain month code!");
             }
@@ -293,6 +293,11 @@ public class OptionChainsFeed extends AbstractLookupFeed {
             final int dayEndIndex = monthCodeCharIndex;
             final int strikePriceBeginIndex = monthCodeCharIndex + 1;
             final int strikePriceEndIndex = length;
+
+            System.out.println(
+                    csvValue + " " + monthCodeCharIndex + " " + symbolEndIndex + " " + yearBeginIndex + " " +
+                            yearEndIndex + " " + dayBeginIndex +
+                            " " + dayEndIndex + " " + strikePriceBeginIndex + " " + strikePriceEndIndex);
 
             final EquityOptionMonth equityOptionMonth = EquityOptionMonth.fromValue(
                     String.valueOf(csvValue.charAt(monthCodeCharIndex)));
@@ -311,6 +316,7 @@ public class OptionChainsFeed extends AbstractLookupFeed {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OptionChainsFeed.class);
     private static final String FEED_NAME_SUFFIX = " Option Chains";
+    private static final Pattern COLON_REGEX = Pattern.compile(Pattern.quote(":"));
     private static final ListCSVMapper<FutureContract> FUTURE_CONTRACT_CSV_MAPPER;
     private static final ListCSVMapper<FutureSpread> FUTURE_SPREAD_CSV_MAPPER;
     private static final ListCSVMapper<OptionContract> FUTURE_OPTION_CSV_MAPPER;
@@ -318,13 +324,13 @@ public class OptionChainsFeed extends AbstractLookupFeed {
 
     static {
         FUTURE_CONTRACT_CSV_MAPPER = new ListCSVMapper<>(() -> new ArrayList<>(30),
-                FutureContract::new, CSVPOJOPopulators::futureContract);
+                FutureContract::new, CSVPOJOPopulators::futureContract, COLON_REGEX);
         FUTURE_SPREAD_CSV_MAPPER = new ListCSVMapper<>(() -> new ArrayList<>(30),
-                FutureSpread::new, CSVPOJOPopulators::futureSpread);
+                FutureSpread::new, CSVPOJOPopulators::futureSpread, COLON_REGEX);
         FUTURE_OPTION_CSV_MAPPER = new ListCSVMapper<>(() -> new ArrayList<>(30),
-                OptionContract::new, CSVPOJOPopulators::futureOptionContract);
+                OptionContract::new, CSVPOJOPopulators::futureOptionContract, COLON_REGEX);
         EQUITY_OPTION_CSV_MAPPER = new ListCSVMapper<>(() -> new ArrayList<>(30),
-                OptionContract::new, CSVPOJOPopulators::equityOptionContract);
+                OptionContract::new, CSVPOJOPopulators::equityOptionContract, COLON_REGEX);
     }
 
     protected final Object messageReceivedLock;
@@ -358,7 +364,7 @@ public class OptionChainsFeed extends AbstractLookupFeed {
         }
 
         // All messages sent on this feed must have a Request ID first
-        if (!valuePresent(csv, 0)) {
+        if (!valueNotWhitespace(csv, 0)) {
             LOGGER.error("Received unknown message format: {}", (Object) csv);
             return;
         }
@@ -578,7 +584,7 @@ public class OptionChainsFeed extends AbstractLookupFeed {
      * @param years           the years of the chain
      * @param nearMonths      the number of near contracts to display: values 0 through 4
      *
-     * @return a {@link SingleMessageFuture} of {@link FutureSpread}s
+     * @return a {@link SingleMessageFuture} of {@link OptionContract}s
      *
      * @throws IOException thrown for {@link IOException}s
      */
@@ -637,16 +643,16 @@ public class OptionChainsFeed extends AbstractLookupFeed {
      *
      * @param symbol                 the symbol. Max Length 30 characters.
      * @param putsCallsOption        the {@link PutsCallsOption}
-     * @param months                 the {@link FutureMonth}s of the chain
+     * @param months                 the {@link EquityOptionMonth}s of the chain
      * @param nearMonths             the number of near contracts to display: values 0 through 4
      * @param nonStandardOptionTypes {@link NonStandardOptionTypes}
      *
-     * @return a {@link SingleMessageFuture} of {@link FutureSpread}s
+     * @return a {@link SingleMessageFuture} of {@link OptionContract}s
      *
      * @throws IOException thrown for {@link IOException}s
      */
-    private SingleMessageFuture<List<OptionContract>> getEquityOptionChain(String symbol,
-            PutsCallsOption putsCallsOption, List<FutureMonth> months, Integer nearMonths,
+    public SingleMessageFuture<List<OptionContract>> getEquityOptionChain(String symbol,
+            PutsCallsOption putsCallsOption, List<EquityOptionMonth> months, Integer nearMonths,
             NonStandardOptionTypes nonStandardOptionTypes) throws IOException {
         return getEquityOptionChainWithFilter(symbol, putsCallsOption, months, nearMonths, OptionFilterType.NONE, null,
                 null, nonStandardOptionTypes);
@@ -658,19 +664,20 @@ public class OptionChainsFeed extends AbstractLookupFeed {
      *
      * @param symbol                 the symbol. Max Length 30 characters.
      * @param putsCallsOption        the {@link PutsCallsOption}
-     * @param months                 the {@link FutureMonth}s of the chain
+     * @param months                 the {@link EquityOptionMonth}s of the chain
      * @param nearMonths             the number of near contracts to display: values 0 through 4
      * @param beginningStrikePrice   the beginning strike price
      * @param endingStrikePrice      the ending strike price
      * @param nonStandardOptionTypes {@link NonStandardOptionTypes}
      *
-     * @return a {@link SingleMessageFuture} of {@link FutureSpread}s
+     * @return a {@link SingleMessageFuture} of {@link OptionContract}s
      *
      * @throws IOException thrown for {@link IOException}s
      */
-    private SingleMessageFuture<List<OptionContract>> getEquityOptionChainWithStrikeFilter(String symbol,
-            PutsCallsOption putsCallsOption, List<FutureMonth> months, Integer nearMonths, Double beginningStrikePrice,
-            Double endingStrikePrice, NonStandardOptionTypes nonStandardOptionTypes) throws IOException {
+    public SingleMessageFuture<List<OptionContract>> getEquityOptionChainWithStrikeFilter(String symbol,
+            PutsCallsOption putsCallsOption, List<EquityOptionMonth> months, Integer nearMonths,
+            Double beginningStrikePrice, Double endingStrikePrice, NonStandardOptionTypes nonStandardOptionTypes)
+            throws IOException {
         return getEquityOptionChainWithFilter(symbol, putsCallsOption, months, nearMonths,
                 OptionFilterType.STRIKE_RANGE, beginningStrikePrice.toString(), endingStrikePrice.toString(),
                 nonStandardOptionTypes);
@@ -682,18 +689,18 @@ public class OptionChainsFeed extends AbstractLookupFeed {
      *
      * @param symbol                 the symbol. Max Length 30 characters.
      * @param putsCallsOption        the {@link PutsCallsOption}
-     * @param months                 the {@link FutureMonth}s of the chain
+     * @param months                 the {@link EquityOptionMonth}s of the chain
      * @param nearMonths             the number of near contracts to display: values 0 through 4
      * @param itmCount               the number of contracts In-The-Money
      * @param otmCount               the number of contracts Out-Of-The-Money
      * @param nonStandardOptionTypes {@link NonStandardOptionTypes}
      *
-     * @return a {@link SingleMessageFuture} of {@link FutureSpread}s
+     * @return a {@link SingleMessageFuture} of {@link OptionContract}s
      *
      * @throws IOException thrown for {@link IOException}s
      */
-    private SingleMessageFuture<List<OptionContract>> getEquityOptionChainWithITMOTMFilter(String symbol,
-            PutsCallsOption putsCallsOption, List<FutureMonth> months, Integer nearMonths, Integer itmCount,
+    public SingleMessageFuture<List<OptionContract>> getEquityOptionChainWithITMOTMFilter(String symbol,
+            PutsCallsOption putsCallsOption, List<EquityOptionMonth> months, Integer nearMonths, Integer itmCount,
             Integer otmCount, NonStandardOptionTypes nonStandardOptionTypes) throws IOException {
         return getEquityOptionChainWithFilter(symbol, putsCallsOption, months, nearMonths,
                 OptionFilterType.IN_OR_OUT_OF_THE_MONEY, itmCount.toString(), otmCount.toString(),
@@ -705,7 +712,7 @@ public class OptionChainsFeed extends AbstractLookupFeed {
      *
      * @param symbol                 the symbol. Max Length 30 characters.
      * @param putsCallsOption        the {@link PutsCallsOption}
-     * @param months                 the {@link FutureMonth}s of the chain
+     * @param months                 the {@link EquityOptionMonth}s of the chain
      * @param nearMonths             the number of near contracts to display: values 0 through 4
      * @param optionFilterType       the {@link OptionFilterType}
      * @param filter1                ignored if [Filter Type] is "0". If [Filter Type] = "1" then beginning strike price
@@ -714,12 +721,12 @@ public class OptionChainsFeed extends AbstractLookupFeed {
      *                               if [Filter Type] = "2" then the number of contracts out of the money
      * @param nonStandardOptionTypes {@link NonStandardOptionTypes}
      *
-     * @return a {@link SingleMessageFuture} of {@link FutureSpread}s
+     * @return a {@link SingleMessageFuture} of {@link OptionContract}s
      *
      * @throws IOException thrown for {@link IOException}s
      */
     private SingleMessageFuture<List<OptionContract>> getEquityOptionChainWithFilter(String symbol,
-            PutsCallsOption putsCallsOption, List<FutureMonth> months, Integer nearMonths,
+            PutsCallsOption putsCallsOption, List<EquityOptionMonth> months, Integer nearMonths,
             OptionFilterType optionFilterType, String filter1, String filter2,
             NonStandardOptionTypes nonStandardOptionTypes) throws IOException {
         Preconditions.checkNotNull(symbol);
@@ -737,7 +744,7 @@ public class OptionChainsFeed extends AbstractLookupFeed {
         requestBuilder.append(putsCallsOption.value()).append(",");
 
         if (months != null) {
-            requestBuilder.append(months.stream().map(FutureMonth::value).collect(Collectors.joining()));
+            requestBuilder.append(months.stream().map(EquityOptionMonth::value).collect(Collectors.joining()));
         }
         requestBuilder.append(",");
 

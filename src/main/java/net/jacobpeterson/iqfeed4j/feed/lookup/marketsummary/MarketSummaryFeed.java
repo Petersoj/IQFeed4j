@@ -22,13 +22,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.*;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.DATE;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.TIME;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.DOUBLE;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.INT;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.STRING;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.*;
 
 /**
  * {@link MarketSummaryFeed} is an {@link AbstractLookupFeed} for market summary (snapshot) data.
@@ -199,7 +196,7 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
         }
 
         // All messages sent on this feed must have a Request ID first
-        if (!valuePresent(csv, 0)) {
+        if (!valueNotWhitespace(csv, 0)) {
             LOGGER.error("Received unknown message format: {}", (Object) csv);
             return;
         }

@@ -24,7 +24,7 @@ import java.time.LocalTime;
 import java.util.HashMap;
 
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueNotWhitespace;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.*;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.*;
 
@@ -118,7 +118,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         }
 
         // All messages sent on this feed must have a Request ID first
-        if (!valuePresent(csv, 0)) {
+        if (!valueNotWhitespace(csv, 0)) {
             LOGGER.error("Received unknown message format: {}", (Object) csv);
             return;
         }
@@ -134,7 +134,8 @@ public class HistoricalFeed extends AbstractLookupFeed {
                 return;
             }
 
-            if (handleStandardMultiMessage(csv, requestID, datedIntervalListenersOfRequestIDs, DATED_INTERVAL_CSV_MAPPER)) {
+            if (handleStandardMultiMessage(csv, requestID, datedIntervalListenersOfRequestIDs,
+                    DATED_INTERVAL_CSV_MAPPER)) {
                 return;
             }
         }

@@ -120,27 +120,27 @@ public abstract class AbstractLookupFeed extends AbstractFeed {
     /**
      * Check if a message matches the following format:
      * <br>
-     * <code>[Request ID], {@link FeedSpecialMessage#NO_DATA_ERROR}</code>
+     * <code>[Request ID], E, {@link FeedSpecialMessage#NO_DATA_ERROR}</code>
      *
      * @param csv the CSV
      *
      * @return true if the message represents a {@link FeedSpecialMessage#NO_DATA_ERROR} message
      */
     public boolean isRequestNoDataError(String[] csv) {
-        return valueEquals(csv, 1, FeedSpecialMessage.NO_DATA_ERROR.value());
+        return valueEquals(csv, 2, FeedSpecialMessage.NO_DATA_ERROR.value());
     }
 
     /**
      * Check if a message matches the following format:
      * <br>
-     * <code>[Request ID], {@link FeedSpecialMessage#SYNTAX_ERROR}</code>
+     * <code>[Request ID], E, {@link FeedSpecialMessage#SYNTAX_ERROR}</code>
      *
      * @param csv the CSV
      *
      * @return true if the message represents a {@link FeedSpecialMessage#SYNTAX_ERROR} message
      */
     public boolean isRequestSyntaxError(String[] csv) {
-        return valueEquals(csv, 1, FeedSpecialMessage.SYNTAX_ERROR.value());
+        return valueEquals(csv, 2, FeedSpecialMessage.SYNTAX_ERROR.value());
     }
 
     /**

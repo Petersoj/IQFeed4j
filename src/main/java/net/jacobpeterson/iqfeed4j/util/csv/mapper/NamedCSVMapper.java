@@ -6,7 +6,7 @@ import java.util.concurrent.Callable;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueNotWhitespace;
 
 /**
  * {@inheritDoc}
@@ -84,7 +84,7 @@ public class NamedCSVMapper<T> extends CSVMapper<T> {
             }
 
             int csvNamedIndex = csvIndexOfIndexName.getValue();
-            if (!valuePresent(csv, csvNamedIndex + offset)) { // Don't map empty CSV values
+            if (!valueNotWhitespace(csv, csvNamedIndex + offset)) { // Don't map empty CSV values
                 continue;
             }
             try {
