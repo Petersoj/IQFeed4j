@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "title": "Represent a currently watched interval bar. See <a href=\"https://www.iqfeed.net/dev/api/docs/Derivatives_StreamingIntervalBars_TCPIP.cfm\">Streaming interval bars via TCP/IP</a>",
+  "properties": {
+    "Symbol": {
+      "existingJavaType": "java.lang.String",
+      "title": "The symbol."
+    },
+    "Interval": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "The interval length."
+    },
+    "RequestID": {
+      "existingJavaType": "java.lang.String",
+      "title": "The Request ID."
+    }
+  }
+}

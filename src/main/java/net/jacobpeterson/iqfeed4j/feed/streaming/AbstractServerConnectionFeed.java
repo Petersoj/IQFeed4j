@@ -59,4 +59,13 @@ public abstract class AbstractServerConnectionFeed extends AbstractFeed {
 
         return null;
     }
+
+    /**
+     * Gets {@link #serverConnectionStatus}.
+     *
+     * @return the {@link ServerConnectionStatus}
+     */
+    public ServerConnectionStatus getServerConnectionStatus() {
+        return serverConnectionStatus;
+    }
 }

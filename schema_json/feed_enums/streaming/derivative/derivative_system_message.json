@@ -1,0 +1,23 @@
+{
+  "type": "string",
+  "title": "Enums for Derivative feed System message types. See <a href=\"https://www.iqfeed.net/dev/api/docs/Derivatives_StreamingIntervalBars_TCPIP.cfm\">Streaming interval bars via TCP/IP</a>",
+  "enum": [
+    "SYMBOL LIMIT REACHED",
+    "REPLACED PREVIOUS WATCH",
+    "WATCHES"
+  ],
+  "javaEnums": [
+    {
+      "name": "SYMBOL_LIMIT_REACHED",
+      "title": "The attempt to watch a symbol has failed, due to the symbol limit being reached."
+    },
+    {
+      "name": "REPLACED_PREVIOUSLY_WATCHED_INTERVAL",
+      "title": "The new interval bar watch has replaced the previous watched streaming interval bar watch."
+    },
+    {
+      "name": "WATCHED_INTERVALS",
+      "title": "The message is a response for the <code>S,REQUEST WATCHES</code> request."
+    }
+  ]
+}

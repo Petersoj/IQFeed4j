@@ -1,7 +1,6 @@
 package net.jacobpeterson.iqfeed4j.feed.lookup;
 
 import com.google.common.base.Splitter;
-import net.jacobpeterson.iqfeed4j.feed.AbstractFeed;
 import net.jacobpeterson.iqfeed4j.feed.AbstractRequestIDFeed;
 import net.jacobpeterson.iqfeed4j.feed.MultiMessageListener;
 import net.jacobpeterson.iqfeed4j.model.feedenums.FeedMessageType;
@@ -16,12 +15,10 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.Map;
 
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueNotWhitespace;
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.*;
 
 /**
- * {@link AbstractLookupFeed} represents the Lookup {@link AbstractFeed}. Methods in this class are not synchronized.
+ * {@link AbstractLookupFeed} represents the Lookup {@link AbstractRequestIDFeed}.
  */
 public abstract class AbstractLookupFeed extends AbstractRequestIDFeed {
 
