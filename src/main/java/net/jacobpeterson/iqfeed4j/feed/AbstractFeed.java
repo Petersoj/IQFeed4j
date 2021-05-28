@@ -233,7 +233,15 @@ public abstract class AbstractFeed implements Runnable {
      * @param message   the message
      * @param exception the {@link Exception}
      */
-    protected abstract void onAsyncException(String message, Exception exception);
+    protected void onAsyncException(String message, Exception exception) {
+        LOGGER.error(message, exception);
+        LOGGER.info("Attempting to close {}...", feedName);
+        try {
+            stop();
+        } catch (Exception stopException) {
+            LOGGER.error("Could not close {}!", feedName, stopException);
+        }
+    }
 
     /**
      * Sends a message. This method is synchronized.

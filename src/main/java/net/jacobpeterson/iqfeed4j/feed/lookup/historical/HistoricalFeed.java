@@ -3,8 +3,7 @@ package net.jacobpeterson.iqfeed4j.feed.lookup.historical;
 import com.google.common.base.Preconditions;
 import net.jacobpeterson.iqfeed4j.feed.MultiMessageListener;
 import net.jacobpeterson.iqfeed4j.feed.lookup.AbstractLookupFeed;
-import net.jacobpeterson.iqfeed4j.model.feedenums.FeedMessageType;
-import net.jacobpeterson.iqfeed4j.model.feedenums.lookup.historical.IntervalType;
+import net.jacobpeterson.iqfeed4j.model.feedenums.interval.IntervalType;
 import net.jacobpeterson.iqfeed4j.model.feedenums.lookup.historical.PartialDatapoint;
 import net.jacobpeterson.iqfeed4j.model.feedenums.lookup.historical.TimeLabelPlacement;
 import net.jacobpeterson.iqfeed4j.model.feedenums.util.DataDirection;
@@ -23,8 +22,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashMap;
 
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueNotWhitespace;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.*;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.*;
 
@@ -112,14 +109,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
 
     @Override
     protected void onMessageReceived(String[] csv) {
-        if (valueEquals(csv, 0, FeedMessageType.ERROR.value())) {
-            LOGGER.error("Received error message! {}", (Object) csv);
-            return;
-        }
-
-        // All messages sent on this feed must have a Request ID first
-        if (!valueNotWhitespace(csv, 0)) {
-            LOGGER.error("Received unknown message format: {}", (Object) csv);
+        if (isErrorOrInvalidMessage(csv)) {
             return;
         }
 
@@ -138,17 +128,6 @@ public class HistoricalFeed extends AbstractLookupFeed {
                     DATED_INTERVAL_CSV_MAPPER)) {
                 return;
             }
-        }
-    }
-
-    @Override
-    protected void onAsyncException(String message, Exception exception) {
-        LOGGER.error(message, exception);
-        LOGGER.info("Attempting to close {}...", feedName);
-        try {
-            stop();
-        } catch (Exception stopException) {
-            LOGGER.error("Could not close {}!", feedName, stopException);
         }
     }
 

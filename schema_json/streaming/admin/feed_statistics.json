@@ -2,47 +2,47 @@
   "type": "object",
   "title": "Status message that gives information about the feed operation and is received once per second. See <a href=\"https://www.iqfeed.net/dev/api/docs/AdminSystemMessages.cfm\">Admin Port System Messages</a>",
   "properties": {
-    "serverIP": {
+    "ServerIP": {
       "existingJavaType": "java.lang.String",
       "title": "IP address for least loaded Quote Server."
     },
-    "serverPort": {
+    "ServerPort": {
       "existingJavaType": "java.lang.Integer",
       "title": "Port for least loaded Quote Server."
     },
-    "maxSymbols": {
+    "MaxSymbols": {
       "existingJavaType": "java.lang.Integer",
       "title": "The maximum # of symbols that can be watched at any given time."
     },
-    "numberOfSymbols": {
+    "NumberOfSymbols": {
       "existingJavaType": "java.lang.Integer",
       "title": "The # of symbols that are currently being watched."
     },
-    "clientsConnected": {
+    "ClientsConnected": {
       "existingJavaType": "java.lang.Integer",
       "title": "The # of clients that are currently connected."
     },
-    "secondsSinceLastUpdate": {
+    "SecondsSinceLastUpdate": {
       "existingJavaType": "java.lang.Integer",
       "title": "The # of seconds since the last update from the Quote server ."
     },
-    "reconnections": {
+    "Reconnections": {
       "existingJavaType": "java.lang.Integer",
       "title": "The # of times that IQFeed has reconnected."
     },
-    "attemptedReconnections": {
+    "AttemptedReconnections": {
       "existingJavaType": "java.lang.Integer",
       "title": "The # of times that IQFeed has attempted to reconnect, but failed."
     },
-    "startTime": {
+    "StartTime": {
       "existingJavaType": "java.time.LocalDateTime",
       "title": "The time that the connection (or reconnection) to IQFeed was made."
     },
-    "marketTime": {
+    "MarketTime": {
       "existingJavaType": "java.time.LocalDateTime",
       "title": "The current time of the market."
     },
-    "status": {
+    "Status": {
       "type": "string",
       "enum": [
         "Connected",
@@ -50,35 +50,35 @@
       ],
       "title": "Represents whether IQFeed is connected or not."
     },
-    "iqFeedVersion": {
+    "IQFeedVersion": {
       "existingJavaType": "java.lang.String",
       "title": "Represents the version of IQFeed that is running."
     },
-    "loginID": {
+    "LoginID": {
       "existingJavaType": "java.lang.String",
       "title": "The Login ID that is currently logged in."
     },
-    "totalKiloBytesReceived": {
+    "TotalKiloBytesReceived": {
       "existingJavaType": "java.lang.Double",
       "title": "Found in the \"Internet Bandwidth\" section of the IQConnection Manager. Formula: total bytes received / 1024."
     },
-    "kiloBytesPerSecReceived": {
+    "KiloBytesPerSecReceived": {
       "existingJavaType": "java.lang.Double",
       "title": "Found in the \"Internet Bandwidth\" section of the IQConnection Manager. Formula: bytes received in the past second / 1024."
     },
-    "avgKiloBytesPerSecRecv": {
+    "AvgKiloBytesPerSecRecv": {
       "existingJavaType": "java.lang.Double",
       "title": "Found in the \"Internet Bandwidth\" section of the IQConnection Manager. Formula: total KB's received / total seconds."
     },
-    "totalKiloBytesSent": {
+    "TotalKiloBytesSent": {
       "existingJavaType": "java.lang.Double",
       "title": "Found in the \"Local Bandwidth\" section of the IQConnection Manager. Formula: total bytes sent / 1024."
     },
-    "kiloBytesPerSecSent": {
+    "KiloBytesPerSecSent": {
       "existingJavaType": "java.lang.Double",
       "title": "Found in the \"Local Bandwidth\" section of the IQConnection Manager. Formula: bytes sent in the past second / 1024."
     },
-    "avgKiloBytesPerSecSent": {
+    "AvgKiloBytesPerSecSent": {
       "existingJavaType": "java.lang.Double",
       "title": "Found in the \"Local Bandwidth\" section of the IQConnection Manager. Formula: total KB's sent / total seconds"
     }

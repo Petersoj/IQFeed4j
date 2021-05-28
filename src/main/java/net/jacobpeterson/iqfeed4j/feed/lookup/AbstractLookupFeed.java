@@ -2,6 +2,7 @@ package net.jacobpeterson.iqfeed4j.feed.lookup;
 
 import com.google.common.base.Splitter;
 import net.jacobpeterson.iqfeed4j.feed.AbstractFeed;
+import net.jacobpeterson.iqfeed4j.feed.AbstractRequestIDFeed;
 import net.jacobpeterson.iqfeed4j.feed.MultiMessageListener;
 import net.jacobpeterson.iqfeed4j.model.feedenums.FeedMessageType;
 import net.jacobpeterson.iqfeed4j.model.feedenums.FeedSpecialMessage;
@@ -9,22 +10,23 @@ import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper;
 import net.jacobpeterson.iqfeed4j.util.exception.IQFeedException;
 import net.jacobpeterson.iqfeed4j.util.exception.NoDataException;
 import net.jacobpeterson.iqfeed4j.util.exception.SyntaxException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Map;
 
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueNotWhitespace;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
 
 /**
  * {@link AbstractLookupFeed} represents the Lookup {@link AbstractFeed}. Methods in this class are not synchronized.
  */
-public abstract class AbstractLookupFeed extends AbstractFeed {
+public abstract class AbstractLookupFeed extends AbstractRequestIDFeed {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractLookupFeed.class);
     private static final String FEED_NAME_SUFFIX = " Lookup Feed";
-
-    private final HashSet<Integer> requestIDs;
 
     /**
      * Instantiates a new {@link AbstractLookupFeed}.
@@ -36,14 +38,12 @@ public abstract class AbstractLookupFeed extends AbstractFeed {
      */
     public AbstractLookupFeed(String lookupFeedName, String hostname, int port, Splitter csvSplitter) {
         super(lookupFeedName + FEED_NAME_SUFFIX, hostname, port, csvSplitter);
-
-        requestIDs = new HashSet<>();
     }
 
     /**
      * Handles a standard message for a {@link MultiMessageListener} by: checking for request error messages, handling
-     * 'End of Message' messages, and performing {@link CSVMapper#map(String[], int)} on the 'CSV' to call {@link
-     * MultiMessageListener#onMessageReceived(Object)}.
+     * {@link FeedSpecialMessage#END_OF_MESSAGE} messages, and performing {@link CSVMapper#map(String[], int)} on the
+     * 'CSV' to call {@link MultiMessageListener#onMessageReceived(Object)}.
      *
      * @param <T>                   the type of {@link MultiMessageListener}
      * @param csv                   the CSV
@@ -90,80 +90,25 @@ public abstract class AbstractLookupFeed extends AbstractFeed {
     }
 
     /**
-     * Checks for a request ID error message format.
-     * <br>
-     * e.g. <code>[Request ID], E, &lt;Error Text&gt;</code>
-     *
-     * @param csv       the CSV
-     * @param requestID the request ID
-     *
-     * @return true if the CSV represents an {@link FeedMessageType#ERROR} message
-     */
-    protected boolean isRequestErrorMessage(String[] csv, String requestID) {
-        return valueEquals(csv, 0, requestID) && valueEquals(csv, 1, FeedMessageType.ERROR.value());
-    }
-
-    /**
-     * Check if a message matches the following format:
-     * <br>
-     * <code>[Request ID], {@link FeedSpecialMessage#END_OF_MESSAGE}</code>
-     *
-     * @param csv       the CSV
-     * @param requestID the request ID
-     *
-     * @return true if the message represents an {@link FeedSpecialMessage#END_OF_MESSAGE} message
-     */
-    public boolean isRequestEndOfMessage(String[] csv, String requestID) {
-        return valueEquals(csv, 0, requestID) && valueEquals(csv, 1, FeedSpecialMessage.END_OF_MESSAGE.value());
-    }
-
-    /**
-     * Check if a message matches the following format:
-     * <br>
-     * <code>[Request ID], E, {@link FeedSpecialMessage#NO_DATA_ERROR}</code>
+     * Checks if a message is a {@link FeedMessageType#ERROR} message or that the first CSV value is whitespace to check
+     * if a Request ID is present.
      *
      * @param csv the CSV
      *
-     * @return true if the message represents a {@link FeedSpecialMessage#NO_DATA_ERROR} message
+     * @return true if the message is an error or is invalid
      */
-    public boolean isRequestNoDataError(String[] csv) {
-        return valueEquals(csv, 2, FeedSpecialMessage.NO_DATA_ERROR.value());
-    }
-
-    /**
-     * Check if a message matches the following format:
-     * <br>
-     * <code>[Request ID], E, {@link FeedSpecialMessage#SYNTAX_ERROR}</code>
-     *
-     * @param csv the CSV
-     *
-     * @return true if the message represents a {@link FeedSpecialMessage#SYNTAX_ERROR} message
-     */
-    public boolean isRequestSyntaxError(String[] csv) {
-        return valueEquals(csv, 2, FeedSpecialMessage.SYNTAX_ERROR.value());
-    }
-
-    /**
-     * Gets a new Request ID. This method is synchronized.
-     *
-     * @return a new request ID
-     */
-    protected String getNewRequestID() {
-        synchronized (requestIDs) {
-            int maxRequestID = requestIDs.stream().max(Integer::compareTo).orElse(0) + 1;
-            requestIDs.add(maxRequestID);
-            return String.valueOf(maxRequestID);
+    protected boolean isErrorOrInvalidMessage(String[] csv) {
+        if (valueEquals(csv, 0, FeedMessageType.ERROR.value())) {
+            LOGGER.error("Received error message! {}", (Object) csv);
+            return true;
         }
-    }
 
-    /**
-     * Removes a Request ID. This method is synchronized.
-     *
-     * @param requestID the request ID
-     */
-    protected void removeRequestID(String requestID) {
-        synchronized (requestIDs) {
-            requestIDs.remove(Integer.parseInt(requestID));
+        // All messages sent on this feed must have a numeric Request ID first
+        if (!valueNotWhitespace(csv, 0)) {
+            LOGGER.error("Received unknown message format: {}", (Object) csv);
+            return true;
         }
+
+        return false;
     }
 }

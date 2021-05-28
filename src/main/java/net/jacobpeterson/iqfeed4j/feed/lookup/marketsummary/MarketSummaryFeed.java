@@ -3,7 +3,7 @@ package net.jacobpeterson.iqfeed4j.feed.lookup.marketsummary;
 import com.google.common.base.Preconditions;
 import net.jacobpeterson.iqfeed4j.feed.MultiMessageListener;
 import net.jacobpeterson.iqfeed4j.feed.lookup.AbstractLookupFeed;
-import net.jacobpeterson.iqfeed4j.model.feedenums.FeedMessageType;
+import net.jacobpeterson.iqfeed4j.feed.lookup.symbolmarketinfo.SymbolMarketInfoFeed;
 import net.jacobpeterson.iqfeed4j.model.lookup.marketsummary.EndOfDaySnapshot;
 import net.jacobpeterson.iqfeed4j.model.lookup.marketsummary.FiveMinuteSnapshot;
 import net.jacobpeterson.iqfeed4j.model.lookup.marketsummary.FundamentalSnapshot;
@@ -22,10 +22,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.*;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.DATE;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.TIME;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.*;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.DOUBLE;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.INT;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.STRING;
 
 /**
  * {@link MarketSummaryFeed} is an {@link AbstractLookupFeed} for market summary (snapshot) data.
@@ -190,14 +192,7 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
 
     @Override
     protected void onMessageReceived(String[] csv) {
-        if (valueEquals(csv, 0, FeedMessageType.ERROR.value())) {
-            LOGGER.error("Received error message! {}", (Object) csv);
-            return;
-        }
-
-        // All messages sent on this feed must have a Request ID first
-        if (!valueNotWhitespace(csv, 0)) {
-            LOGGER.error("Received unknown message format: {}", (Object) csv);
+        if (isErrorOrInvalidMessage(csv)) {
             return;
         }
 
@@ -292,17 +287,6 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
         return true;
     }
 
-    @Override
-    protected void onAsyncException(String message, Exception exception) {
-        LOGGER.error(message, exception);
-        LOGGER.info("Attempting to close {}...", feedName);
-        try {
-            stop();
-        } catch (Exception stopException) {
-            LOGGER.error("Could not close {}!", feedName, stopException);
-        }
-    }
-
     //
     // START Feed commands
     //
@@ -312,7 +296,8 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
      * request. This method is thread-safe.
      *
      * @param securityType             a number representing the desired security type. (Futures, equities, spots,
-     *                                 etc... Values can be found using the SST command). // TODO add SST reference
+     *                                 etc... Values can be found using
+     *                                 {@link SymbolMarketInfoFeed#requestSecurityTypes(MultiMessageListener)}).
      * @param groupID                  a number representing the desired exchange group.
      * @param date                     the date of data being requested
      * @param endOfDaySnapshotListener the {@link MultiMessageListener} for the requested {@link EndOfDaySnapshot}s
@@ -349,7 +334,8 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
      * request. This method is thread-safe.
      *
      * @param securityType                a number representing the desired security type. (Futures, equities, spots,
-     *                                    etc... Values can be found using the SST command). // TODO add SST reference
+     *                                    etc... Values can be found using
+     *                                    {@link SymbolMarketInfoFeed#requestSecurityTypes(MultiMessageListener)}).
      * @param groupID                     a number representing the desired exchange group.
      * @param date                        the date of data being requested
      * @param fundamentalSnapshotListener the {@link MultiMessageListener} for the requested {@link
@@ -388,7 +374,8 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
      * This method is thread-safe.
      *
      * @param securityType               a number representing the desired security type. (Futures, equities, spots,
-     *                                   etc... Values can be found using the SST command). // TODO add SST reference
+     *                                   etc... Values can be found using
+     *                                   {@link SymbolMarketInfoFeed#requestSecurityTypes(MultiMessageListener)}).
      * @param groupID                    a number representing the desired exchange group.
      * @param fiveMinuteSnapshotListener the {@link MultiMessageListener} for the requested {@link FiveMinuteSnapshot}s
      *

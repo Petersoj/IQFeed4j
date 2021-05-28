@@ -1,0 +1,8 @@
+{
+  "type": "string",
+  "title": "Enum for IQFeed server connection status. See <a href=\"https://www.iqfeed.net/dev/api/docs/docsBeta/index.cfm\">IQFeed Documentation</a>",
+  "enum": [
+    "SERVER CONNECTED",
+    "SERVER DISCONNECTED"
+  ]
+}

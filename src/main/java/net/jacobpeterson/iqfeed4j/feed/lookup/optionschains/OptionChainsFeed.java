@@ -4,7 +4,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import net.jacobpeterson.iqfeed4j.feed.SingleMessageFuture;
 import net.jacobpeterson.iqfeed4j.feed.lookup.AbstractLookupFeed;
-import net.jacobpeterson.iqfeed4j.model.feedenums.FeedMessageType;
 import net.jacobpeterson.iqfeed4j.model.feedenums.lookup.optionchains.EquityOptionMonth;
 import net.jacobpeterson.iqfeed4j.model.feedenums.lookup.optionchains.FutureMonth;
 import net.jacobpeterson.iqfeed4j.model.feedenums.lookup.optionchains.NonStandardOptionTypes;
@@ -34,7 +33,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.*;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
 
 /**
  * {@link OptionChainsFeed} is an {@link AbstractLookupFeed} for Option chains data.
@@ -358,14 +357,7 @@ public class OptionChainsFeed extends AbstractLookupFeed {
 
     @Override
     protected void onMessageReceived(String[] csv) {
-        if (valueEquals(csv, 0, FeedMessageType.ERROR.value())) {
-            LOGGER.error("Received error message! {}", (Object) csv);
-            return;
-        }
-
-        // All messages sent on this feed must have a Request ID first
-        if (!valueNotWhitespace(csv, 0)) {
-            LOGGER.error("Received unknown message format: {}", (Object) csv);
+        if (isErrorOrInvalidMessage(csv)) {
             return;
         }
 
@@ -440,17 +432,6 @@ public class OptionChainsFeed extends AbstractLookupFeed {
         }
 
         return true;
-    }
-
-    @Override
-    protected void onAsyncException(String message, Exception exception) {
-        LOGGER.error(message, exception);
-        LOGGER.info("Attempting to close {}...", feedName);
-        try {
-            stop();
-        } catch (Exception stopException) {
-            LOGGER.error("Could not close {}!", feedName, stopException);
-        }
     }
 
     //

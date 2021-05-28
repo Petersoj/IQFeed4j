@@ -1,0 +1,62 @@
+{
+  "type": "object",
+  "title": "Represent an interval bar. See <a href=\"https://www.iqfeed.net/dev/api/docs/Derivatives_StreamingIntervalBars_TCPIP.cfm\">Streaming interval bars via TCP/IP</a>",
+  "properties": {
+    "UpdateType": {
+      "type": "string",
+      "enum": [
+        "BU",
+        "BH",
+        "BC"
+      ],
+      "javaEnums": [
+        {
+          "name": "UPDATED"
+        },
+        {
+          "name": "COMPLETE_FROM_HISTORY"
+        },
+        {
+          "name": "COMPLETE_FROM_STREAM"
+        }
+      ],
+      "title": "The update type."
+    },
+    "Symbol": {
+      "existingJavaType": "java.lang.String",
+      "title": "The symbol."
+    },
+    "Timestamp": {
+      "existingJavaType": "java.time.LocalDateTime",
+      "title": "Date/time of the interval."
+    },
+    "Open": {
+      "existingJavaType": "java.lang.Double",
+      "title": "First price in the interval."
+    },
+    "High": {
+      "existingJavaType": "java.lang.Double",
+      "title": "Highest price in the interval."
+    },
+    "Low": {
+      "existingJavaType": "java.lang.Double",
+      "title": "Lowest price in the interval."
+    },
+    "Last": {
+      "existingJavaType": "java.lang.Double",
+      "title": "Last price in the interval."
+    },
+    "CumulativeVolume": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "Last cumulative volume in the interval."
+    },
+    "IntervalVolume": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "Interval volume for the interval."
+    },
+    "NumberOfTrades": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "Number of trades in the interval (only valid for tick interval)."
+    }
+  }
+}

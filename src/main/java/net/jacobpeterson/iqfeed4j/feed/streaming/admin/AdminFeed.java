@@ -1,4 +1,4 @@
-package net.jacobpeterson.iqfeed4j.feed.admin;
+package net.jacobpeterson.iqfeed4j.feed.streaming.admin;
 
 import com.google.common.base.Preconditions;
 import net.jacobpeterson.iqfeed4j.feed.AbstractFeed;
@@ -22,10 +22,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringJoiner;
 
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.*;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueExists;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueNotWhitespace;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.DATE_SPACE_TIME;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.MONTH3_DAY_TIME_AM_PM;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.*;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.DOUBLE;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.INT;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.STRING;
 
 /**
  * {@link AdminFeed} represents the Admin {@link AbstractFeed}. Methods in this class are not synchronized.
@@ -63,7 +67,7 @@ public class AdminFeed extends AbstractFeed {
         FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setStartTime, MONTH3_DAY_TIME_AM_PM);
         FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setMarketTime, MONTH3_DAY_TIME_AM_PM);
         FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setStatus, Status::fromValue);
-        FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setIqFeedVersion, STRING);
+        FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setIQFeedVersion, STRING);
         FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setLoginID, STRING);
         FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setTotalKiloBytesReceived, DOUBLE);
         FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setKiloBytesPerSecReceived, DOUBLE);
@@ -187,17 +191,6 @@ public class AdminFeed extends AbstractFeed {
             } catch (Exception exception) {
                 LOGGER.error("Received unknown message type: {}", csv[1], exception);
             }
-        }
-    }
-
-    @Override
-    protected void onAsyncException(String message, Exception exception) {
-        LOGGER.error(message, exception);
-        LOGGER.info("Attempting to close {}...", feedName);
-        try {
-            stop();
-        } catch (Exception stopException) {
-            LOGGER.error("Could not close {}!", feedName, stopException);
         }
     }
 

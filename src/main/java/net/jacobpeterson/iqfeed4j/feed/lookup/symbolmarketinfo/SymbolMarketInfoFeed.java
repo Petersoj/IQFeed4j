@@ -3,7 +3,6 @@ package net.jacobpeterson.iqfeed4j.feed.lookup.symbolmarketinfo;
 import com.google.common.base.Preconditions;
 import net.jacobpeterson.iqfeed4j.feed.MultiMessageListener;
 import net.jacobpeterson.iqfeed4j.feed.lookup.AbstractLookupFeed;
-import net.jacobpeterson.iqfeed4j.model.feedenums.FeedMessageType;
 import net.jacobpeterson.iqfeed4j.model.feedenums.lookup.symbolmarketinfo.SearchCodeType;
 import net.jacobpeterson.iqfeed4j.model.feedenums.lookup.symbolmarketinfo.SearchField;
 import net.jacobpeterson.iqfeed4j.model.feedenums.lookup.symbolmarketinfo.SymbolFilterType;
@@ -25,8 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueNotWhitespace;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.INT;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.STRING;
 
@@ -124,14 +121,7 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
 
     @Override
     protected void onMessageReceived(String[] csv) {
-        if (valueEquals(csv, 0, FeedMessageType.ERROR.value())) {
-            LOGGER.error("Received error message! {}", (Object) csv);
-            return;
-        }
-
-        // All messages sent on this feed must have a Request ID first
-        if (!valueNotWhitespace(csv, 0)) {
-            LOGGER.error("Received unknown message format: {}", (Object) csv);
+        if (isErrorOrInvalidMessage(csv)) {
             return;
         }
 
@@ -175,17 +165,6 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
             if (handleStandardMultiMessage(csv, requestID, niacCodeListenersOfRequestIDs, NIAC_CODE_CSV_MAPPER)) {
                 return;
             }
-        }
-    }
-
-    @Override
-    protected void onAsyncException(String message, Exception exception) {
-        LOGGER.error(message, exception);
-        LOGGER.info("Attempting to close {}...", feedName);
-        try {
-            stop();
-        } catch (Exception stopException) {
-            LOGGER.error("Could not close {}!", feedName, stopException);
         }
     }
 
