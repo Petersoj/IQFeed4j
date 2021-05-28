@@ -1,8 +1,9 @@
 package net.jacobpeterson.iqfeed4j.feed.lookup;
 
 import com.google.common.base.Splitter;
-import net.jacobpeterson.iqfeed4j.feed.AbstractRequestIDFeed;
+import net.jacobpeterson.iqfeed4j.feed.AbstractFeed;
 import net.jacobpeterson.iqfeed4j.feed.MultiMessageListener;
+import net.jacobpeterson.iqfeed4j.feed.RequestIDFeedHelper;
 import net.jacobpeterson.iqfeed4j.model.feedenums.FeedMessageType;
 import net.jacobpeterson.iqfeed4j.model.feedenums.FeedSpecialMessage;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper;
@@ -15,15 +16,19 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.Map;
 
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.*;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueNotWhitespace;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
 
 /**
- * {@link AbstractLookupFeed} represents the Lookup {@link AbstractRequestIDFeed}.
+ * {@link AbstractLookupFeed} represents a {@link AbstractFeed} for Lookup data.
  */
-public abstract class AbstractLookupFeed extends AbstractRequestIDFeed {
+public abstract class AbstractLookupFeed extends AbstractFeed {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractLookupFeed.class);
     private static final String FEED_NAME_SUFFIX = " Lookup Feed";
+
+    protected final RequestIDFeedHelper requestIDFeedHelper;
 
     /**
      * Instantiates a new {@link AbstractLookupFeed}.
@@ -34,7 +39,9 @@ public abstract class AbstractLookupFeed extends AbstractRequestIDFeed {
      * @param csvSplitter    the CSV {@link Splitter}
      */
     public AbstractLookupFeed(String lookupFeedName, String hostname, int port, Splitter csvSplitter) {
-        super(lookupFeedName + FEED_NAME_SUFFIX, hostname, port, csvSplitter);
+        super(lookupFeedName + FEED_NAME_SUFFIX, hostname, port, csvSplitter, true, true);
+
+        requestIDFeedHelper = new RequestIDFeedHelper();
     }
 
     /**
@@ -59,10 +66,10 @@ public abstract class AbstractLookupFeed extends AbstractRequestIDFeed {
             return false;
         }
 
-        if (isRequestErrorMessage(csv, requestID)) {
-            if (isRequestNoDataError(csv)) {
+        if (requestIDFeedHelper.isRequestErrorMessage(csv, requestID)) {
+            if (requestIDFeedHelper.isRequestNoDataError(csv)) {
                 listener.onMessageException(new NoDataException());
-            } else if (isRequestSyntaxError(csv)) {
+            } else if (requestIDFeedHelper.isRequestSyntaxError(csv)) {
                 listener.onMessageException(new SyntaxException());
             } else {
                 listener.onMessageException(new IQFeedException(
@@ -70,9 +77,9 @@ public abstract class AbstractLookupFeed extends AbstractRequestIDFeed {
                                 String.join(",", Arrays.copyOfRange(csv, 2, csv.length)) :
                                 "Error message not present."));
             }
-        } else if (isRequestEndOfMessage(csv, requestID)) {
+        } else if (requestIDFeedHelper.isRequestEndOfMessage(csv, requestID)) {
             listenersOfRequestIDs.remove(requestID);
-            removeRequestID(requestID);
+            requestIDFeedHelper.removeRequestID(requestID);
             listener.onEndOfMultiMessage();
         } else {
             try {

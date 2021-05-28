@@ -47,6 +47,8 @@ public abstract class AbstractFeed implements Runnable {
     protected final String hostname;
     protected final int port;
     protected final Splitter csvSplitter;
+    protected final boolean validateProtocolVersion;
+    protected final boolean sendClientName;
     private final Object startStopLock;
 
     private Thread socketThread;
@@ -60,16 +62,21 @@ public abstract class AbstractFeed implements Runnable {
     /**
      * Instantiates a new {@link AbstractFeed}.
      *
-     * @param feedName    the feed name
-     * @param hostname    the host name
-     * @param port        the port
-     * @param csvSplitter the CSV {@link Splitter}
+     * @param feedName                the feed name
+     * @param hostname                the host name
+     * @param port                    the port
+     * @param csvSplitter             the CSV {@link Splitter}
+     * @param validateProtocolVersion true to send and validate the {@link #CURRENTLY_SUPPORTED_PROTOCOL_VERSION}
+     * @param sendClientName          true to send the client 'feedName'
      */
-    public AbstractFeed(String feedName, String hostname, int port, Splitter csvSplitter) {
+    public AbstractFeed(String feedName, String hostname, int port, Splitter csvSplitter,
+            boolean validateProtocolVersion, boolean sendClientName) {
         this.feedName = feedName;
         this.hostname = hostname;
         this.port = port;
         this.csvSplitter = csvSplitter;
+        this.validateProtocolVersion = validateProtocolVersion;
+        this.sendClientName = sendClientName;
 
         startStopLock = new Object();
 
@@ -104,13 +111,23 @@ public abstract class AbstractFeed implements Runnable {
 
             LOGGER.debug("{} feed socket connection established.", feedName);
 
-            // Send protocol version command first
-            String protocolVersionCommand = String.format("%s,%s,%s%s",
-                    FeedMessageType.SYSTEM.value(), FeedCommand.SET_PROTOCOL.value(),
-                    CURRENTLY_SUPPORTED_PROTOCOL_VERSION,
-                    LineEnding.CR_LF.getASCIIString());
-            LOGGER.debug("Setting protocol version: {}", protocolVersionCommand);
-            sendMessage(protocolVersionCommand);
+            if (validateProtocolVersion) {
+                // Send protocol version command first
+                String protocolVersionCommand = String.format("%s,%s,%s%s",
+                        FeedMessageType.SYSTEM.value(), FeedCommand.SET_PROTOCOL.value(),
+                        CURRENTLY_SUPPORTED_PROTOCOL_VERSION,
+                        LineEnding.CR_LF.getASCIIString());
+                LOGGER.debug("Setting protocol version: {}", protocolVersionCommand);
+                sendMessage(protocolVersionCommand);
+            }
+
+            if (sendClientName) {
+                String clientNameCommand = String.format("%s,%s,%s%s",
+                        FeedMessageType.SYSTEM.value(), FeedCommand.SET_CLIENT_NAME.value(), feedName,
+                        LineEnding.CR_LF.getASCIIString());
+                LOGGER.debug("Setting client name: {}", clientNameCommand);
+                sendMessage(clientNameCommand);
+            }
 
             socketThread = new Thread(this);
             socketThread.start();
@@ -168,7 +185,7 @@ public abstract class AbstractFeed implements Runnable {
     @Override
     @SuppressWarnings("UnstableApiUsage")
     public void run() {
-        // Confirm #start() method has released 'startStopLock' and exited synchronized scope
+        // Confirm start() method has released 'startStopLock' and exited synchronized scope
         synchronized (startStopLock) {}
 
         while (!Thread.currentThread().isInterrupted()) { // Check if thread has been closed/interrupted
@@ -186,25 +203,25 @@ public abstract class AbstractFeed implements Runnable {
                     String[] csv = csvSplitter.splitToList(line).toArray(new String[0]);
 
                     // Confirm protocol version valid
-                    if (protocolVersionValidated) {
-                        // Call message handlers
+                    if (validateProtocolVersion) {
+                        if (valueEquals(csv, 0, FeedMessageType.SYSTEM.value()) &&
+                                valueEquals(csv, 1, FeedMessageType.CURRENT_PROTOCOL.value()) &&
+                                valueEquals(csv, 2, CURRENTLY_SUPPORTED_PROTOCOL_VERSION)) {
+                            LOGGER.debug("Protocol version validated: {}", (Object) csv);
+
+                            protocolVersionValidated = true;
+                            onProtocolVersionValidated();
+                        } else {
+                            LOGGER.warn("Received message before protocol version was validated: {}", (Object) csv);
+                        }
+                    }
+
+                    // Call message handlers
+                    if (!validateProtocolVersion || protocolVersionValidated) {
                         onMessageReceived(csv);
                         if (customFeedMessageListener != null) {
                             customFeedMessageListener.onMessageReceived(csv);
                         }
-                    } else if (valueEquals(csv, 0, FeedMessageType.SYSTEM.value()) &&
-                            valueEquals(csv, 1, FeedMessageType.CURRENT_PROTOCOL.value()) &&
-                            valueEquals(csv, 2, CURRENTLY_SUPPORTED_PROTOCOL_VERSION)) {
-                        LOGGER.debug("Protocol version validated: {}", (Object) csv);
-
-                        String clientNameCommand = String.format("%s,%s,%s%s",
-                                FeedMessageType.SYSTEM.value(), FeedCommand.SET_CLIENT_NAME.value(), feedName,
-                                LineEnding.CR_LF.getASCIIString());
-                        LOGGER.debug("Setting client name: {}", clientNameCommand);
-                        sendMessage(clientNameCommand);
-
-                        protocolVersionValidated = true;
-                        onProtocolVersionValidated();
                     }
                 }
             } catch (Exception exception) {

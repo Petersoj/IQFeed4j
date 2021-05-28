@@ -1,6 +1,5 @@
 package net.jacobpeterson.iqfeed4j.feed;
 
-import com.google.common.base.Splitter;
 import net.jacobpeterson.iqfeed4j.feed.lookup.AbstractLookupFeed;
 import net.jacobpeterson.iqfeed4j.model.feedenums.FeedMessageType;
 import net.jacobpeterson.iqfeed4j.model.feedenums.FeedSpecialMessage;
@@ -10,23 +9,16 @@ import java.util.HashSet;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
 
 /**
- * {@link AbstractRequestIDFeed} is a {@link AbstractFeed} that uses Request IDs.
+ * {@link RequestIDFeedHelper} is a helper for an {@link AbstractFeed} that uses Request IDs.
  */
-public abstract class AbstractRequestIDFeed extends AbstractFeed {
+public class RequestIDFeedHelper {
 
     private final HashSet<Integer> requestIDs;
 
     /**
      * Instantiates a new {@link AbstractLookupFeed}.
-     *
-     * @param feedName    the feed name
-     * @param hostname    the host name
-     * @param port        the port
-     * @param csvSplitter the CSV {@link Splitter}
      */
-    public AbstractRequestIDFeed(String feedName, String hostname, int port, Splitter csvSplitter) {
-        super(feedName, hostname, port, csvSplitter);
-
+    public RequestIDFeedHelper() {
         requestIDs = new HashSet<>();
     }
 
@@ -40,7 +32,7 @@ public abstract class AbstractRequestIDFeed extends AbstractFeed {
      *
      * @return true if the CSV represents an {@link FeedMessageType#ERROR} message
      */
-    protected boolean isRequestErrorMessage(String[] csv, String requestID) {
+    public boolean isRequestErrorMessage(String[] csv, String requestID) {
         return valueEquals(csv, 0, requestID) && valueEquals(csv, 1, FeedMessageType.ERROR.value());
     }
 
@@ -89,7 +81,7 @@ public abstract class AbstractRequestIDFeed extends AbstractFeed {
      *
      * @return a new request ID
      */
-    protected String getNewRequestID() {
+    public String getNewRequestID() {
         synchronized (requestIDs) {
             int maxRequestID = requestIDs.stream().max(Integer::compareTo).orElse(0) + 1;
             requestIDs.add(maxRequestID);
@@ -102,7 +94,7 @@ public abstract class AbstractRequestIDFeed extends AbstractFeed {
      *
      * @param requestID the request ID
      */
-    protected void removeRequestID(String requestID) {
+    public void removeRequestID(String requestID) {
         synchronized (requestIDs) {
             requestIDs.remove(Integer.parseInt(requestID));
         }

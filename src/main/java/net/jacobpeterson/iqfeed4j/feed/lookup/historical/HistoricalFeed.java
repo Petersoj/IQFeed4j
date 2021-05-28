@@ -22,8 +22,14 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashMap;
 
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.*;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.*;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.DASHED_DATE;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.DASHED_DATE_SPACE_TIME;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.DASHED_DATE_SPACE_TIME_FRACTIONAL;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.DOUBLE;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.INT;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.LONG;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.SHORT;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.STRING;
 
 /**
  * {@link HistoricalFeed} is an {@link AbstractLookupFeed} for historical data.
@@ -151,7 +157,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         Preconditions.checkNotNull(symbol);
         Preconditions.checkNotNull(ticksListener);
 
-        String requestID = getNewRequestID();
+        String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
         requestBuilder.append("HTX").append(",");
@@ -197,7 +203,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         Preconditions.checkNotNull(symbol);
         Preconditions.checkNotNull(ticksListener);
 
-        String requestID = getNewRequestID();
+        String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
         requestBuilder.append("HTD").append(",");
@@ -260,7 +266,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         Preconditions.checkArgument(beginDateTime != null || endDateTime != null);
         Preconditions.checkNotNull(ticksListener);
 
-        String requestID = getNewRequestID();
+        String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
         requestBuilder.append("HTT").append(",");
@@ -327,7 +333,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         Preconditions.checkNotNull(maxDataPoints);
         Preconditions.checkNotNull(intervalsListener);
 
-        String requestID = getNewRequestID();
+        String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
         requestBuilder.append("HIX").append(",");
@@ -383,7 +389,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         Preconditions.checkNotNull(symbol);
         Preconditions.checkNotNull(intervalsListener);
 
-        String requestID = getNewRequestID();
+        String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
         requestBuilder.append("HID").append(",");
@@ -457,7 +463,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         Preconditions.checkArgument(beginDateTime != null || endDateTime != null);
         Preconditions.checkNotNull(intervalsListener);
 
-        String requestID = getNewRequestID();
+        String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
         requestBuilder.append("HIT").append(",");
@@ -533,7 +539,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         Preconditions.checkNotNull(symbol);
         Preconditions.checkNotNull(datedIntervalsListener);
 
-        String requestID = getNewRequestID();
+        String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
         requestBuilder.append("HDX").append(",");
@@ -585,7 +591,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         Preconditions.checkArgument(beginDate != null || endDate != null);
         Preconditions.checkNotNull(datedIntervalsListener);
 
-        String requestID = getNewRequestID();
+        String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
         requestBuilder.append("HDT").append(",");
@@ -648,7 +654,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         Preconditions.checkNotNull(symbol);
         Preconditions.checkNotNull(datedIntervalsListener);
 
-        String requestID = getNewRequestID();
+        String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
         requestBuilder.append("HWX").append(",");
@@ -697,7 +703,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         Preconditions.checkNotNull(symbol);
         Preconditions.checkNotNull(datedIntervalsListener);
 
-        String requestID = getNewRequestID();
+        String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
         requestBuilder.append("HMX").append(",");

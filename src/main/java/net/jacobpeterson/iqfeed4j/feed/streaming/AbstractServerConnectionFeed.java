@@ -25,7 +25,7 @@ public abstract class AbstractServerConnectionFeed extends AbstractFeed {
      * @param csvSplitter the CSV {@link Splitter}
      */
     public AbstractServerConnectionFeed(String feedName, String hostname, int port, Splitter csvSplitter) {
-        super(feedName, hostname, port, csvSplitter);
+        super(feedName, hostname, port, csvSplitter, false, true);
     }
 
     /**

@@ -85,7 +85,7 @@ public class NewsFeed extends AbstractLookupFeed {
         Preconditions.checkNotNull(xmlTextOption);
         Preconditions.checkNotNull(messageLineListener);
 
-        String requestID = getNewRequestID();
+        String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
         requestBuilder.append("NCG").append(",");
@@ -125,7 +125,7 @@ public class NewsFeed extends AbstractLookupFeed {
         Preconditions.checkNotNull(xmlTextOption);
         Preconditions.checkNotNull(messageLineListener);
 
-        String requestID = getNewRequestID();
+        String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
         requestBuilder.append("NHL").append(",");
@@ -193,7 +193,7 @@ public class NewsFeed extends AbstractLookupFeed {
                 "'deliverTo' must be present with EMAIL option!");
         Preconditions.checkNotNull(messageLineListener);
 
-        String requestID = getNewRequestID();
+        String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
         requestBuilder.append("NSY").append(",");
@@ -241,7 +241,7 @@ public class NewsFeed extends AbstractLookupFeed {
         Preconditions.checkArgument(toDate == null || fromDate != null, "You  must have both 'from' and 'to' dates!");
         Preconditions.checkNotNull(messageLineListener);
 
-        String requestID = getNewRequestID();
+        String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
         requestBuilder.append("NSC").append(",");

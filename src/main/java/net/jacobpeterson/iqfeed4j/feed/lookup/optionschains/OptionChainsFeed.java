@@ -293,11 +293,6 @@ public class OptionChainsFeed extends AbstractLookupFeed {
             final int strikePriceBeginIndex = monthCodeCharIndex + 1;
             final int strikePriceEndIndex = length;
 
-            System.out.println(
-                    csvValue + " " + monthCodeCharIndex + " " + symbolEndIndex + " " + yearBeginIndex + " " +
-                            yearEndIndex + " " + dayBeginIndex +
-                            " " + dayEndIndex + " " + strikePriceBeginIndex + " " + strikePriceEndIndex);
-
             final EquityOptionMonth equityOptionMonth = EquityOptionMonth.fromValue(
                     String.valueOf(csvValue.charAt(monthCodeCharIndex)));
 
@@ -408,10 +403,10 @@ public class OptionChainsFeed extends AbstractLookupFeed {
             return false;
         }
 
-        if (isRequestErrorMessage(csv, requestID)) {
-            if (isRequestNoDataError(csv)) {
+        if (requestIDFeedHelper.isRequestErrorMessage(csv, requestID)) {
+            if (requestIDFeedHelper.isRequestNoDataError(csv)) {
                 future.completeExceptionally(new NoDataException());
-            } else if (isRequestSyntaxError(csv)) {
+            } else if (requestIDFeedHelper.isRequestSyntaxError(csv)) {
                 future.completeExceptionally(new SyntaxException());
             } else {
                 future.completeExceptionally(new IQFeedException(
@@ -419,9 +414,9 @@ public class OptionChainsFeed extends AbstractLookupFeed {
                                 String.join(",", Arrays.copyOfRange(csv, 2, csv.length)) :
                                 "Error message not present."));
             }
-        } else if (isRequestEndOfMessage(csv, requestID)) {
+        } else if (requestIDFeedHelper.isRequestEndOfMessage(csv, requestID)) {
             listenersOfRequestIDs.remove(requestID);
-            removeRequestID(requestID);
+            requestIDFeedHelper.removeRequestID(requestID);
         } else {
             try {
                 List<T> message = listCSVMapper.mapToList(csv, 1);
@@ -457,7 +452,7 @@ public class OptionChainsFeed extends AbstractLookupFeed {
         Preconditions.checkNotNull(years);
         Preconditions.checkArgument(years.size() > 0);
 
-        String requestID = getNewRequestID();
+        String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
         requestBuilder.append("CFU").append(",");
@@ -516,7 +511,7 @@ public class OptionChainsFeed extends AbstractLookupFeed {
         Preconditions.checkNotNull(years);
         Preconditions.checkArgument(years.size() > 0);
 
-        String requestID = getNewRequestID();
+        String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
         requestBuilder.append("CFS").append(",");
@@ -578,7 +573,7 @@ public class OptionChainsFeed extends AbstractLookupFeed {
         Preconditions.checkNotNull(years);
         Preconditions.checkArgument(years.size() > 0);
 
-        String requestID = getNewRequestID();
+        String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
         requestBuilder.append("CFO").append(",");
@@ -717,7 +712,7 @@ public class OptionChainsFeed extends AbstractLookupFeed {
         Preconditions.checkArgument(optionFilterType == OptionFilterType.NONE || (filter1 != null && filter2 != null));
         Preconditions.checkNotNull(nonStandardOptionTypes);
 
-        String requestID = getNewRequestID();
+        String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
         requestBuilder.append("CEO").append(",");

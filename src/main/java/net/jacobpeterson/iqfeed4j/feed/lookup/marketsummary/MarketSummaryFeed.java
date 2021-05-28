@@ -239,10 +239,10 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
             return false;
         }
 
-        if (isRequestErrorMessage(csv, requestID)) {
-            if (isRequestNoDataError(csv)) {
+        if (requestIDFeedHelper.isRequestErrorMessage(csv, requestID)) {
+            if (requestIDFeedHelper.isRequestNoDataError(csv)) {
                 listener.onMessageException(new NoDataException());
-            } else if (isRequestSyntaxError(csv)) {
+            } else if (requestIDFeedHelper.isRequestSyntaxError(csv)) {
                 listener.onMessageException(new SyntaxException());
             } else {
                 listener.onMessageException(new IQFeedException(
@@ -250,10 +250,10 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
                                 String.join(",", Arrays.copyOfRange(csv, 2, csv.length)) :
                                 "Error message not present."));
             }
-        } else if (isRequestEndOfMessage(csv, requestID)) {
+        } else if (requestIDFeedHelper.isRequestEndOfMessage(csv, requestID)) {
             listenersOfRequestIDs.remove(requestID);
             csvIndicesOfIndexNamesOfRequestIDs.remove(requestID);
-            removeRequestID(requestID);
+            requestIDFeedHelper.removeRequestID(requestID);
             listener.onEndOfMultiMessage();
         } else {
             Map<String, Integer> csvIndicesOfIndexNames = csvIndicesOfIndexNamesOfRequestIDs.get(requestID);
@@ -311,7 +311,7 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
         Preconditions.checkNotNull(date);
         Preconditions.checkNotNull(endOfDaySnapshotListener);
 
-        String requestID = getNewRequestID();
+        String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
         requestBuilder.append("EDS").append(",");
@@ -350,7 +350,7 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
         Preconditions.checkNotNull(date);
         Preconditions.checkNotNull(fundamentalSnapshotListener);
 
-        String requestID = getNewRequestID();
+        String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
         requestBuilder.append("FDS").append(",");
@@ -387,7 +387,7 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
         Preconditions.checkNotNull(groupID);
         Preconditions.checkNotNull(fiveMinuteSnapshotListener);
 
-        String requestID = getNewRequestID();
+        String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
         requestBuilder.append("5MS").append(",");

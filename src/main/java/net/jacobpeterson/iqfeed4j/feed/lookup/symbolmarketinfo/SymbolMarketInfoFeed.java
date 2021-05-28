@@ -193,7 +193,7 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
         Preconditions.checkNotNull(filterValues);
         Preconditions.checkNotNull(symbolSearchResultListener);
 
-        String requestID = getNewRequestID();
+        String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
         requestBuilder.append("SBF").append(",");
@@ -231,7 +231,7 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
 
         Preconditions.checkArgument(searchString.length() >= 2);
 
-        String requestID = getNewRequestID();
+        String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
         requestBuilder.append(searchCodeType.value()).append(",");
@@ -263,7 +263,7 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
             throws IOException {
         Preconditions.checkNotNull(listener);
 
-        String requestID = getNewRequestID();
+        String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
         requestBuilder.append(requestCode).append(",");
