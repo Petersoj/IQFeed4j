@@ -1,7 +1,7 @@
 package net.jacobpeterson.iqfeed4j.feed.lookup.optionschains;
 
 import com.google.common.base.Splitter;
-import net.jacobpeterson.iqfeed4j.feed.SingleMessageFuture;
+import net.jacobpeterson.iqfeed4j.feed.message.SingleMessageFuture;
 import net.jacobpeterson.iqfeed4j.feed.lookup.AbstractLookupFeed;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.enums.EquityOptionMonth;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.enums.FutureMonth;

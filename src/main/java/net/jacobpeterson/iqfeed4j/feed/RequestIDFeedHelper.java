@@ -1,8 +1,8 @@
 package net.jacobpeterson.iqfeed4j.feed;
 
 import net.jacobpeterson.iqfeed4j.feed.lookup.AbstractLookupFeed;
-import net.jacobpeterson.iqfeed4j.model.feed.enums.FeedMessageType;
-import net.jacobpeterson.iqfeed4j.model.feed.enums.FeedSpecialMessage;
+import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedMessageType;
+import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedSpecialMessage;
 
 import java.util.HashSet;
 

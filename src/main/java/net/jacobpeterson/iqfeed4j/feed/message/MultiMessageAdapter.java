@@ -1,4 +1,4 @@
-package net.jacobpeterson.iqfeed4j.feed;
+package net.jacobpeterson.iqfeed4j.feed.message;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

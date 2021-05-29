@@ -2,10 +2,10 @@ package net.jacobpeterson.iqfeed4j.feed.lookup;
 
 import com.google.common.base.Splitter;
 import net.jacobpeterson.iqfeed4j.feed.AbstractFeed;
-import net.jacobpeterson.iqfeed4j.feed.MultiMessageListener;
+import net.jacobpeterson.iqfeed4j.feed.message.MultiMessageListener;
 import net.jacobpeterson.iqfeed4j.feed.RequestIDFeedHelper;
-import net.jacobpeterson.iqfeed4j.model.feed.enums.FeedMessageType;
-import net.jacobpeterson.iqfeed4j.model.feed.enums.FeedSpecialMessage;
+import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedMessageType;
+import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedSpecialMessage;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper;
 import net.jacobpeterson.iqfeed4j.util.exception.IQFeedException;
 import net.jacobpeterson.iqfeed4j.util.exception.NoDataException;
@@ -16,9 +16,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.Map;
 
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueNotWhitespace;
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.*;
 
 /**
  * {@link AbstractLookupFeed} represents a {@link AbstractFeed} for Lookup data.

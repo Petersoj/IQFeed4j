@@ -1,6 +1,6 @@
 package net.jacobpeterson.iqfeed4j.feed.lookup.marketsummary;
 
-import net.jacobpeterson.iqfeed4j.feed.MultiMessageListener;
+import net.jacobpeterson.iqfeed4j.feed.message.MultiMessageListener;
 import net.jacobpeterson.iqfeed4j.feed.lookup.AbstractLookupFeed;
 import net.jacobpeterson.iqfeed4j.feed.lookup.symbolmarketinfo.SymbolMarketInfoFeed;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.marketsummary.EndOfDaySnapshot;

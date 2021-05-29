@@ -1,8 +1,9 @@
 package net.jacobpeterson.iqfeed4j.feed;
 
 import com.google.common.base.Splitter;
-import net.jacobpeterson.iqfeed4j.model.feed.enums.FeedCommand;
-import net.jacobpeterson.iqfeed4j.model.feed.enums.FeedMessageType;
+import net.jacobpeterson.iqfeed4j.feed.message.FeedMessageListener;
+import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedCommand;
+import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedMessageType;
 import net.jacobpeterson.iqfeed4j.util.string.LineEnding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +58,7 @@ public abstract class AbstractFeed implements Runnable {
     private BufferedReader feedReader;
     private boolean intentionalSocketClose;
     private boolean protocolVersionValidated;
-    protected FeedMessageListener customFeedMessageListener;
+    protected FeedMessageListener<String[]> customFeedMessageListener;
 
     /**
      * Instantiates a new {@link AbstractFeed}.
@@ -323,7 +324,7 @@ public abstract class AbstractFeed implements Runnable {
      *
      * @param customFeedMessageListener the custom {@link FeedMessageListener}
      */
-    public void setCustomFeedMessageListener(FeedMessageListener customFeedMessageListener) {
+    public void setCustomFeedMessageListener(FeedMessageListener<String[]> customFeedMessageListener) {
         this.customFeedMessageListener = customFeedMessageListener;
     }
 }

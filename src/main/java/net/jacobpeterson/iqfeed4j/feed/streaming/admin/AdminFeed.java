@@ -1,16 +1,16 @@
 package net.jacobpeterson.iqfeed4j.feed.streaming.admin;
 
 import net.jacobpeterson.iqfeed4j.feed.AbstractFeed;
-import net.jacobpeterson.iqfeed4j.feed.SingleMessageFuture;
-import net.jacobpeterson.iqfeed4j.model.feed.enums.FeedCommand;
-import net.jacobpeterson.iqfeed4j.model.feed.enums.FeedMessageType;
+import net.jacobpeterson.iqfeed4j.feed.message.SingleMessageFuture;
+import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedCommand;
+import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedMessageType;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.admin.ClientStatistics;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.admin.ClientStatistics.Type;
-import net.jacobpeterson.iqfeed4j.model.feed.streaming.admin.FeedStatistics;
-import net.jacobpeterson.iqfeed4j.model.feed.streaming.admin.FeedStatistics.Status;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.admin.enums.AdminCommand;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.admin.enums.AdminMessageType;
-import net.jacobpeterson.iqfeed4j.model.feed.util.enums.OnOffOption;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.admin.enums.OnOffOption;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.common.FeedStatistics;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.common.FeedStatistics.Status;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.IndexCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.string.LineEnding;
 import org.slf4j.Logger;

@@ -1,10 +1,10 @@
 package net.jacobpeterson.iqfeed4j.feed.streaming.derivative;
 
 import net.jacobpeterson.iqfeed4j.feed.RequestIDFeedHelper;
-import net.jacobpeterson.iqfeed4j.feed.SingleMessageFuture;
+import net.jacobpeterson.iqfeed4j.feed.message.SingleMessageFuture;
 import net.jacobpeterson.iqfeed4j.feed.streaming.AbstractServerConnectionFeed;
+import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedMessageType;
 import net.jacobpeterson.iqfeed4j.model.feed.common.interval.IntervalType;
-import net.jacobpeterson.iqfeed4j.model.feed.enums.FeedMessageType;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.derivative.Interval;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.derivative.WatchedInterval;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.derivative.enums.DerivativeSystemMessage;

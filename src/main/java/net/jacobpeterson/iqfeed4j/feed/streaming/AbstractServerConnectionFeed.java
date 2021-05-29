@@ -2,8 +2,8 @@ package net.jacobpeterson.iqfeed4j.feed.streaming;
 
 import com.google.common.base.Splitter;
 import net.jacobpeterson.iqfeed4j.feed.AbstractFeed;
-import net.jacobpeterson.iqfeed4j.model.feed.enums.FeedMessageType;
-import net.jacobpeterson.iqfeed4j.model.feed.streaming.enums.ServerConnectionStatus;
+import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedMessageType;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.common.enums.ServerConnectionStatus;
 
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;

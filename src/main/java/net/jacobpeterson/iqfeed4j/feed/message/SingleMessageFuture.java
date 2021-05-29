@@ -1,4 +1,4 @@
-package net.jacobpeterson.iqfeed4j.feed;
+package net.jacobpeterson.iqfeed4j.feed.message;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;

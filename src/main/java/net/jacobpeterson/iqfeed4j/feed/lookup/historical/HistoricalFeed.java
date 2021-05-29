@@ -1,14 +1,14 @@
 package net.jacobpeterson.iqfeed4j.feed.lookup.historical;
 
-import net.jacobpeterson.iqfeed4j.feed.MultiMessageListener;
+import net.jacobpeterson.iqfeed4j.feed.message.MultiMessageListener;
 import net.jacobpeterson.iqfeed4j.feed.lookup.AbstractLookupFeed;
 import net.jacobpeterson.iqfeed4j.model.feed.common.interval.IntervalType;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.historical.DatedInterval;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.historical.Interval;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.historical.Tick;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.historical.enums.DataDirection;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.historical.enums.PartialDatapoint;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.historical.enums.TimeLabelPlacement;
-import net.jacobpeterson.iqfeed4j.model.feed.util.enums.DataDirection;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeFormatters;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.IndexCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.string.LineEnding;
