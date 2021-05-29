@@ -1,18 +1,17 @@
 package net.jacobpeterson.iqfeed4j.feed.lookup.optionschains;
 
-import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import net.jacobpeterson.iqfeed4j.feed.SingleMessageFuture;
 import net.jacobpeterson.iqfeed4j.feed.lookup.AbstractLookupFeed;
-import net.jacobpeterson.iqfeed4j.model.feedenums.lookup.optionchains.EquityOptionMonth;
-import net.jacobpeterson.iqfeed4j.model.feedenums.lookup.optionchains.FutureMonth;
-import net.jacobpeterson.iqfeed4j.model.feedenums.lookup.optionchains.NonStandardOptionTypes;
-import net.jacobpeterson.iqfeed4j.model.feedenums.lookup.optionchains.OptionFilterType;
-import net.jacobpeterson.iqfeed4j.model.feedenums.lookup.optionchains.OptionType;
-import net.jacobpeterson.iqfeed4j.model.feedenums.lookup.optionchains.PutsCallsOption;
-import net.jacobpeterson.iqfeed4j.model.lookup.optionchains.FutureContract;
-import net.jacobpeterson.iqfeed4j.model.lookup.optionchains.FutureSpread;
-import net.jacobpeterson.iqfeed4j.model.lookup.optionchains.OptionContract;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.enums.EquityOptionMonth;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.enums.FutureMonth;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.enums.NonStandardOptionTypes;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.enums.OptionFilterType;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.enums.OptionType;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.enums.PutsCallsOption;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.FutureContract;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.FutureSpread;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.OptionContract;
 import net.jacobpeterson.iqfeed4j.util.chars.CharUtil;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.ListCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.exception.IQFeedException;

@@ -1,17 +1,16 @@
 package net.jacobpeterson.iqfeed4j.feed.streaming.admin;
 
-import com.google.common.base.Preconditions;
 import net.jacobpeterson.iqfeed4j.feed.AbstractFeed;
 import net.jacobpeterson.iqfeed4j.feed.SingleMessageFuture;
-import net.jacobpeterson.iqfeed4j.model.feedenums.FeedCommand;
-import net.jacobpeterson.iqfeed4j.model.feedenums.FeedMessageType;
-import net.jacobpeterson.iqfeed4j.model.feedenums.streaming.admin.AdminCommand;
-import net.jacobpeterson.iqfeed4j.model.feedenums.streaming.admin.AdminMessageType;
-import net.jacobpeterson.iqfeed4j.model.feedenums.util.OnOffOption;
-import net.jacobpeterson.iqfeed4j.model.streaming.admin.ClientStatistics;
-import net.jacobpeterson.iqfeed4j.model.streaming.admin.ClientStatistics.Type;
-import net.jacobpeterson.iqfeed4j.model.streaming.admin.FeedStatistics;
-import net.jacobpeterson.iqfeed4j.model.streaming.admin.FeedStatistics.Status;
+import net.jacobpeterson.iqfeed4j.model.feed.enums.FeedCommand;
+import net.jacobpeterson.iqfeed4j.model.feed.enums.FeedMessageType;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.admin.ClientStatistics;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.admin.ClientStatistics.Type;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.admin.FeedStatistics;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.admin.FeedStatistics.Status;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.admin.enums.AdminCommand;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.admin.enums.AdminMessageType;
+import net.jacobpeterson.iqfeed4j.model.feed.util.enums.OnOffOption;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.IndexCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.string.LineEnding;
 import org.slf4j.Logger;
@@ -22,15 +21,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringJoiner;
 
-import static com.google.common.base.Preconditions.*;
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueExists;
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueNotWhitespace;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.*;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.DATE_SPACE_TIME;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.MONTH3_DAY_TIME_AM_PM;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.DOUBLE;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.INT;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.STRING;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.*;
 
 /**
  * {@link AdminFeed} represents the Admin {@link AbstractFeed}. Methods in this class are not synchronized.

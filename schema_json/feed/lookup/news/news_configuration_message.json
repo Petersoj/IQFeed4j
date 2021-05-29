@@ -3,11 +3,11 @@
   "title": "POJO for NCG (News Configuration) requests. See <a href=\"https://www.iqfeed.net/dev/api/docs//NewsLookupviaTCPIP.cfm\">News Lookup via TCP/IP</a>",
   "properties": {
     "Type": {
-      "existingJavaType": "net.jacobpeterson.iqfeed4j.model.feedenums.lookup.news.NewsConfigurationMessageType"
+      "existingJavaType": "net.jacobpeterson.iqfeed4j.model.feed.lookup.news.enums.NewsConfigurationMessageType"
     },
     "Category": {
       "existingJavaType": "java.lang.String",
-      "title": "Only present for {@link net.jacobpeterson.iqfeed4j.model.feedenums.lookup.news.NewsConfigurationMessageType#CATEGORY}."
+      "title": "Only present for {@link net.jacobpeterson.iqfeed4j.model.feed.lookup.news.enums.NewsConfigurationMessageType#CATEGORY}."
     },
     "Source": {
       "existingJavaType": "java.lang.String"

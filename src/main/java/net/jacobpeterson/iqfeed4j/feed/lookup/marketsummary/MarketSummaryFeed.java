@@ -1,12 +1,11 @@
 package net.jacobpeterson.iqfeed4j.feed.lookup.marketsummary;
 
-import com.google.common.base.Preconditions;
 import net.jacobpeterson.iqfeed4j.feed.MultiMessageListener;
 import net.jacobpeterson.iqfeed4j.feed.lookup.AbstractLookupFeed;
 import net.jacobpeterson.iqfeed4j.feed.lookup.symbolmarketinfo.SymbolMarketInfoFeed;
-import net.jacobpeterson.iqfeed4j.model.lookup.marketsummary.EndOfDaySnapshot;
-import net.jacobpeterson.iqfeed4j.model.lookup.marketsummary.FiveMinuteSnapshot;
-import net.jacobpeterson.iqfeed4j.model.lookup.marketsummary.FundamentalSnapshot;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.marketsummary.EndOfDaySnapshot;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.marketsummary.FiveMinuteSnapshot;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.marketsummary.FundamentalSnapshot;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeFormatters;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.NamedCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.exception.IQFeedException;

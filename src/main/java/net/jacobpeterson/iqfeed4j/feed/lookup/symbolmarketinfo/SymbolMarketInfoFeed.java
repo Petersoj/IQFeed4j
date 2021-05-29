@@ -1,17 +1,16 @@
 package net.jacobpeterson.iqfeed4j.feed.lookup.symbolmarketinfo;
 
-import com.google.common.base.Preconditions;
 import net.jacobpeterson.iqfeed4j.feed.MultiMessageListener;
 import net.jacobpeterson.iqfeed4j.feed.lookup.AbstractLookupFeed;
-import net.jacobpeterson.iqfeed4j.model.feedenums.lookup.symbolmarketinfo.SearchCodeType;
-import net.jacobpeterson.iqfeed4j.model.feedenums.lookup.symbolmarketinfo.SearchField;
-import net.jacobpeterson.iqfeed4j.model.feedenums.lookup.symbolmarketinfo.SymbolFilterType;
-import net.jacobpeterson.iqfeed4j.model.lookup.symbolmarketinfo.ListedMarket;
-import net.jacobpeterson.iqfeed4j.model.lookup.symbolmarketinfo.NIACCode;
-import net.jacobpeterson.iqfeed4j.model.lookup.symbolmarketinfo.SICCode;
-import net.jacobpeterson.iqfeed4j.model.lookup.symbolmarketinfo.SecurityType;
-import net.jacobpeterson.iqfeed4j.model.lookup.symbolmarketinfo.SymbolSearchResult;
-import net.jacobpeterson.iqfeed4j.model.lookup.symbolmarketinfo.TradeCondition;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.symbolmarketinfo.enums.SearchCodeType;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.symbolmarketinfo.enums.SearchField;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.symbolmarketinfo.enums.SymbolFilterType;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.symbolmarketinfo.ListedMarket;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.symbolmarketinfo.NIACCode;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.symbolmarketinfo.SICCode;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.symbolmarketinfo.SecurityType;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.symbolmarketinfo.SymbolSearchResult;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.symbolmarketinfo.TradeCondition;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.IndexCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.TrailingCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.string.LineEnding;

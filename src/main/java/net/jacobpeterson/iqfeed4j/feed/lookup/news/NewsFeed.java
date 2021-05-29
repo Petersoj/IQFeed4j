@@ -1,11 +1,10 @@
 package net.jacobpeterson.iqfeed4j.feed.lookup.news;
 
-import com.google.common.base.Preconditions;
 import net.jacobpeterson.iqfeed4j.feed.MultiMessageListener;
 import net.jacobpeterson.iqfeed4j.feed.lookup.AbstractLookupFeed;
-import net.jacobpeterson.iqfeed4j.model.feedenums.lookup.news.XMLTextEmailOption;
-import net.jacobpeterson.iqfeed4j.model.feedenums.lookup.news.XMLTextOption;
-import net.jacobpeterson.iqfeed4j.model.util.MessageLine;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.news.enums.XMLTextEmailOption;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.news.enums.XMLTextOption;
+import net.jacobpeterson.iqfeed4j.model.feed.util.MessageLine;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.TrailingCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.string.LineEnding;
@@ -19,7 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeFormatters.DATE;
 
 /**

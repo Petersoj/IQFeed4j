@@ -11,7 +11,7 @@
       "title": "The expiration date."
     },
     "OptionType": {
-      "existingJavaType": "net.jacobpeterson.iqfeed4j.model.feedenums.lookup.optionchains.OptionType",
+      "existingJavaType": "net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.enums.OptionType",
       "title": "The type of Option contract."
     },
     "StrikePrice": {

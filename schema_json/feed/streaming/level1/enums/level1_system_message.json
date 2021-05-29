@@ -1,0 +1,18 @@
+{
+  "type": "string",
+  "title": "Enums for Level1 feed System message types. See <a href=\"https://www.iqfeed.net/dev/api/docs/docsBeta/Level1SystemMessage.cfm\">Level 1 Port System Messages</a>",
+  "enum": [
+    "KEY",
+    "KEYOK",
+    "SERVER RECONNECT FAILED",
+    "SYMBOL LIMIT REACHED",
+    "IP",
+    "CUST",
+    "STATS",
+    "FUNDAMENTAL FIELDNAMES",
+    "UPDATE FIELDNAMES",
+    "CURRENT UPDATE FIELDNAMES",
+    "CURRENT LOG LEVELS",
+    "WATCHES"
+  ]
+}

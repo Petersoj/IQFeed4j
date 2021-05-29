@@ -1,7 +1,7 @@
 package net.jacobpeterson.iqfeed4j.feed.streaming.derivative;
 
 import net.jacobpeterson.iqfeed4j.feed.MultiMessageListener;
-import net.jacobpeterson.iqfeed4j.model.streaming.derivative.Interval;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.derivative.Interval;
 
 /**
  * {@link IntervalListener} is a {@link MultiMessageListener} for {@link Interval}s.

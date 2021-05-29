@@ -1,15 +1,14 @@
 package net.jacobpeterson.iqfeed4j.feed.lookup.historical;
 
-import com.google.common.base.Preconditions;
 import net.jacobpeterson.iqfeed4j.feed.MultiMessageListener;
 import net.jacobpeterson.iqfeed4j.feed.lookup.AbstractLookupFeed;
-import net.jacobpeterson.iqfeed4j.model.feedenums.interval.IntervalType;
-import net.jacobpeterson.iqfeed4j.model.feedenums.lookup.historical.PartialDatapoint;
-import net.jacobpeterson.iqfeed4j.model.feedenums.lookup.historical.TimeLabelPlacement;
-import net.jacobpeterson.iqfeed4j.model.feedenums.util.DataDirection;
-import net.jacobpeterson.iqfeed4j.model.lookup.historical.DatedInterval;
-import net.jacobpeterson.iqfeed4j.model.lookup.historical.Interval;
-import net.jacobpeterson.iqfeed4j.model.lookup.historical.Tick;
+import net.jacobpeterson.iqfeed4j.model.feed.common.interval.IntervalType;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.historical.DatedInterval;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.historical.Interval;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.historical.Tick;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.historical.enums.PartialDatapoint;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.historical.enums.TimeLabelPlacement;
+import net.jacobpeterson.iqfeed4j.model.feed.util.enums.DataDirection;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeFormatters;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.IndexCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.string.LineEnding;
@@ -22,15 +21,10 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashMap;
 
-import static com.google.common.base.Preconditions.*;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.DASHED_DATE;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.DASHED_DATE_SPACE_TIME;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.DASHED_DATE_SPACE_TIME_FRACTIONAL;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.DOUBLE;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.INT;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.LONG;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.SHORT;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.STRING;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.*;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.*;
 
 /**
  * {@link HistoricalFeed} is an {@link AbstractLookupFeed} for historical data.

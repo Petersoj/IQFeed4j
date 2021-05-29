@@ -1,8 +1,8 @@
 package net.jacobpeterson.iqfeed4j.feed;
 
 import com.google.common.base.Splitter;
-import net.jacobpeterson.iqfeed4j.model.feedenums.FeedCommand;
-import net.jacobpeterson.iqfeed4j.model.feedenums.FeedMessageType;
+import net.jacobpeterson.iqfeed4j.model.feed.enums.FeedCommand;
+import net.jacobpeterson.iqfeed4j.model.feed.enums.FeedMessageType;
 import net.jacobpeterson.iqfeed4j.util.string.LineEnding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
