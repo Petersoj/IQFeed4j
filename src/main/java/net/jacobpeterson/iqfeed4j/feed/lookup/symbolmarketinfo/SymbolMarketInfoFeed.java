@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.google.common.base.Preconditions.*;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.INT;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.STRING;
 
@@ -187,11 +188,11 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
     public void searchSymbols(SearchField searchField, String searchString, SymbolFilterType symbolFilterType,
             List<Integer> filterValues, MultiMessageListener<SymbolSearchResult> symbolSearchResultListener)
             throws IOException {
-        Preconditions.checkNotNull(searchField);
-        Preconditions.checkNotNull(searchString);
-        Preconditions.checkNotNull(symbolFilterType);
-        Preconditions.checkNotNull(filterValues);
-        Preconditions.checkNotNull(symbolSearchResultListener);
+        checkNotNull(searchField);
+        checkNotNull(searchString);
+        checkNotNull(symbolFilterType);
+        checkNotNull(filterValues);
+        checkNotNull(symbolSearchResultListener);
 
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
@@ -225,11 +226,11 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
      */
     public void searchSymbols(SearchCodeType searchCodeType, String searchString,
             MultiMessageListener<SymbolSearchResult> symbolSearchResultListener) throws IOException {
-        Preconditions.checkNotNull(searchCodeType);
-        Preconditions.checkNotNull(searchString);
-        Preconditions.checkNotNull(symbolSearchResultListener);
+        checkNotNull(searchCodeType);
+        checkNotNull(searchString);
+        checkNotNull(symbolSearchResultListener);
 
-        Preconditions.checkArgument(searchString.length() >= 2);
+        checkArgument(searchString.length() >= 2);
 
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
@@ -261,7 +262,7 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
     private <T> void requestGenericMultiMessage(String requestCode,
             Map<String, MultiMessageListener<T>> listenersOfRequestIDs, MultiMessageListener<T> listener)
             throws IOException {
-        Preconditions.checkNotNull(listener);
+        checkNotNull(listener);
 
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();

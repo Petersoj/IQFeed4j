@@ -1,6 +1,5 @@
 package net.jacobpeterson.iqfeed4j.feed.streaming.derivative;
 
-import com.google.common.base.Preconditions;
 import net.jacobpeterson.iqfeed4j.feed.RequestIDFeedHelper;
 import net.jacobpeterson.iqfeed4j.feed.SingleMessageFuture;
 import net.jacobpeterson.iqfeed4j.feed.streaming.AbstractServerConnectionFeed;
@@ -11,6 +10,7 @@ import net.jacobpeterson.iqfeed4j.model.streaming.derivative.Interval;
 import net.jacobpeterson.iqfeed4j.model.streaming.derivative.WatchedInterval;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.IndexCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.NestedListCSVMapper;
+import net.jacobpeterson.iqfeed4j.util.map.MapUtil;
 import net.jacobpeterson.iqfeed4j.util.string.LineEnding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +21,9 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueExists;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
@@ -66,7 +68,8 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
 
     protected final Object messageReceivedLock;
     protected final RequestIDFeedHelper requestIDFeedHelper;
-    protected final HashMap<String, List<IntervalListener>> intervalListenersOfSymbols;
+    protected final HashMap<String, IntervalListener> intervalListenersOfRequestIDs;
+    protected final HashMap<String, List<IntervalListener>> intervalListenersOfWatchedSymbols;
     protected SingleMessageFuture<List<WatchedInterval>> watchedIntervalsFuture;
 
     /**
@@ -81,7 +84,8 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
 
         messageReceivedLock = new Object();
         requestIDFeedHelper = new RequestIDFeedHelper();
-        intervalListenersOfSymbols = new HashMap<>();
+        intervalListenersOfRequestIDs = new HashMap<>();
+        intervalListenersOfWatchedSymbols = new HashMap<>();
     }
 
     @Override
@@ -109,7 +113,7 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
                         case REPLACED_PREVIOUSLY_WATCHED_INTERVAL:
                             String symbol = csv[2];
 
-                            List<IntervalListener> intervalListeners = intervalListenersOfSymbols.get(symbol);
+                            List<IntervalListener> intervalListeners = intervalListenersOfWatchedSymbols.get(symbol);
                             if (intervalListeners == null) {
                                 LOGGER.warn("Received {} System message, but no listener could be found for symbol: {}",
                                         derivativeSystemMessage, symbol);
@@ -121,12 +125,22 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
                                     intervalListeners.forEach(listener -> listener.onSymbolLimitReached(symbol));
                                     break;
                                 case REPLACED_PREVIOUSLY_WATCHED_INTERVAL:
-                                    String requestID = valuePresent(csv, 3) ? csv[3] : null;
-                                    intervalListeners.forEach(listener ->
-                                            listener.onReplacedPreviouslyWatchedSymbol(symbol, requestID));
+                                    if (valueExists(csv, 3)) {
+                                        String requestID = csv[3];
+                                        IntervalListener intervalListener =
+                                                intervalListenersOfRequestIDs.get(requestID);
+                                        if (intervalListener == null) {
+                                            LOGGER.warn("Received {} System message, but no listener could " +
+                                                    "be found for Request ID: {}", derivativeSystemMessage, requestID);
+                                            return;
+                                        }
+                                        intervalListener.onReplacedPreviouslyWatchedSymbol(symbol, requestID);
+                                    } else {
+                                        intervalListeners.forEach(listener ->
+                                                listener.onReplacedPreviouslyWatchedSymbol(symbol, null));
+                                    }
                                     break;
                             }
-
                             break;
                         case WATCHED_INTERVALS:
                             if (watchedIntervalsFuture != null) {
@@ -151,35 +165,38 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
             }
 
             // Check for 'BW' request responses
-            boolean requestIDExists = false;
-            if (valueEquals(csv, 0, SYMBOL_NOT_WATCHED_MESSAGE_PREFIX) ||
-                    (requestIDExists = valueEquals(csv, 1, SYMBOL_NOT_WATCHED_MESSAGE_PREFIX))) {
-                if ((!requestIDExists && !valuePresent(csv, 1)) || (requestIDExists && !valuePresent(csv, 2))) {
+            if (valueEquals(csv, 0, SYMBOL_NOT_WATCHED_MESSAGE_PREFIX)) {
+                if (!valuePresent(csv, 1)) {
                     LOGGER.error("Invalid message received: {}", (Object) csv);
                     return;
                 }
 
-                String symbol = requestIDExists ? csv[2] : csv[1];
-                List<IntervalListener> intervalListeners = intervalListenersOfSymbols.get(symbol);
+                String symbol = csv[1];
+                List<IntervalListener> intervalListeners = intervalListenersOfWatchedSymbols.get(symbol);
                 if (intervalListeners == null) {
-                    LOGGER.warn("Received '{}' message, but no listener could be found for symbol: {}",
+                    LOGGER.warn("Received '{}' message, but no listeners could be found for symbol: {}",
                             SYMBOL_NOT_WATCHED_MESSAGE_PREFIX, symbol);
                     return;
                 }
                 intervalListeners.forEach(listener -> listener.onSymbolNotWatched(symbol));
-            } else {
-                try {
-                    Interval interval = INTERVAL_CSV_MAPPER.map(csv, 0);
-                    List<IntervalListener> intervalListeners = intervalListenersOfSymbols.get(interval.getSymbol());
-                    if (intervalListeners == null) {
-                        LOGGER.warn("Received Interval message, but no listener could be found for symbol: {}",
-                                interval.getSymbol());
-                        return;
-                    }
-                    intervalListeners.forEach(listener -> listener.onMessageReceived(interval));
-                } catch (Exception exception) {
-                    LOGGER.error("Could not map Interval! Message: {}", csv, exception);
+            } else if (valueExists(csv, 0)) {
+                String requestID = csv[0]; // All interval messages on this feed should start with a Request ID
+
+                IntervalListener intervalListener = intervalListenersOfRequestIDs.get(requestID);
+                if (intervalListener == null) {
+                    LOGGER.warn("Received Interval message, but no listener could be found for Request ID: {}",
+                            requestID);
+                    return;
                 }
+
+                try {
+                    Interval interval = INTERVAL_CSV_MAPPER.map(csv, 1);
+                    intervalListener.onMessageReceived(interval);
+                } catch (Exception exception) {
+                    intervalListener.onMessageException(exception);
+                }
+            } else {
+                LOGGER.error("Received unknown message: {}", (Object) csv);
             }
         }
     }
@@ -209,7 +226,6 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
      *                            (optional)
      * @param endFilterTime       allows you to specify the latest time of day (Eastern) for which to receive data.
      *                            (optional)
-     * @param requestID           the Request ID (optional)
      * @param intervalType        the {@link IntervalType}
      * @param updateIntervalDelay the number of seconds before sending out an updated bar (defaults to 0) (optional)
      * @param intervalListener    the {@link IntervalListener} for this request
@@ -218,13 +234,12 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
      */
     public void requestIntervalWatch(String symbol, int intervalLength, LocalDateTime beginDateTime,
             Integer maxDaysOfDataPoints, Integer maxDataPoints, LocalTime beginFilterTime, LocalTime endFilterTime,
-            String requestID, IntervalType intervalType, Integer updateIntervalDelay, IntervalListener intervalListener)
+            IntervalType intervalType, Integer updateIntervalDelay, IntervalListener intervalListener)
             throws IOException {
-        Preconditions.checkNotNull(symbol);
-        Preconditions.checkNotNull(intervalType);
-        Preconditions.checkArgument(requestID == null || !requestID.equals(SYMBOL_NOT_WATCHED_MESSAGE_PREFIX),
-                "Request ID cannot be: " + SYMBOL_NOT_WATCHED_MESSAGE_PREFIX);
+        checkNotNull(symbol);
+        checkNotNull(intervalType);
 
+        String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
         requestBuilder.append("BW").append(",");
@@ -256,11 +271,7 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
         }
         requestBuilder.append(",");
 
-        if (requestID != null) {
-            requestBuilder.append(requestID);
-        }
-        requestBuilder.append(",");
-
+        requestBuilder.append(requestID).append(",");
         requestBuilder.append(intervalType.value()).append(",");
         requestBuilder.append(","); // For reserved value
 
@@ -271,9 +282,11 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
         requestBuilder.append(LineEnding.CR_LF.getASCIIString());
 
         synchronized (messageReceivedLock) {
-            List<IntervalListener> intervalListenersOfSymbol =
-                    intervalListenersOfSymbols.computeIfAbsent(symbol, k -> new ArrayList<>());
-            intervalListenersOfSymbol.add(intervalListener);
+            intervalListenersOfRequestIDs.put(requestID, intervalListener);
+
+            List<IntervalListener> intervalListeners =
+                    intervalListenersOfWatchedSymbols.computeIfAbsent(symbol, k -> new ArrayList<>());
+            intervalListeners.add(intervalListener);
         }
         String requestString = requestBuilder.toString();
         LOGGER.debug("Sending request: {}", requestString);
@@ -281,27 +294,34 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
     }
 
     /**
-     * Remove a watch request based on the 'symbol' and optional 'requestID'. This sends an BR request. This method is
-     * thread-safe.
+     * Remove a watch request given a {@link IntervalListener}. This sends an BR request. This method is thread-safe.
      *
-     * @param symbol    the symbol to remove from watching
-     * @param requestID the Request ID to remove associated with the watch request
+     * @param intervalListener the {@link IntervalListener} to remove
      *
-     * @throws IOException thrown for {@link IOException}s
+     * @throws Exception thrown for {@link Exception}s
      */
-    public void requestWatchRemoval(String symbol, String requestID) throws IOException {
-        Preconditions.checkNotNull(symbol);
+    public void requestIntervalWatchRemoval(IntervalListener intervalListener) throws Exception {
+        checkNotNull(intervalListener);
+
+        String symbol = getWatchedSymbol(intervalListener);
+        String requestID = getRequestID(intervalListener);
+        checkNotNull(symbol);
+        checkNotNull(requestID);
 
         StringBuilder requestBuilder = new StringBuilder();
-
         requestBuilder.append("BR").append(",");
         requestBuilder.append(symbol).append(",");
-
-        if (requestID != null) {
-            requestBuilder.append(requestID);
-        }
+        requestBuilder.append(requestID);
         requestBuilder.append(LineEnding.CR_LF.getASCIIString());
 
+        synchronized (messageReceivedLock) {
+            intervalListenersOfRequestIDs.remove(requestID);
+
+            List<IntervalListener> intervalListeners = intervalListenersOfWatchedSymbols.get(symbol);
+            if (intervalListeners != null) {
+                intervalListeners.remove(intervalListener);
+            }
+        }
         String requestString = requestBuilder.toString();
         LOGGER.debug("Sending request: {}", requestString);
         sendMessage(requestString);
@@ -323,7 +343,6 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
         }
 
         StringBuilder requestBuilder = new StringBuilder();
-
         requestBuilder.append(FeedMessageType.SYSTEM.value()).append(",");
         requestBuilder.append("REQUEST WATCHES");
         requestBuilder.append(LineEnding.CR_LF.getASCIIString());
@@ -346,11 +365,14 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
      */
     public void requestUnwatchAll() throws IOException {
         StringBuilder requestBuilder = new StringBuilder();
-
         requestBuilder.append(FeedMessageType.SYSTEM.value()).append(",");
         requestBuilder.append("UNWATCH ALL");
         requestBuilder.append(LineEnding.CR_LF.getASCIIString());
 
+        synchronized (messageReceivedLock) {
+            intervalListenersOfRequestIDs.clear();
+            intervalListenersOfWatchedSymbols.clear();
+        }
         String requestString = requestBuilder.toString();
         LOGGER.debug("Sending request: {}", requestString);
         sendMessage(requestString);
@@ -359,4 +381,47 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
     //
     // END Feed commands
     //
+
+    /**
+     * Gets an {@link IntervalListener} for the given 'requestID' if one exists.
+     *
+     * @param requestID the Request ID
+     *
+     * @return the {@link IntervalListener} or null
+     */
+    public IntervalListener getIntervalListener(String requestID) {
+        synchronized (messageReceivedLock) {
+            return intervalListenersOfRequestIDs.get(requestID);
+        }
+    }
+
+    /**
+     * Gets a Request ID for the given {@link IntervalListener} if one exists.
+     *
+     * @param intervalListener the {@link IntervalListener}
+     *
+     * @return the Request ID or null
+     */
+    public String getRequestID(IntervalListener intervalListener) {
+        synchronized (messageReceivedLock) {
+            return MapUtil.getKeyByValue(intervalListenersOfRequestIDs, intervalListener);
+        }
+    }
+
+    /**
+     * Gets the watched symbol for the given {@link IntervalListener}.
+     *
+     * @param intervalListener the {@link IntervalListener}
+     *
+     * @return the watched symbol
+     */
+    public String getWatchedSymbol(IntervalListener intervalListener) {
+        synchronized (messageReceivedLock) {
+            return intervalListenersOfWatchedSymbols.entrySet().stream()
+                    .filter(entry -> entry.getValue().contains(intervalListener))
+                    .map(Map.Entry::getKey)
+                    .findFirst()
+                    .orElse(null);
+        }
+    }
 }

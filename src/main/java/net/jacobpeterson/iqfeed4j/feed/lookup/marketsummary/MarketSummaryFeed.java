@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.*;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.DATE;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.TIME;
@@ -306,10 +307,10 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
      */
     public void requestEndOfDaySummary(String securityType, String groupID, LocalDate date,
             MultiMessageListener<EndOfDaySnapshot> endOfDaySnapshotListener) throws IOException {
-        Preconditions.checkNotNull(securityType);
-        Preconditions.checkNotNull(groupID);
-        Preconditions.checkNotNull(date);
-        Preconditions.checkNotNull(endOfDaySnapshotListener);
+        checkNotNull(securityType);
+        checkNotNull(groupID);
+        checkNotNull(date);
+        checkNotNull(endOfDaySnapshotListener);
 
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
@@ -345,10 +346,10 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
      */
     public void requestFundamentalSummary(String securityType, String groupID, LocalDate date,
             MultiMessageListener<FundamentalSnapshot> fundamentalSnapshotListener) throws IOException {
-        Preconditions.checkNotNull(securityType);
-        Preconditions.checkNotNull(groupID);
-        Preconditions.checkNotNull(date);
-        Preconditions.checkNotNull(fundamentalSnapshotListener);
+        checkNotNull(securityType);
+        checkNotNull(groupID);
+        checkNotNull(date);
+        checkNotNull(fundamentalSnapshotListener);
 
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
@@ -383,9 +384,9 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
      */
     public void request5MinuteSummary(String securityType, String groupID,
             MultiMessageListener<FiveMinuteSnapshot> fiveMinuteSnapshotListener) throws IOException {
-        Preconditions.checkNotNull(securityType);
-        Preconditions.checkNotNull(groupID);
-        Preconditions.checkNotNull(fiveMinuteSnapshotListener);
+        checkNotNull(securityType);
+        checkNotNull(groupID);
+        checkNotNull(fiveMinuteSnapshotListener);
 
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();

@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static com.google.common.base.Preconditions.*;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
 
 /**
@@ -447,10 +448,10 @@ public class OptionChainsFeed extends AbstractLookupFeed {
      */
     public SingleMessageFuture<List<FutureContract>> getFutureChain(String symbol, List<FutureMonth> months,
             List<Integer> years, Integer nearMonths) throws IOException {
-        Preconditions.checkNotNull(symbol);
-        Preconditions.checkArgument(months == null || !months.isEmpty());
-        Preconditions.checkNotNull(years);
-        Preconditions.checkArgument(years.size() > 0);
+        checkNotNull(symbol);
+        checkArgument(months == null || !months.isEmpty());
+        checkNotNull(years);
+        checkArgument(years.size() > 0);
 
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
@@ -506,10 +507,10 @@ public class OptionChainsFeed extends AbstractLookupFeed {
      */
     public SingleMessageFuture<List<FutureSpread>> getFutureSpreadChain(String symbol, List<FutureMonth> months,
             List<Integer> years, Integer nearMonths) throws IOException {
-        Preconditions.checkNotNull(symbol);
-        Preconditions.checkArgument(months == null || !months.isEmpty());
-        Preconditions.checkNotNull(years);
-        Preconditions.checkArgument(years.size() > 0);
+        checkNotNull(symbol);
+        checkArgument(months == null || !months.isEmpty());
+        checkNotNull(years);
+        checkArgument(years.size() > 0);
 
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
@@ -567,11 +568,11 @@ public class OptionChainsFeed extends AbstractLookupFeed {
     public SingleMessageFuture<List<OptionContract>> getFutureOptionChain(String symbol,
             PutsCallsOption putsCallsOption, List<FutureMonth> months, List<Integer> years, Integer nearMonths)
             throws IOException {
-        Preconditions.checkNotNull(symbol);
-        Preconditions.checkNotNull(putsCallsOption);
-        Preconditions.checkArgument(months == null || !months.isEmpty());
-        Preconditions.checkNotNull(years);
-        Preconditions.checkArgument(years.size() > 0);
+        checkNotNull(symbol);
+        checkNotNull(putsCallsOption);
+        checkArgument(months == null || !months.isEmpty());
+        checkNotNull(years);
+        checkArgument(years.size() > 0);
 
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
@@ -705,12 +706,12 @@ public class OptionChainsFeed extends AbstractLookupFeed {
             PutsCallsOption putsCallsOption, List<EquityOptionMonth> months, Integer nearMonths,
             OptionFilterType optionFilterType, String filter1, String filter2,
             NonStandardOptionTypes nonStandardOptionTypes) throws IOException {
-        Preconditions.checkNotNull(symbol);
-        Preconditions.checkNotNull(putsCallsOption);
-        Preconditions.checkArgument(months == null || !months.isEmpty());
-        Preconditions.checkNotNull(optionFilterType);
-        Preconditions.checkArgument(optionFilterType == OptionFilterType.NONE || (filter1 != null && filter2 != null));
-        Preconditions.checkNotNull(nonStandardOptionTypes);
+        checkNotNull(symbol);
+        checkNotNull(putsCallsOption);
+        checkArgument(months == null || !months.isEmpty());
+        checkNotNull(optionFilterType);
+        checkArgument(optionFilterType == OptionFilterType.NONE || (filter1 != null && filter2 != null));
+        checkNotNull(nonStandardOptionTypes);
 
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();

@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringJoiner;
 
+import static com.google.common.base.Preconditions.*;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueExists;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueNotWhitespace;
@@ -265,8 +266,8 @@ public class AdminFeed extends AbstractFeed {
      * @throws Exception thrown for {@link Exception}s
      */
     public SingleMessageFuture<Void> registerClientApp(String productID, String productVersion) throws Exception {
-        Preconditions.checkNotNull(productID);
-        Preconditions.checkNotNull(productVersion);
+        checkNotNull(productID);
+        checkNotNull(productVersion);
 
         return getOrSendAdminCommandFuture(voidFutureOfAdminMessageTypes,
                 AdminMessageType.REGISTER_CLIENT_APP_COMPLETED,
@@ -285,8 +286,8 @@ public class AdminFeed extends AbstractFeed {
      * @throws Exception thrown for {@link Exception}s
      */
     public SingleMessageFuture<Void> removeClientApp(String productID, String productVersion) throws Exception {
-        Preconditions.checkNotNull(productID);
-        Preconditions.checkNotNull(productVersion);
+        checkNotNull(productID);
+        checkNotNull(productVersion);
 
         return getOrSendAdminCommandFuture(voidFutureOfAdminMessageTypes,
                 AdminMessageType.REMOVE_CLIENT_APP_COMPLETED,
@@ -303,7 +304,7 @@ public class AdminFeed extends AbstractFeed {
      * @throws Exception thrown for {@link Exception}s
      */
     public SingleMessageFuture<String> setLoginID(String loginID) throws Exception {
-        Preconditions.checkNotNull(loginID);
+        checkNotNull(loginID);
 
         return getOrSendAdminCommandFuture(stringFutureOfAdminMessageTypes,
                 AdminMessageType.CURRENT_LOGINID,
@@ -320,7 +321,7 @@ public class AdminFeed extends AbstractFeed {
      * @throws Exception thrown for {@link Exception}s
      */
     public SingleMessageFuture<String> setPassword(String password) throws Exception {
-        Preconditions.checkNotNull(password);
+        checkNotNull(password);
 
         return getOrSendAdminCommandFuture(stringFutureOfAdminMessageTypes,
                 AdminMessageType.CURRENT_PASSWORD,
@@ -339,7 +340,7 @@ public class AdminFeed extends AbstractFeed {
      * @throws Exception thrown for {@link Exception}s
      */
     public SingleMessageFuture<Void> setSaveLoginInfo(OnOffOption onOffOption) throws Exception {
-        Preconditions.checkNotNull(onOffOption);
+        checkNotNull(onOffOption);
 
         switch (onOffOption) {
             case ON:
@@ -367,7 +368,7 @@ public class AdminFeed extends AbstractFeed {
      * @throws Exception thrown for {@link Exception}s
      */
     public SingleMessageFuture<Void> setAutoconnect(OnOffOption onOffOption) throws Exception {
-        Preconditions.checkNotNull(onOffOption);
+        checkNotNull(onOffOption);
 
         switch (onOffOption) {
             case ON:

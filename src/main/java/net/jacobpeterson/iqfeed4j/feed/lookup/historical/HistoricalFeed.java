@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashMap;
 
+import static com.google.common.base.Preconditions.*;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.DASHED_DATE;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.DASHED_DATE_SPACE_TIME;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.DASHED_DATE_SPACE_TIME_FRACTIONAL;
@@ -154,8 +155,8 @@ public class HistoricalFeed extends AbstractLookupFeed {
      */
     public void requestTicks(String symbol, int maxDataPoints, DataDirection dataDirection,
             MultiMessageListener<Tick> ticksListener) throws IOException {
-        Preconditions.checkNotNull(symbol);
-        Preconditions.checkNotNull(ticksListener);
+        checkNotNull(symbol);
+        checkNotNull(ticksListener);
 
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
@@ -200,8 +201,8 @@ public class HistoricalFeed extends AbstractLookupFeed {
     public void requestTicks(String symbol, int maxDays, Integer maxDataPoints, LocalTime beginFilterTime,
             LocalTime endFilterTime, DataDirection dataDirection, MultiMessageListener<Tick> ticksListener)
             throws IOException {
-        Preconditions.checkNotNull(symbol);
-        Preconditions.checkNotNull(ticksListener);
+        checkNotNull(symbol);
+        checkNotNull(ticksListener);
 
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
@@ -262,9 +263,9 @@ public class HistoricalFeed extends AbstractLookupFeed {
     public void requestTicks(String symbol, LocalDateTime beginDateTime, LocalDateTime endDateTime,
             Integer maxDataPoints, LocalTime beginFilterTime, LocalTime endFilterTime, DataDirection dataDirection,
             MultiMessageListener<Tick> ticksListener) throws IOException {
-        Preconditions.checkNotNull(symbol);
-        Preconditions.checkArgument(beginDateTime != null || endDateTime != null);
-        Preconditions.checkNotNull(ticksListener);
+        checkNotNull(symbol);
+        checkArgument(beginDateTime != null || endDateTime != null);
+        checkNotNull(ticksListener);
 
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
@@ -329,9 +330,9 @@ public class HistoricalFeed extends AbstractLookupFeed {
      */
     public void requestIntervals(String symbol, int intervalLength, Integer maxDataPoints, DataDirection dataDirection,
             IntervalType intervalType, MultiMessageListener<Interval> intervalsListener) throws IOException {
-        Preconditions.checkNotNull(symbol);
-        Preconditions.checkNotNull(maxDataPoints);
-        Preconditions.checkNotNull(intervalsListener);
+        checkNotNull(symbol);
+        checkNotNull(maxDataPoints);
+        checkNotNull(intervalsListener);
 
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
@@ -386,8 +387,8 @@ public class HistoricalFeed extends AbstractLookupFeed {
     public void requestIntervals(String symbol, int intervalLength, int maxDays, Integer maxDataPoints,
             LocalTime beginFilterTime, LocalTime endFilterTime, DataDirection dataDirection, IntervalType intervalType,
             MultiMessageListener<Interval> intervalsListener) throws IOException {
-        Preconditions.checkNotNull(symbol);
-        Preconditions.checkNotNull(intervalsListener);
+        checkNotNull(symbol);
+        checkNotNull(intervalsListener);
 
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
@@ -459,9 +460,9 @@ public class HistoricalFeed extends AbstractLookupFeed {
             LocalDateTime endDateTime, Integer maxDataPoints, LocalTime beginFilterTime, LocalTime endFilterTime,
             DataDirection dataDirection, IntervalType intervalType, MultiMessageListener<Interval> intervalsListener)
             throws IOException {
-        Preconditions.checkNotNull(symbol);
-        Preconditions.checkArgument(beginDateTime != null || endDateTime != null);
-        Preconditions.checkNotNull(intervalsListener);
+        checkNotNull(symbol);
+        checkArgument(beginDateTime != null || endDateTime != null);
+        checkNotNull(intervalsListener);
 
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
@@ -536,8 +537,8 @@ public class HistoricalFeed extends AbstractLookupFeed {
     public void requestDayIntervals(String symbol, int maxDays, DataDirection dataDirection,
             PartialDatapoint partialDatapoint, MultiMessageListener<DatedInterval> datedIntervalsListener)
             throws IOException {
-        Preconditions.checkNotNull(symbol);
-        Preconditions.checkNotNull(datedIntervalsListener);
+        checkNotNull(symbol);
+        checkNotNull(datedIntervalsListener);
 
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
@@ -587,9 +588,9 @@ public class HistoricalFeed extends AbstractLookupFeed {
     public void requestDayIntervals(String symbol, LocalDate beginDate, LocalDate endDate, Integer maxDataPoints,
             DataDirection dataDirection, PartialDatapoint partialDatapoint,
             MultiMessageListener<DatedInterval> datedIntervalsListener) throws IOException {
-        Preconditions.checkNotNull(symbol);
-        Preconditions.checkArgument(beginDate != null || endDate != null);
-        Preconditions.checkNotNull(datedIntervalsListener);
+        checkNotNull(symbol);
+        checkArgument(beginDate != null || endDate != null);
+        checkNotNull(datedIntervalsListener);
 
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
@@ -651,8 +652,8 @@ public class HistoricalFeed extends AbstractLookupFeed {
     public void requestWeekIntervals(String symbol, int maxWeeks, DataDirection dataDirection,
             PartialDatapoint partialDatapoint, MultiMessageListener<DatedInterval> datedIntervalsListener)
             throws IOException {
-        Preconditions.checkNotNull(symbol);
-        Preconditions.checkNotNull(datedIntervalsListener);
+        checkNotNull(symbol);
+        checkNotNull(datedIntervalsListener);
 
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
@@ -700,8 +701,8 @@ public class HistoricalFeed extends AbstractLookupFeed {
     public void requestMonthIntervals(String symbol, int maxMonths, DataDirection dataDirection,
             PartialDatapoint partialDatapoint, MultiMessageListener<DatedInterval> datedIntervalsListener)
             throws IOException {
-        Preconditions.checkNotNull(symbol);
-        Preconditions.checkNotNull(datedIntervalsListener);
+        checkNotNull(symbol);
+        checkNotNull(datedIntervalsListener);
 
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();

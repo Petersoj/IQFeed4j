@@ -26,7 +26,7 @@ public abstract class IntervalListener extends MultiMessageListener<Interval> {
      * Called when the new interval bar watch has replaced the previous watched streaming interval bar watch.
      *
      * @param symbol    the symbol
-     * @param requestID the request ID (can be null)
+     * @param requestID the request ID
      */
     public abstract void onReplacedPreviouslyWatchedSymbol(String symbol, String requestID);
 }

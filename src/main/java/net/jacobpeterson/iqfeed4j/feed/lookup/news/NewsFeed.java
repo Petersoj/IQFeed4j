@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.google.common.base.Preconditions.*;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeFormatters.DATE;
 
 /**
@@ -82,8 +83,8 @@ public class NewsFeed extends AbstractLookupFeed {
      */
     public void requestNewsConfiguration(XMLTextOption xmlTextOption,
             MultiMessageListener<MessageLine> messageLineListener) throws IOException {
-        Preconditions.checkNotNull(xmlTextOption);
-        Preconditions.checkNotNull(messageLineListener);
+        checkNotNull(xmlTextOption);
+        checkNotNull(messageLineListener);
 
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
@@ -122,8 +123,8 @@ public class NewsFeed extends AbstractLookupFeed {
     public void requestNewsHeadlines(List<String> sources, List<String> symbols, XMLTextOption xmlTextOption,
             Integer limit, List<LocalDate> dates, Map<LocalDate, LocalDate> dateRanges,
             MultiMessageListener<MessageLine> messageLineListener) throws IOException {
-        Preconditions.checkNotNull(xmlTextOption);
-        Preconditions.checkNotNull(messageLineListener);
+        checkNotNull(xmlTextOption);
+        checkNotNull(messageLineListener);
 
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
@@ -187,11 +188,11 @@ public class NewsFeed extends AbstractLookupFeed {
      */
     public void requestNewsStory(String id, XMLTextEmailOption xmlTextEmailOption, String deliverTo,
             MultiMessageListener<MessageLine> messageLineListener) throws IOException {
-        Preconditions.checkNotNull(id);
-        Preconditions.checkNotNull(xmlTextEmailOption);
-        Preconditions.checkArgument(xmlTextEmailOption != XMLTextEmailOption.EMAIL || deliverTo != null,
+        checkNotNull(id);
+        checkNotNull(xmlTextEmailOption);
+        checkArgument(xmlTextEmailOption != XMLTextEmailOption.EMAIL || deliverTo != null,
                 "'deliverTo' must be present with EMAIL option!");
-        Preconditions.checkNotNull(messageLineListener);
+        checkNotNull(messageLineListener);
 
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
@@ -234,12 +235,12 @@ public class NewsFeed extends AbstractLookupFeed {
     public void requestNewsStoryCount(List<String> symbols, XMLTextOption xmlTextOption, List<String> sources,
             LocalDate fromDate, LocalDate toDate, MultiMessageListener<MessageLine> messageLineListener)
             throws IOException {
-        Preconditions.checkNotNull(symbols);
-        Preconditions.checkArgument(!symbols.isEmpty(), "'symbols' cannot be empty!");
-        Preconditions.checkNotNull(xmlTextOption);
-        Preconditions.checkArgument(fromDate == null || toDate != null, "You  must have both 'from' and 'to' dates!");
-        Preconditions.checkArgument(toDate == null || fromDate != null, "You  must have both 'from' and 'to' dates!");
-        Preconditions.checkNotNull(messageLineListener);
+        checkNotNull(symbols);
+        checkArgument(!symbols.isEmpty(), "'symbols' cannot be empty!");
+        checkNotNull(xmlTextOption);
+        checkArgument(fromDate == null || toDate != null, "You  must have both 'from' and 'to' dates!");
+        checkArgument(toDate == null || fromDate != null, "You  must have both 'from' and 'to' dates!");
+        checkNotNull(messageLineListener);
 
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
