@@ -119,7 +119,7 @@ public abstract class CSVMapper<T> {
      * Maps the given CSV to a POJO.
      *
      * @param csv    the CSV
-     * @param offset offset to add to CSV indices when applying {@link CSVMapper.MappingFunctions}
+     * @param offset offset to add to CSV indices when applying {@link CSVMapper.MappingFunction}
      *
      * @return a new POJO
      *
@@ -128,17 +128,16 @@ public abstract class CSVMapper<T> {
     public abstract T map(String[] csv, int offset) throws Exception;
 
     /**
-     * {@link MappingFunctions} holds functions for CSV to field mapping.
+     * {@link CSVMapper.MappingFunction} holds functions for CSV to field mapping.
      *
      * @param <P> the type of the POJO field
      */
-    protected final class MappingFunctions<P> {
+    protected final class MappingFunction<P> {
 
-        private final BiConsumer<T, P> fieldSetter;
-        private final Function<String, P> stringToFieldConverter;
+        private final BiConsumer<T, String> mappingConsumer;
 
         /**
-         * Instantiates a new {@link MappingFunctions}.
+         * Instantiates a new {@link CSVMapper.MappingFunction}.
          *
          * @param fieldSetter            the field setter {@link BiConsumer}. The first argument is the POJO instance
          *                               and the second argument is the converted field to be set in the instance.
@@ -146,9 +145,19 @@ public abstract class CSVMapper<T> {
          *                               converted POJO field instance and the argument is the CSV value {@link
          *                               String}.
          */
-        public MappingFunctions(BiConsumer<T, P> fieldSetter, Function<String, P> stringToFieldConverter) {
-            this.fieldSetter = fieldSetter;
-            this.stringToFieldConverter = stringToFieldConverter;
+        public MappingFunction(BiConsumer<T, P> fieldSetter, Function<String, P> stringToFieldConverter) {
+            mappingConsumer = (instance, value) -> fieldSetter.accept(instance, stringToFieldConverter.apply(value));
+        }
+
+        /**
+         * Instantiates a new {@link CSVMapper.MappingFunction}.
+         *
+         * @param csvValueConsumer a {@link BiConsumer} that will takes a POJO instance as the first argument, and a CSV
+         *                         {@link String} value as the second argument. This is so that fields inside the POJO
+         *                         can be directly set according to the passed in CSV {@link String} value.
+         */
+        public MappingFunction(BiConsumer<T, String> csvValueConsumer) {
+            mappingConsumer = csvValueConsumer;
         }
 
         /**
@@ -158,25 +167,7 @@ public abstract class CSVMapper<T> {
          * @param value    the CSV value
          */
         public void apply(T instance, String value) {
-            fieldSetter.accept(instance, stringToFieldConverter.apply(value));
-        }
-
-        /**
-         * Gets {@link #fieldSetter}.
-         *
-         * @return a {@link BiConsumer}
-         */
-        public BiConsumer<T, P> getFieldSetter() {
-            return fieldSetter;
-        }
-
-        /**
-         * Gets {@link #stringToFieldConverter}.
-         *
-         * @return a {@link Function}
-         */
-        public Function<String, P> getStringToFieldConverter() {
-            return stringToFieldConverter;
+            mappingConsumer.accept(instance, value);
         }
     }
 }

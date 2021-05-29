@@ -24,7 +24,7 @@
           "name": "LOOKUP"
         }
       ],
-      "title": "The basis for last trade."
+      "title": "The type of client."
     },
     "ClientID": {
       "existingJavaType": "java.lang.Integer",

@@ -1,7 +1,7 @@
 package net.jacobpeterson.iqfeed4j.feed.lookup.historical;
 
-import net.jacobpeterson.iqfeed4j.feed.message.MultiMessageListener;
 import net.jacobpeterson.iqfeed4j.feed.lookup.AbstractLookupFeed;
+import net.jacobpeterson.iqfeed4j.feed.message.MultiMessageListener;
 import net.jacobpeterson.iqfeed4j.model.feed.common.interval.IntervalType;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.historical.DatedInterval;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.historical.Interval;
@@ -12,6 +12,7 @@ import net.jacobpeterson.iqfeed4j.model.feed.lookup.historical.enums.TimeLabelPl
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeFormatters;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.IndexCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.string.LineEnding;
+import net.jacobpeterson.iqfeed4j.util.tradecondition.TradeConditionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,8 +24,13 @@ import java.util.HashMap;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.*;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.*;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.DASHED_DATE;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.DASHED_DATE_SPACE_TIME;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.DASHED_DATE_SPACE_TIME_FRACTIONAL;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.DOUBLE;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.INT;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.LONG;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.SHORT;
 
 /**
  * {@link HistoricalFeed} is an {@link AbstractLookupFeed} for historical data.
@@ -63,7 +69,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         TICK_CSV_MAPPER.addMapping(Tick::setTickID, INT);
         TICK_CSV_MAPPER.addMapping(Tick::setBasisForLast, Tick.BasisForLast::fromValue);
         TICK_CSV_MAPPER.addMapping(Tick::setTradeMarketCenter, SHORT);
-        TICK_CSV_MAPPER.addMapping(Tick::setTradeConditions, STRING);
+        TICK_CSV_MAPPER.addMapping(Tick::setTradeConditions, TradeConditionUtil::listFromTradeConditionString);
         TICK_CSV_MAPPER.addMapping(Tick::setTradeAggressor, Tick.TradeAggressor::fromValue);
         TICK_CSV_MAPPER.addMapping(Tick::setDayCode, INT);
 

@@ -17,7 +17,7 @@ import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueNotWhitespace;
 public class NestedListCSVMapper<T> extends CSVMapper<T> {
 
     protected final Callable<? extends List<T>> listInstantiator;
-    protected final HashMap<Integer, MappingFunctions<?>> mappingFunctionsOfCSVIndices;
+    protected final HashMap<Integer, MappingFunction<?>> mappingFunctionsOfCSVIndices;
     protected final int nestedListLength;
 
     /**
@@ -42,8 +42,8 @@ public class NestedListCSVMapper<T> extends CSVMapper<T> {
      * Function)} CSV index + 1.
      *
      * @param <P>                    the type of the POJO field
-     * @param fieldSetter            see {@link CSVMapper.MappingFunctions} constructor doc
-     * @param stringToFieldConverter see {@link CSVMapper.MappingFunctions} constructor doc
+     * @param fieldSetter            see {@link CSVMapper.MappingFunction} constructor doc
+     * @param stringToFieldConverter see {@link CSVMapper.MappingFunction} constructor doc
      */
     public <P> void addMapping(BiConsumer<T, P> fieldSetter, Function<String, P> stringToFieldConverter) {
         int nextCSVIndex = mappingFunctionsOfCSVIndices.keySet().stream().max(Integer::compareTo).orElse(-1) + 1;
@@ -55,11 +55,11 @@ public class NestedListCSVMapper<T> extends CSVMapper<T> {
      *
      * @param <P>                    the type of the POJO field
      * @param csvIndex               the CSV index
-     * @param fieldSetter            see {@link CSVMapper.MappingFunctions} constructor doc
-     * @param stringToFieldConverter see {@link CSVMapper.MappingFunctions} constructor doc
+     * @param fieldSetter            see {@link CSVMapper.MappingFunction} constructor doc
+     * @param stringToFieldConverter see {@link CSVMapper.MappingFunction} constructor doc
      */
     public <P> void setMapping(int csvIndex, BiConsumer<T, P> fieldSetter, Function<String, P> stringToFieldConverter) {
-        mappingFunctionsOfCSVIndices.put(csvIndex, new MappingFunctions<P>(fieldSetter, stringToFieldConverter));
+        mappingFunctionsOfCSVIndices.put(csvIndex, new MappingFunction<P>(fieldSetter, stringToFieldConverter));
     }
 
     /**
@@ -84,7 +84,7 @@ public class NestedListCSVMapper<T> extends CSVMapper<T> {
      * BiConsumer, Function)}. This will iterate through the list at {@link #nestedListLength} length.
      *
      * @param csv    the CSV
-     * @param offset offset to add to CSV indices when applying {@link CSVMapper.MappingFunctions}
+     * @param offset offset to add to CSV indices when applying {@link CSVMapper.MappingFunction}
      *
      * @return a new {@link List} of mapped POJOs
      *

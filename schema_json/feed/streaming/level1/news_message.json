@@ -1,0 +1,26 @@
+{
+  "type": "object",
+  "title": "Represents a News message. See <a href=\"https://www.iqfeed.net/dev/api/docs/docsBeta/StreamingNewsMessageFormat.cfm\">Streaming News Messages</a>",
+  "properties": {
+    "DistributorCode": {
+      "existingJavaType": "java.lang.String",
+      "title": "Distributor Type code."
+    },
+    "StoryID": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "Numerical story ID."
+    },
+    "SymbolList": {
+      "existingJavaType": "java.util.List<java.lang.String>",
+      "title": "Symbols associated with the story."
+    },
+    "Timestamp": {
+      "existingJavaType": "java.time.LocalDateTime",
+      "title": "The timestamp."
+    },
+    "Headline": {
+      "existingJavaType": "java.lang.String",
+      "title": "The text of the headline."
+    }
+  }
+}

@@ -1,0 +1,254 @@
+{
+  "type": "object",
+  "title": "Represents a Fundamental message. See <a href=\"https://www.iqfeed.net/dev/api/docs/docsBeta/Level1FundamentalMessage.cfm\">Fundamental Message Format</a>",
+  "properties": {
+    "Symbol": {
+      "existingJavaType": "java.lang.String",
+      "title": "The Symbol ID to match with watch request."
+    },
+    "ExchangeID": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "This is the Exchange Group ID."
+    },
+    "PERatio": {
+      "existingJavaType": "java.lang.Double",
+      "title": "Price/Earnings ratio."
+    },
+    "AverageVolume": {
+      "existingJavaType": "java.lang.Double",
+      "title": "Average daily volume in 1000's of shares (4 week average)."
+    },
+    "52WeekHigh": {
+      "existingJavaType": "java.lang.Double",
+      "title": "Highest price of the last 52 weeks. For futures, this is the contract High."
+    },
+    "52WeekLow": {
+      "existingJavaType": "java.lang.Double",
+      "title": "Lowest price of the last 52 weeks. For futures, this is the contract Low."
+    },
+    "CalendarYearHigh": {
+      "existingJavaType": "java.lang.Double",
+      "title": "High price for the current calendar year."
+    },
+    "CalendarYearLow": {
+      "existingJavaType": "java.lang.Double",
+      "title": "Low price for the current calendar year."
+    },
+    "DividendYield": {
+      "existingJavaType": "java.lang.Double",
+      "title": "The annual dividends per share paid by the company divided by the current market price per share of stock sent as a percentage."
+    },
+    "DividendAmount": {
+      "existingJavaType": "java.lang.Double",
+      "title": "The current quarter actual dividend."
+    },
+    "DividendRate": {
+      "existingJavaType": "java.lang.Double",
+      "title": "The annualized amount at which a dividend is expected to be paid by a company."
+    },
+    "PayDate": {
+      "existingJavaType": "java.time.LocalDate",
+      "title": "Date on which a company made its last dividend payment."
+    },
+    "ExDividendDate": {
+      "existingJavaType": "java.time.LocalDate",
+      "title": "The actual date in which a stock goes ex-dividend, typically about 3 weeks before the dividend is paid to shareholders of record. Also the amount of the dividend is reflected in a reduction of the share price on this date."
+    },
+    "CurrentYearEarningsPerShare": {
+      "existingJavaType": "java.lang.Double",
+      "title": "The portion of a company's profit allocated to each outstanding share of common stock."
+    },
+    "NextYearEarningsPerShare": {
+      "existingJavaType": "java.lang.Double",
+      "title": "The total amount of earnings per share a company is estimated to accumulate over the next four quarters of the current fiscal year."
+    },
+    "FiveYearGrowthPercentage": {
+      "existingJavaType": "java.lang.Double",
+      "title": "Earnings Per Share growth rate over a five year period."
+    },
+    "FiscalYearEnd": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "The two digit month that the fiscal year ends for a company."
+    },
+    "CompanyName": {
+      "existingJavaType": "java.lang.String",
+      "title": "Company name or contract description."
+    },
+    "RootOptionSymbol": {
+      "existingJavaType": "java.util.List<java.lang.String>",
+      "title": "A space separated list."
+    },
+    "PercentHeldByInstitutions": {
+      "existingJavaType": "java.lang.Double",
+      "title": "A percentage of outstanding shares held by banks and institutions."
+    },
+    "Beta": {
+      "existingJavaType": "java.lang.Double",
+      "title": "A coefficient measuring a stock's relative volatility. It is the covariance of a stock in relation to the rest of the stock market. 30 day historical volatility."
+    },
+    "LEAPS": {
+      "existingJavaType": "java.lang.String",
+      "title": "Long term equity anticipation securities."
+    },
+    "CurrentAssets": {
+      "existingJavaType": "java.lang.Double",
+      "title": "The amount of total current assets held by a company as of a specific date in Millions (lastADate)."
+    },
+    "CurrentLiabilities": {
+      "existingJavaType": "java.lang.Double",
+      "title": "The amount of total current liabilities held by a company as of a specific date in Millions (lastADate)."
+    },
+    "BalanceSheetDate": {
+      "existingJavaType": "java.time.LocalDate",
+      "title": "Last date that a company issued their quarterly report."
+    },
+    "LongTermDebt": {
+      "existingJavaType": "java.lang.Double",
+      "title": "The amount of long term debt held by a company as of a specific date in Millions(lastADate)."
+    },
+    "CommonSharesOutstanding": {
+      "existingJavaType": "java.lang.Double",
+      "title": "The amount of common shares outstanding in 1000's of shares."
+    },
+    "SplitFactor1": {
+      "existingJavaType": "java.lang.Double",
+      "title": "The Split Factor 1."
+    },
+    "SplitFactor1Date": {
+      "existingJavaType": "java.lang.Double",
+      "title": "The Split Factor 1 date."
+    },
+    "SplitFactor2": {
+      "existingJavaType": "java.lang.Double",
+      "title": "The Split Factor 2."
+    },
+    "SplitFactor2Date": {
+      "existingJavaType": "java.lang.Double",
+      "title": "The Split Factor 2 date."
+    },
+    "FormatCode": {
+      "existingJavaType": "java.lang.String",
+      "title": "Display format code, See: <a href=\"https://www.iqfeed.net/dev/api/docs/docsBeta/PriceFormatCodes.cfm\">Price Format Codes</a>."
+    },
+    "Precision": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "Number of decimal digits."
+    },
+    "SIC": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "Federally designed numbering system identifying companies by industry. This 4 digit number corresponds to a specific industry."
+    },
+    "HistoricalVolatility": {
+      "existingJavaType": "java.lang.Double",
+      "title": "30-trading day volatility that it is calculated using <a href=\"https://en.wikipedia.org/wiki/Black%E2%80%93Scholes_model\">Black-Scholes model</a>.\nNOTE: For futures symbols this field is the Implied Volatility instead of Historical Volatility."
+    },
+    "SecurityType": {
+      "existingJavaType": "java.lang.String",
+      "title": "The security type code, See: <a href=\"https://www.iqfeed.net/dev/api/docs/docsBeta/SecurityTypes.cfm\">Security Types</a>."
+    },
+    "ListedMarket": {
+      "existingJavaType": "java.lang.String",
+      "title": "The listing market ID, See: <a href=\"https://www.iqfeed.net/dev/api/docs/docsBeta/ListedMarkets.cfm\">Listed Markets</a>."
+    },
+    "52WeekHighDate": {
+      "existingJavaType": "java.time.LocalDate",
+      "title": "The date of the highest price of the last 52 weeks. For futures, this is the contract High Date."
+    },
+    "52WeekLowDate": {
+      "existingJavaType": "java.time.LocalDate",
+      "title": "The date of the lowest price of the last 52 weeks. For futures, this is the contract Low Date."
+    },
+    "CalendarYearHighDate": {
+      "existingJavaType": "java.time.LocalDate",
+      "title": "Date at which the High price for the current calendar year occurred."
+    },
+    "CalendarYearLowDate": {
+      "existingJavaType": "java.time.LocalDate",
+      "title": "Date at which the Low price for the current calendar year occurred."
+    },
+    "YearEndClose": {
+      "existingJavaType": "java.lang.Double",
+      "title": "Price of Year End Close. (Equities Only)."
+    },
+    "MaturityDate": {
+      "existingJavaType": "java.time.LocalDate",
+      "title": "Date of maturity for a Bond."
+    },
+    "CouponRate": {
+      "existingJavaType": "java.lang.Double",
+      "title": "Interest Rate for a Bond."
+    },
+    "ExpirationDate": {
+      "existingJavaType": "java.time.LocalDate",
+      "title": "IEOptions, Futures, FutureOptions, and SSFutures only."
+    },
+    "StrikePrice": {
+      "existingJavaType": "java.lang.Double",
+      "title": "IEOptions only."
+    },
+    "NAICS": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "<a href=\"https://www.census.gov/naics//\">North American Industry Classification System</a>."
+    },
+    "ExchangeRoot": {
+      "existingJavaType": "java.lang.String",
+      "title": "The root symbol that you can find this symbol listed under at the exchange."
+    },
+    "OptionsPremiumMultiplier": {
+      "existingJavaType": "java.lang.Double",
+      "title": "IEOptions only."
+    },
+    "OptionsMultipleDeliverables": {
+      "type": "string",
+      "enum": [
+        "0",
+        "1"
+      ],
+      "javaEnums": [
+        {
+          "name": "EXISTS"
+        },
+        {
+          "name": "DOES_NOT_EXIST"
+        }
+      ],
+      "title": "IEOptions only."
+    },
+    "SessionOpenTime": {
+      "existingJavaType": "java.time.LocalTime",
+      "title": "Futures and Future Options Only."
+    },
+    "SessionCloseTime": {
+      "existingJavaType": "java.time.LocalTime",
+      "title": "Futures and Future Options Only."
+    },
+    "BaseCurrency": {
+      "existingJavaType": "java.lang.String",
+      "title": "Futures and Future Options Only."
+    },
+    "ContractSize": {
+      "existingJavaType": "java.lang.String",
+      "title": "Deliverable quantity of a future or option contract."
+    },
+    "ContractMonths": {
+      "existingJavaType": "java.lang.String",
+      "title": "non-delimited string of upper-case single character month codes."
+    },
+    "MinimumTickSize": {
+      "existingJavaType": "java.lang.Double",
+      "title": "Minimum price movement."
+    },
+    "FirstDeliveryDate": {
+      "existingJavaType": "java.time.LocalDate",
+      "title": "Futures and Future Options Only."
+    },
+    "FIGI": {
+      "existingJavaType": "java.lang.String",
+      "title": "Financial Instrument Global Identifier."
+    },
+    "SecuritySubType": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "The security SubType code, See: <a href=\"https://www.iqfeed.net/dev/api/docs/docsBeta/SecuritySubTypes.cfm\">Security Sub-Types</a>."
+    }
+  }
+}

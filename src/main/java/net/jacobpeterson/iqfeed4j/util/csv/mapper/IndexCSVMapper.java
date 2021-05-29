@@ -14,7 +14,7 @@ import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueNotWhitespace;
  */
 public class IndexCSVMapper<T> extends CSVMapper<T> {
 
-    protected final HashMap<Integer, MappingFunctions<?>> mappingFunctionsOfCSVIndices;
+    protected final HashMap<Integer, MappingFunction<?>> mappingFunctionsOfCSVIndices;
 
     /**
      * Instantiates a new {@link IndexCSVMapper}.
@@ -28,16 +28,32 @@ public class IndexCSVMapper<T> extends CSVMapper<T> {
     }
 
     /**
-     * Adds a CSV index to POJO field mapping as the CSV index being the largest {@link #setMapping(int, BiConsumer,
-     * Function)} CSV index + 1.
+     * Adds a CSV index to POJO field mapping as the CSV index being the largest mapped CSV index + 1.
      *
      * @param <P>                    the type of the POJO field
-     * @param fieldSetter            see {@link CSVMapper.MappingFunctions} constructor doc
-     * @param stringToFieldConverter see {@link CSVMapper.MappingFunctions} constructor doc
+     * @param fieldSetter            see {@link CSVMapper.MappingFunction} constructor doc
+     * @param stringToFieldConverter see {@link CSVMapper.MappingFunction} constructor doc
      */
     public <P> void addMapping(BiConsumer<T, P> fieldSetter, Function<String, P> stringToFieldConverter) {
-        int nextCSVIndex = mappingFunctionsOfCSVIndices.keySet().stream().max(Integer::compareTo).orElse(-1) + 1;
-        setMapping(nextCSVIndex, fieldSetter, stringToFieldConverter);
+        setMapping(getNextCSVIndex(), fieldSetter, stringToFieldConverter);
+    }
+
+    /**
+     * Adds a CSV index to POJO field mapping as the CSV index being the largest mapped CSV index + 1.
+     *
+     * @param csvValueConsumer see {@link CSVMapper.MappingFunction} constructor doc
+     */
+    public void addMapping(BiConsumer<T, String> csvValueConsumer) {
+        setMapping(getNextCSVIndex(), csvValueConsumer);
+    }
+
+    /**
+     * Gets the largest CSV index in {@link #mappingFunctionsOfCSVIndices} + 1.
+     *
+     * @return an int
+     */
+    private int getNextCSVIndex() {
+        return mappingFunctionsOfCSVIndices.keySet().stream().max(Integer::compareTo).orElse(-1) + 1;
     }
 
     /**
@@ -45,11 +61,22 @@ public class IndexCSVMapper<T> extends CSVMapper<T> {
      *
      * @param <P>                    the type of the POJO field
      * @param csvIndex               the CSV index
-     * @param fieldSetter            see {@link CSVMapper.MappingFunctions} constructor doc
-     * @param stringToFieldConverter see {@link CSVMapper.MappingFunctions} constructor doc
+     * @param fieldSetter            see {@link CSVMapper.MappingFunction} constructor doc
+     * @param stringToFieldConverter see {@link CSVMapper.MappingFunction} constructor doc
      */
     public <P> void setMapping(int csvIndex, BiConsumer<T, P> fieldSetter, Function<String, P> stringToFieldConverter) {
-        mappingFunctionsOfCSVIndices.put(csvIndex, new MappingFunctions<P>(fieldSetter, stringToFieldConverter));
+        mappingFunctionsOfCSVIndices.put(csvIndex, new MappingFunction<P>(fieldSetter, stringToFieldConverter));
+    }
+
+    /**
+     * Sets a CSV index to POJO field mapping.
+     *
+     * @param <P>              the type parameter
+     * @param csvIndex         the CSV index
+     * @param csvValueConsumer see {@link CSVMapper.MappingFunction} constructor doc
+     */
+    public <P> void setMapping(int csvIndex, BiConsumer<T, String> csvValueConsumer) {
+        mappingFunctionsOfCSVIndices.put(csvIndex, new MappingFunction<P>(csvValueConsumer));
     }
 
     /**

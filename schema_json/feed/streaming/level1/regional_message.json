@@ -1,0 +1,50 @@
+{
+  "type": "object",
+  "title": "Represents a Regional message. See <a href=\"https://www.iqfeed.net/dev/api/docs/docsBeta/RegionalMessageFormat.cfm\">Regional Messages</a>",
+  "properties": {
+    "Symbol": {
+      "existingJavaType": "java.lang.String",
+      "title": "Symbol."
+    },
+    "Exchange": {
+      "existingJavaType": "java.lang.String",
+      "title": "Deprecated - Use {@link #marketCenter}. See: <a href=\"https://www.iqfeed.net/dev/api/docs/docsBeta/MarketCenters.cfm\">Market Center Codes</a>."
+    },
+    "Regional Bid": {
+      "existingJavaType": "java.lang.Double",
+      "title": "Regional Bid."
+    },
+    "Regional Bid Size": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "Regional Bid Size."
+    },
+    "Regional BidTime": {
+      "existingJavaType": "java.time.LocalTime",
+      "title": "Currently Time of last Trade."
+    },
+    "Regional Ask": {
+      "existingJavaType": "java.lang.Double",
+      "title": "Regional Ask."
+    },
+    "Regional Ask Size": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "Regional Ask Size."
+    },
+    "Regional AskTime": {
+      "existingJavaType": "java.time.LocalTime",
+      "title": "Currently Time of last Trade."
+    },
+    "Fraction Display Code": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "Display formatting code. See <a href=\"https://www.iqfeed.net/dev/api/docs/docsBeta/PriceFormatCodes.cfm\">Price Format Codes</a>."
+    },
+    "Decimal Precision": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "Last Precision used."
+    },
+    "Market Center": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "The regional exchange that the update occurred at. See the <a href=\"https://www.iqfeed.net/dev/api/docs/docsBeta/ListedMarkets.cfm\">Listed Markets Codes</a> for a list of possible values."
+    }
+  }
+}

@@ -1,0 +1,347 @@
+{
+  "type": "object",
+  "title": "Represents a Update/Summary message. See <a href=\"https://www.iqfeed.net/dev/api/docs/docsBeta/Level1UpdateSummaryMessage.cfm\">Update/Message Summary Format</a>",
+  "properties": {
+    "7DayYield": {
+      "existingJavaType": "java.lang.Double",
+      "title": "A price field, the value from a Money Market fund over the last seven days."
+    },
+    "Ask": {
+      "existingJavaType": "java.lang.Double",
+      "title": "The lowest price a market maker or broker is willing to accept for a security."
+    },
+    "AskChange": {
+      "existingJavaType": "java.lang.Double",
+      "title": "Change in Ask since last offer."
+    },
+    "AskMarketCenter": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "The Market Center that sent the ask information.\nSee Listed Market Codes for possible values."
+    },
+    "AskSize": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "The share size available for the ask price in a given security."
+    },
+    "AskTime": {
+      "existingJavaType": "java.time.LocalTime",
+      "title": "The time of the last ask."
+    },
+    "AvailableRegions": {
+      "existingJavaType": "java.lang.String",
+      "title": "String containing a list of all regional exchanges for which there is data available. See Listed Market Codes for possible values."
+    },
+    "AverageMaturity": {
+      "existingJavaType": "java.lang.Double",
+      "title": "The average number of days until maturity of a Money Market Fund's assets."
+    },
+    "Bid": {
+      "existingJavaType": "java.lang.Double",
+      "title": "The highest price a market maker or broker is willing to pay for a security."
+    },
+    "BidChange": {
+      "existingJavaType": "java.lang.Double",
+      "title": "Change in Bid since last offer."
+    },
+    "BidMarketCenter": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "The Market Center that sent the bid information. See Listed Market Codes for possible values."
+    },
+    "BidSize": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "The share size available for the bid price in a given security."
+    },
+    "BidTime": {
+      "existingJavaType": "java.time.LocalTime",
+      "title": "The time of the last bid."
+    },
+    "Change": {
+      "existingJavaType": "java.lang.Double",
+      "title": "Today's change (Last - Close)."
+    },
+    "ChangeFromOpen": {
+      "existingJavaType": "java.lang.Double",
+      "title": "Change in last since open."
+    },
+    "Close": {
+      "existingJavaType": "java.lang.Double",
+      "title": "The closing price of the day. For commodities this will be the last TRADE of the session."
+    },
+    "CloseRange1": {
+      "existingJavaType": "java.lang.Double",
+      "title": "For commodities only. Range value for closing trades that aren't reported individually."
+    },
+    "CloseRange2": {
+      "existingJavaType": "java.lang.Double",
+      "title": "For commodities only. Range value for closing trades that aren't reported individually."
+    },
+    "DaysToExpiration": {
+      "existingJavaType": "java.lang.String",
+      "title": "Number of days to contract expiration."
+    },
+    "DecimalPrecision": {
+      "existingJavaType": "java.lang.String",
+      "title": "Last Precision used."
+    },
+    "Delay": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "The number of minutes a quote is delayed when not authorized for real-time data."
+    },
+    "ExchangeID": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "This is the Exchange Group ID. Use the Listed Markets lookup to decode this value."
+    },
+    "ExtendedTrade": {
+      "existingJavaType": "java.lang.Double",
+      "title": "Price of the most recent extended trade (last qualified trades + Form T trades)."
+    },
+    "ExtendedTradeDate": {
+      "existingJavaType": "java.time.LocalDate",
+      "title": "Date of the extended trade."
+    },
+    "ExtendedTradeMarketCenter": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "Market Center of the most recent extended trade (last qualified trades + Form T trades)."
+    },
+    "ExtendedTradeSize": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "Size of the most recent extended trade (last qualified trades + Form T trades)."
+    },
+    "ExtendedTradeTime": {
+      "existingJavaType": "java.time.LocalTime",
+      "title": "Time (including microseconds) of the most recent extended trade (last qualified trades + Form T trades)."
+    },
+    "ExtendedTradingChange": {
+      "existingJavaType": "java.lang.Double",
+      "title": "Extended Trade minus Yesterday's close."
+    },
+    "ExtendedTradingDifference": {
+      "existingJavaType": "java.lang.Double",
+      "title": "Extended Trade minus Last."
+    },
+    "FinancialStatusIndicator": {
+      "existingJavaType": "java.lang.String",
+      "title": "Denotes if an issuer has failed to submit its regulatory filings on a timely basis, has failed to meet the exchange's continuing listing standards, and/or has filed for bankruptcy. See Financial Status Indicator Codes."
+    },
+    "FractionDisplayCode": {
+      "existingJavaType": "java.lang.String",
+      "title": "Display formatting code. See <a href=\"http://www.iqfeed.net/dev/api/docs/PriceFormatCodes.cfm\">Price Format Codes</a>."
+    },
+    "High": {
+      "existingJavaType": "java.lang.Double",
+      "title": "Today's highest trade price."
+    },
+    "Last": {
+      "existingJavaType": "java.lang.Double",
+      "title": "Last trade price from the regular trading session."
+    },
+    "LastDate": {
+      "existingJavaType": "java.time.LocalDate",
+      "title": "Date of the last qualified trade."
+    },
+    "LastMarketCenter": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "Market Center of most recent last qualified trade."
+    },
+    "LastSize": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "Size of the most recent last qualified trade."
+    },
+    "LastTime": {
+      "existingJavaType": "java.time.LocalTime",
+      "title": "Time (including microseconds) of most recent last qualified trade."
+    },
+    "Low": {
+      "existingJavaType": "java.lang.Double",
+      "title": "Today's lowest trade price."
+    },
+    "MarketCapitalization": {
+      "existingJavaType": "java.lang.Double",
+      "title": "Real-time calculated market cap (Last * Common Shares Outstanding)."
+    },
+    "MarketOpen": {
+      "type": "string",
+      "enum": [
+        "0",
+        "1"
+      ],
+      "javaEnums": [
+        {
+          "name": "CLOSED"
+        },
+        {
+          "name": "OPEN"
+        }
+      ],
+      "title": "NOTE: This field is valid for Futures and Future Options only."
+    },
+    "MessageContents": {
+      "existingJavaType": "java.util.List<net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateMessageContents>",
+      "title": "NOTE: you can get multiple codes in a single message but you will only get one trade identifier per message.\nNOTE: It is also possible to receive no codes in a message if the fields that updated were not trade or quote related."
+    },
+    "MostRecentTrade": {
+      "existingJavaType": "java.lang.Double",
+      "title": "Price of the most recent trade (including all non-last-qualified trades)."
+    },
+    "MostRecentTradeAggressor": {
+      "type": "string",
+      "enum": [
+        "0",
+        "1",
+        "2",
+        "3"
+      ],
+      "javaEnums": [
+        {
+          "name": "INVALID",
+          "title": "(not supported)"
+        },
+        {
+          "name": "BUY"
+        },
+        {
+          "name": "SELL"
+        },
+        {
+          "name": "NEITHER_BUY_NOR_SELL"
+        }
+      ],
+      "title": "The most recent trade aggressor."
+    },
+    "MostRecentTradeConditions": {
+      "existingJavaType": "java.util.List<java.lang.Integer>",
+      "title": "Conditions that identify the type of trade that occurred."
+    },
+    "MostRecentTradeDate": {
+      "existingJavaType": "java.time.LocalDate",
+      "title": "Date of the most recent trade."
+    },
+    "MostRecentTradeDayCode": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "The day of the month corresponding to the trading day that a trade applies to."
+    },
+    "MostRecentTradeMarketCenter": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "Market Center of the most recent trade (including all non-last-qualified trades)."
+    },
+    "MostRecentTradeSize": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "Size of the most recent trade (including all non-last-qualified trades)."
+    },
+    "MostRecentTradeTime": {
+      "existingJavaType": "java.time.LocalTime",
+      "title": "Time (including microseconds) of the most recent trade (including all non-last-qualified trades)."
+    },
+    "NetAssetValue": {
+      "existingJavaType": "java.lang.Double",
+      "title": "Mutual Funds only. The market value of a mutual fund share equal to the net asset of a fund divided by the total number of shares outstanding.\nNOTE: this field is the same as the Bid field for Mutual Funds."
+    },
+    "NumberOfTradesToday": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "The number of trades for the current day."
+    },
+    "Open": {
+      "existingJavaType": "java.lang.Double",
+      "title": "The opening price of the day. For commodities this will be the first TRADE of the session."
+    },
+    "OpenInterest": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "IEOptions, Futures, FutureOptions, and SSFutures only."
+    },
+    "OpenRange1": {
+      "existingJavaType": "java.lang.Double",
+      "title": "For commodities only. Range value for opening trades that aren't reported individually."
+    },
+    "OpenRange2": {
+      "existingJavaType": "java.lang.Double",
+      "title": "For commodities only. Range value for opening trades that aren't reported individually."
+    },
+    "PercentChange": {
+      "existingJavaType": "java.lang.Double",
+      "title": "(Change / Close)."
+    },
+    "PercentOffAverageVolume": {
+      "existingJavaType": "java.lang.Double",
+      "title": "Current Total Volume divided by Average Volume (from fundamental message)."
+    },
+    "PreviousDayVolume": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "Previous Day's Volume."
+    },
+    "PriceEarningsRatio": {
+      "existingJavaType": "java.lang.Double",
+      "title": "Real-time calculated PE (Today's Last / Earnings Per Share)."
+    },
+    "Range": {
+      "existingJavaType": "java.lang.Double",
+      "title": "Trading range for the current day (high - low)."
+    },
+    "RestrictedCode": {
+      "type": "string",
+      "enum": [
+        "N",
+        "R"
+      ],
+      "javaEnums": [
+        {
+          "name": "NOT_RESTRICTED"
+        },
+        {
+          "name": "RESTRICTED"
+        }
+      ],
+      "title": "Short Sale Restricted flag."
+    },
+    "Settle": {
+      "existingJavaType": "java.lang.Double",
+      "title": "Futures or FutureOptions only."
+    },
+    "SettlementDate": {
+      "existingJavaType": "java.time.LocalDate",
+      "title": "The date that the Settle is valid for."
+    },
+    "Spread": {
+      "existingJavaType": "java.lang.Double",
+      "title": "The difference between Bid and Ask prices."
+    },
+    "Symbol": {
+      "existingJavaType": "java.lang.String",
+      "title": "The Symbol ID to match with watch request."
+    },
+    "Tick": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "\"173\"=Up,\"175\"=Down, \"183\"=No Change. Only valid for Last qualified trades."
+    },
+    "TickID": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "Identifier for tick."
+    },
+    "TotalVolume": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "Today's cumulative volume in number of shares."
+    },
+    "Type": {
+      "type": "string",
+      "enum": [
+        "Q",
+        "P"
+      ],
+      "javaEnums": [
+        {
+          "name": "UPDATE"
+        },
+        {
+          "name": "SUMMARY"
+        }
+      ],
+      "title": "The type of this message."
+    },
+    "Volatility": {
+      "existingJavaType": "java.lang.Double",
+      "title": "Real-time calculated volatility (Today's High - Today's Low) / Last."
+    },
+    "VWAP": {
+      "existingJavaType": "java.lang.Double",
+      "title": "Volume Weighted Average Price."
+    }
+  }
+}

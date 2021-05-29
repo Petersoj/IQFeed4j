@@ -16,9 +16,9 @@ import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueNotWhitespace;
  */
 public class TrailingCSVMapper<T> extends CSVMapper<T> {
 
-    protected final HashMap<Integer, MappingFunctions<?>> mappingFunctionsOfCSVIndices;
+    protected final HashMap<Integer, MappingFunction<?>> mappingFunctionsOfCSVIndices;
     protected int trailingCSVIndex;
-    protected MappingFunctions<?> trailingMappingFunction;
+    protected MappingFunction<?> trailingMappingFunction;
 
     /**
      * Instantiates a new {@link TrailingCSVMapper}.
@@ -36,8 +36,8 @@ public class TrailingCSVMapper<T> extends CSVMapper<T> {
      * Function)} CSV index + 1.
      *
      * @param <P>                    the type of the POJO field
-     * @param fieldSetter            see {@link CSVMapper.MappingFunctions} constructor doc
-     * @param stringToFieldConverter see {@link CSVMapper.MappingFunctions} constructor doc
+     * @param fieldSetter            see {@link CSVMapper.MappingFunction} constructor doc
+     * @param stringToFieldConverter see {@link CSVMapper.MappingFunction} constructor doc
      */
     public <P> void addMapping(BiConsumer<T, P> fieldSetter, Function<String, P> stringToFieldConverter) {
         int nextCSVIndex = mappingFunctionsOfCSVIndices.keySet().stream().max(Integer::compareTo).orElse(-1) + 1;
@@ -49,12 +49,12 @@ public class TrailingCSVMapper<T> extends CSVMapper<T> {
      *
      * @param <P>                    the type of the POJO field
      * @param csvIndex               the CSV index
-     * @param fieldSetter            see {@link CSVMapper.MappingFunctions} constructor doc
-     * @param stringToFieldConverter see {@link CSVMapper.MappingFunctions} constructor doc
+     * @param fieldSetter            see {@link CSVMapper.MappingFunction} constructor doc
+     * @param stringToFieldConverter see {@link CSVMapper.MappingFunction} constructor doc
      */
     @SuppressWarnings("OptionalGetWithoutIsPresent") // Optional will always be present here
     public <P> void setMapping(int csvIndex, BiConsumer<T, P> fieldSetter, Function<String, P> stringToFieldConverter) {
-        mappingFunctionsOfCSVIndices.put(csvIndex, new MappingFunctions<P>(fieldSetter, stringToFieldConverter));
+        mappingFunctionsOfCSVIndices.put(csvIndex, new MappingFunction<P>(fieldSetter, stringToFieldConverter));
         trailingCSVIndex = mappingFunctionsOfCSVIndices.keySet().stream().max(Integer::compareTo).get() + 1;
     }
 
@@ -72,11 +72,11 @@ public class TrailingCSVMapper<T> extends CSVMapper<T> {
      * #setMapping(int, BiConsumer, Function)} CSV index + 1.
      *
      * @param <P>                    the type of the POJO field
-     * @param fieldSetter            see {@link CSVMapper.MappingFunctions} constructor doc
-     * @param stringToFieldConverter see {@link CSVMapper.MappingFunctions} constructor doc
+     * @param fieldSetter            see {@link CSVMapper.MappingFunction} constructor doc
+     * @param stringToFieldConverter see {@link CSVMapper.MappingFunction} constructor doc
      */
     public <P> void setTrailingMapping(BiConsumer<T, P> fieldSetter, Function<String, P> stringToFieldConverter) {
-        this.trailingMappingFunction = new MappingFunctions<P>(fieldSetter, stringToFieldConverter);
+        this.trailingMappingFunction = new MappingFunction<P>(fieldSetter, stringToFieldConverter);
     }
 
     /**

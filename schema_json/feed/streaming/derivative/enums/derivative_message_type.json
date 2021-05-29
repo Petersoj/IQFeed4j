@@ -1,0 +1,13 @@
+{
+  "type": "string",
+  "title": "Enums for Derivative feed message types. See <a href=\"https://www.iqfeed.net/dev/api/docs/Derivatives_StreamingIntervalBars_TCPIP.cfm\">Streaming interval bars via TCP/IP</a>",
+  "enum": [
+    "n"
+  ],
+  "javaEnums": [
+    {
+      "name": "SYMBOL_NOT_WATCHED",
+      "title": "Symbol was not found or the user not authorized."
+    }
+  ]
+}

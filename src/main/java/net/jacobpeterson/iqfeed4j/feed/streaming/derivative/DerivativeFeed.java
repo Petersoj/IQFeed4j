@@ -7,7 +7,8 @@ import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedMessageType;
 import net.jacobpeterson.iqfeed4j.model.feed.common.interval.IntervalType;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.derivative.Interval;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.derivative.WatchedInterval;
-import net.jacobpeterson.iqfeed4j.model.feed.streaming.derivative.enums.DerivativeSystemMessage;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.derivative.enums.DerivativeMessageType;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.derivative.enums.DerivativeSystemMessageType;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.IndexCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.NestedListCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.map.MapUtil;
@@ -37,7 +38,6 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DerivativeFeed.class);
     private static final String FEED_NAME_SUFFIX = " Derivative Feed";
-    private static final String SYMBOL_NOT_WATCHED_MESSAGE_PREFIX = "n";
     private static final IndexCSVMapper<Interval> INTERVAL_CSV_MAPPER;
     private static final NestedListCSVMapper<WatchedInterval> WATCHED_INTERVALS_CSV_MAPPER;
 
@@ -76,7 +76,7 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
      * @param port               the port
      */
     public DerivativeFeed(String derivativeFeedName, String hostname, int port) {
-        super(derivativeFeedName + FEED_NAME_SUFFIX, hostname, port, COMMA_DELIMITED_SPLITTER);
+        super(derivativeFeedName + FEED_NAME_SUFFIX, hostname, port, COMMA_DELIMITED_SPLITTER, false, true);
 
         messageReceivedLock = new Object();
         requestIDFeedHelper = new RequestIDFeedHelper();
@@ -97,7 +97,7 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
             // Handle derivative 'SYSTEM' messages
             if (valueEquals(csv, 0, FeedMessageType.SYSTEM.value())) {
                 try {
-                    DerivativeSystemMessage derivativeSystemMessage = DerivativeSystemMessage.fromValue(csv[1]);
+                    DerivativeSystemMessageType derivativeSystemMessage = DerivativeSystemMessageType.fromValue(csv[1]);
 
                     if (!valueExists(csv, 2)) {
                         LOGGER.error("System message needs more arguments!");
@@ -161,7 +161,7 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
             }
 
             // Check for 'BW' request responses
-            if (valueEquals(csv, 0, SYMBOL_NOT_WATCHED_MESSAGE_PREFIX)) {
+            if (valueEquals(csv, 0, DerivativeMessageType.SYMBOL_NOT_WATCHED.value())) {
                 if (!valuePresent(csv, 1)) {
                     LOGGER.error("Invalid message received: {}", (Object) csv);
                     return;
@@ -171,7 +171,7 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
                 List<IntervalListener> intervalListeners = intervalListenersOfWatchedSymbols.get(symbol);
                 if (intervalListeners == null) {
                     LOGGER.warn("Received '{}' message, but no listeners could be found for symbol: {}",
-                            SYMBOL_NOT_WATCHED_MESSAGE_PREFIX, symbol);
+                            DerivativeMessageType.SYMBOL_NOT_WATCHED.value(), symbol);
                     return;
                 }
                 intervalListeners.forEach(listener -> listener.onSymbolNotWatched(symbol));

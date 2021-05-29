@@ -1,0 +1,42 @@
+{
+  "type": "object",
+  "title": "This message is received after your program connects to IQConnect. It contains customer information. See <a href=\"https://www.iqfeed.net/dev/api/docs/docsBeta/Level1SystemMessage.cfm\">Level 1 Port System Messages</a>",
+  "properties": {
+    "ServiceType": {
+      "type": "string",
+      "enum": [
+        "real_time",
+        "delayed"
+      ],
+      "title": "The service type."
+    },
+    "IP": {
+      "existingJavaType": "java.lang.String",
+      "title": "This is the IP address of the Quote server in use."
+    },
+    "Port": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "This will be the port for the Quote server in use."
+    },
+    "Version": {
+      "existingJavaType": "java.lang.String",
+      "title": "Will be the most current version of the IQFeed Client."
+    },
+    "VerboseExchanges": {
+      "existingJavaType": "java.lang.String",
+      "title": "These are the exchanges in text that the customer will get in real-time."
+    },
+    "MaxSymbols": {
+      "existingJavaType": "java.lang.String",
+      "title": "This is the maximum number of symbols a user can watch at one time on the Level 1 port."
+    },
+    "Flags": {
+      "existingJavaType": "java.lang.String",
+      "title": "These are any special flags that may be in their account."
+    },
+    "AccountExpirationDate": {
+      "existingJavaType": "java.time.LocalDate",
+      "title": "Date of account expiration (TRIAL CUSTOMERS ONLY)."
+    }
+  }
+}

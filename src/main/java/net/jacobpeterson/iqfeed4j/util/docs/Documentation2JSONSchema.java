@@ -28,6 +28,8 @@ public final class Documentation2JSONSchema {
      */
     public static void printIQFeedHTMLWebDocAsJSONSchema(String docHTML) throws Exception {
         // For position(): https://stackoverflow.com/questions/2407781/get-nth-child-of-a-node-using-xpath
+        // It is 1-indexed.
+
         String nameXPath = "//tbody/tr/td[position()=2]";
         String typeXPath = "//tbody/tr/td[position()=3]";
         String descriptionXPath = "//tbody/tr/td[position()=4]";

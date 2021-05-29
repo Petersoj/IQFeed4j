@@ -59,7 +59,7 @@
       "title": "The Market Center the trade occurred at."
     },
     "TradeConditions": {
-      "existingJavaType": "java.lang.String",
+      "existingJavaType": "java.util.List<java.lang.Integer>",
       "title": "The trade conditions. Format: One to four, 2 digit hex numbers."
     },
     "TradeAggressor": {

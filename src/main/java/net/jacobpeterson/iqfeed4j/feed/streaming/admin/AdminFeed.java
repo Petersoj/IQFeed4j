@@ -6,8 +6,8 @@ import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedCommand;
 import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedMessageType;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.admin.ClientStatistics;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.admin.ClientStatistics.Type;
-import net.jacobpeterson.iqfeed4j.model.feed.streaming.admin.enums.AdminCommand;
-import net.jacobpeterson.iqfeed4j.model.feed.streaming.admin.enums.AdminMessageType;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.admin.enums.AdminSystemCommand;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.admin.enums.AdminSystemMessageType;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.admin.enums.OnOffOption;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.common.FeedStatistics;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.common.FeedStatistics.Status;
@@ -75,8 +75,8 @@ public class AdminFeed extends AbstractFeed {
 
     protected final Object messageReceivedLock;
     protected final HashMap<Integer, ClientStatistics> clientStatisticsOfClientIDs;
-    protected final HashMap<AdminMessageType, SingleMessageFuture<Void>> voidFutureOfAdminMessageTypes;
-    protected final HashMap<AdminMessageType, SingleMessageFuture<String>> stringFutureOfAdminMessageTypes;
+    protected final HashMap<AdminSystemMessageType, SingleMessageFuture<Void>> voidFutureOfAdminSystemMessageTypes;
+    protected final HashMap<AdminSystemMessageType, SingleMessageFuture<String>> stringFutureOfAdminSystemMessageTypes;
     protected SingleMessageFuture<FeedStatistics> feedStatisticsFuture;
     protected SingleMessageFuture<ClientStatistics> clientStatisticsFuture;
     protected FeedStatistics lastFeedStatistics;
@@ -93,8 +93,8 @@ public class AdminFeed extends AbstractFeed {
 
         messageReceivedLock = new Object();
         clientStatisticsOfClientIDs = new HashMap<>();
-        voidFutureOfAdminMessageTypes = new HashMap<>();
-        stringFutureOfAdminMessageTypes = new HashMap<>();
+        voidFutureOfAdminSystemMessageTypes = new HashMap<>();
+        stringFutureOfAdminSystemMessageTypes = new HashMap<>();
     }
 
     @Override
@@ -112,9 +112,9 @@ public class AdminFeed extends AbstractFeed {
 
         synchronized (messageReceivedLock) {
             try {
-                AdminMessageType parsedAdminMessageType = AdminMessageType.fromValue(csv[1]);
+                AdminSystemMessageType parsedAdminSystemMessageType = AdminSystemMessageType.fromValue(csv[1]);
 
-                switch (parsedAdminMessageType) {
+                switch (parsedAdminSystemMessageType) {
                     // Complete Void Futures
                     case REGISTER_CLIENT_APP_COMPLETED:
                     case REMOVE_CLIENT_APP_COMPLETED:
@@ -123,28 +123,28 @@ public class AdminFeed extends AbstractFeed {
                     case AUTOCONNECT_ON:
                     case AUTOCONNECT_OFF:
                         SingleMessageFuture<Void> voidFuture =
-                                voidFutureOfAdminMessageTypes.get(parsedAdminMessageType);
+                                voidFutureOfAdminSystemMessageTypes.get(parsedAdminSystemMessageType);
                         if (voidFuture != null) {
                             voidFuture.complete(null);
-                            voidFutureOfAdminMessageTypes.put(parsedAdminMessageType, null);
+                            voidFutureOfAdminSystemMessageTypes.put(parsedAdminSystemMessageType, null);
                         } else {
-                            LOGGER.error("Could not complete {} future!", parsedAdminMessageType);
+                            LOGGER.error("Could not complete {} future!", parsedAdminSystemMessageType);
                         }
                         break;
                     // Complete String Futures
                     case CURRENT_LOGINID:
                     case CURRENT_PASSWORD:
                         SingleMessageFuture<String> stringFuture =
-                                stringFutureOfAdminMessageTypes.get(parsedAdminMessageType);
+                                stringFutureOfAdminSystemMessageTypes.get(parsedAdminSystemMessageType);
                         if (stringFuture != null) {
                             if (valueExists(csv, 2)) {
                                 stringFuture.complete(csv[2]);
                             } else {
                                 stringFuture.completeExceptionally(new RuntimeException("CSV response value missing!"));
                             }
-                            stringFutureOfAdminMessageTypes.put(parsedAdminMessageType, null);
+                            stringFutureOfAdminSystemMessageTypes.put(parsedAdminSystemMessageType, null);
                         } else {
-                            LOGGER.error("Could not complete {} future!", parsedAdminMessageType);
+                            LOGGER.error("Could not complete {} future!", parsedAdminSystemMessageType);
                         }
                         break;
                     case STATS:
@@ -157,7 +157,7 @@ public class AdminFeed extends AbstractFeed {
                                 feedStatisticsFuture = null;
                             }
                         } catch (Exception exception) {
-                            LOGGER.error("Could not map {}!", parsedAdminMessageType, exception);
+                            LOGGER.error("Could not map {}!", parsedAdminSystemMessageType, exception);
                             if (feedStatisticsFuture != null) {
                                 feedStatisticsFuture.completeExceptionally(exception);
                                 feedStatisticsFuture = null;
@@ -174,7 +174,7 @@ public class AdminFeed extends AbstractFeed {
                                 clientStatisticsFuture = null;
                             }
                         } catch (Exception exception) {
-                            LOGGER.error("Could not map {}!", parsedAdminMessageType, exception);
+                            LOGGER.error("Could not map {}!", parsedAdminSystemMessageType, exception);
                             if (clientStatisticsFuture != null) {
                                 clientStatisticsFuture.completeExceptionally(exception);
                                 clientStatisticsFuture = null;
@@ -182,7 +182,7 @@ public class AdminFeed extends AbstractFeed {
                         }
                         break;
                     default:
-                        LOGGER.error("Unhandled message type: {}", parsedAdminMessageType);
+                        LOGGER.error("Unhandled message type: {}", parsedAdminSystemMessageType);
                 }
             } catch (Exception exception) {
                 LOGGER.error("Received unknown message type: {}", csv[1], exception);
@@ -191,17 +191,17 @@ public class AdminFeed extends AbstractFeed {
     }
 
     /**
-     * Sends a {@link FeedCommand#SYSTEM} {@link AdminCommand}.
+     * Sends a {@link FeedCommand#SYSTEM} {@link AdminSystemCommand}.
      *
-     * @param adminCommand the {@link AdminCommand}
-     * @param arguments    the arguments. Null for no arguments.
+     * @param AdminSystemCommand the {@link AdminSystemCommand}
+     * @param arguments          the arguments. Null for no arguments.
      *
      * @throws IOException thrown for {@link IOException}s
      */
-    private void sendAdminCommand(AdminCommand adminCommand, String... arguments) throws IOException {
+    private void sendAdminSystemCommand(AdminSystemCommand AdminSystemCommand, String... arguments) throws IOException {
         StringJoiner joiner = new StringJoiner(",", "", LineEnding.CR_LF.getASCIIString());
         joiner.add(FeedCommand.SYSTEM.value());
-        joiner.add(adminCommand.value());
+        joiner.add(AdminSystemCommand.value());
         if (arguments != null && arguments.length != 0) {
             for (String argument : arguments) {
                 joiner.add(argument);
@@ -214,32 +214,33 @@ public class AdminFeed extends AbstractFeed {
     }
 
     /**
-     * Gets the {@link AdminCommand} {@link SingleMessageFuture} or calls {@link #sendAdminCommand(AdminCommand,
-     * String...)} and creates/puts a new {@link SingleMessageFuture}. This method is synchronized with {@link
-     * #messageReceivedLock}.
+     * Gets the {@link AdminSystemCommand} {@link SingleMessageFuture} or calls {@link
+     * #sendAdminSystemCommand(AdminSystemCommand, String...)} and creates/puts a new {@link SingleMessageFuture}. This
+     * method is synchronized with {@link #messageReceivedLock}.
      *
-     * @param <T>                       the {@link SingleMessageFuture} type
-     * @param futureOfAdminMessageTypes the {@link SingleMessageFuture}s of {@link AdminMessageType}s
-     * @param adminMessageType          the {@link AdminMessageType}
-     * @param adminCommand              the {@link AdminCommand} for the {@link AdminMessageType}
-     * @param arguments                 the arguments
+     * @param <T>                             the {@link SingleMessageFuture} type
+     * @param futureOfAdminSystemMessageTypes the {@link SingleMessageFuture}s of {@link AdminSystemMessageType}s
+     * @param AdminSystemMessageType          the {@link AdminSystemMessageType}
+     * @param AdminSystemCommand              the {@link AdminSystemCommand} for the {@link AdminSystemMessageType}
+     * @param arguments                       the arguments
      *
      * @return a {@link SingleMessageFuture}
      *
      * @throws IOException thrown for {@link IOException}s
      */
-    private <T> SingleMessageFuture<T> getOrSendAdminCommandFuture(
-            Map<AdminMessageType, SingleMessageFuture<T>> futureOfAdminMessageTypes, AdminMessageType adminMessageType,
-            AdminCommand adminCommand, String... arguments) throws IOException {
+    private <T> SingleMessageFuture<T> getOrSendAdminSystemCommandFuture(
+            Map<AdminSystemMessageType, SingleMessageFuture<T>> futureOfAdminSystemMessageTypes,
+            AdminSystemMessageType AdminSystemMessageType,
+            AdminSystemCommand AdminSystemCommand, String... arguments) throws IOException {
         synchronized (messageReceivedLock) {
-            SingleMessageFuture<T> messageFuture = futureOfAdminMessageTypes.get(adminMessageType);
+            SingleMessageFuture<T> messageFuture = futureOfAdminSystemMessageTypes.get(AdminSystemMessageType);
             if (messageFuture != null) {
                 return messageFuture;
             }
 
-            sendAdminCommand(adminCommand, arguments);
+            sendAdminSystemCommand(AdminSystemCommand, arguments);
             messageFuture = new SingleMessageFuture<>();
-            futureOfAdminMessageTypes.put(adminMessageType, messageFuture);
+            futureOfAdminSystemMessageTypes.put(AdminSystemMessageType, messageFuture);
             return messageFuture;
         }
     }
@@ -264,9 +265,9 @@ public class AdminFeed extends AbstractFeed {
         checkNotNull(productID);
         checkNotNull(productVersion);
 
-        return getOrSendAdminCommandFuture(voidFutureOfAdminMessageTypes,
-                AdminMessageType.REGISTER_CLIENT_APP_COMPLETED,
-                AdminCommand.REGISTER_CLIENT_APP, productID, productVersion);
+        return getOrSendAdminSystemCommandFuture(voidFutureOfAdminSystemMessageTypes,
+                AdminSystemMessageType.REGISTER_CLIENT_APP_COMPLETED,
+                AdminSystemCommand.REGISTER_CLIENT_APP, productID, productVersion);
     }
 
     /**
@@ -284,9 +285,9 @@ public class AdminFeed extends AbstractFeed {
         checkNotNull(productID);
         checkNotNull(productVersion);
 
-        return getOrSendAdminCommandFuture(voidFutureOfAdminMessageTypes,
-                AdminMessageType.REMOVE_CLIENT_APP_COMPLETED,
-                AdminCommand.REMOVE_CLIENT_APP, productID, productVersion);
+        return getOrSendAdminSystemCommandFuture(voidFutureOfAdminSystemMessageTypes,
+                AdminSystemMessageType.REMOVE_CLIENT_APP_COMPLETED,
+                AdminSystemCommand.REMOVE_CLIENT_APP, productID, productVersion);
     }
 
     /**
@@ -301,9 +302,9 @@ public class AdminFeed extends AbstractFeed {
     public SingleMessageFuture<String> setLoginID(String loginID) throws Exception {
         checkNotNull(loginID);
 
-        return getOrSendAdminCommandFuture(stringFutureOfAdminMessageTypes,
-                AdminMessageType.CURRENT_LOGINID,
-                AdminCommand.SET_LOGINID, loginID);
+        return getOrSendAdminSystemCommandFuture(stringFutureOfAdminSystemMessageTypes,
+                AdminSystemMessageType.CURRENT_LOGINID,
+                AdminSystemCommand.SET_LOGINID, loginID);
     }
 
     /**
@@ -318,9 +319,9 @@ public class AdminFeed extends AbstractFeed {
     public SingleMessageFuture<String> setPassword(String password) throws Exception {
         checkNotNull(password);
 
-        return getOrSendAdminCommandFuture(stringFutureOfAdminMessageTypes,
-                AdminMessageType.CURRENT_PASSWORD,
-                AdminCommand.SET_PASSWORD, password);
+        return getOrSendAdminSystemCommandFuture(stringFutureOfAdminSystemMessageTypes,
+                AdminSystemMessageType.CURRENT_PASSWORD,
+                AdminSystemCommand.SET_PASSWORD, password);
     }
 
     /**
@@ -339,13 +340,13 @@ public class AdminFeed extends AbstractFeed {
 
         switch (onOffOption) {
             case ON:
-                return getOrSendAdminCommandFuture(voidFutureOfAdminMessageTypes,
-                        AdminMessageType.LOGIN_INFO_SAVED,
-                        AdminCommand.SET_SAVE_LOGIN_INFO, onOffOption.value());
+                return getOrSendAdminSystemCommandFuture(voidFutureOfAdminSystemMessageTypes,
+                        AdminSystemMessageType.LOGIN_INFO_SAVED,
+                        AdminSystemCommand.SET_SAVE_LOGIN_INFO, onOffOption.value());
             case OFF:
-                return getOrSendAdminCommandFuture(voidFutureOfAdminMessageTypes,
-                        AdminMessageType.LOGIN_INFO_NOT_SAVED,
-                        AdminCommand.SET_SAVE_LOGIN_INFO, onOffOption.value());
+                return getOrSendAdminSystemCommandFuture(voidFutureOfAdminSystemMessageTypes,
+                        AdminSystemMessageType.LOGIN_INFO_NOT_SAVED,
+                        AdminSystemCommand.SET_SAVE_LOGIN_INFO, onOffOption.value());
             default:
                 throw new UnsupportedOperationException();
         }
@@ -367,13 +368,13 @@ public class AdminFeed extends AbstractFeed {
 
         switch (onOffOption) {
             case ON:
-                return getOrSendAdminCommandFuture(voidFutureOfAdminMessageTypes,
-                        AdminMessageType.AUTOCONNECT_ON,
-                        AdminCommand.SET_AUTOCONNECT, onOffOption.value());
+                return getOrSendAdminSystemCommandFuture(voidFutureOfAdminSystemMessageTypes,
+                        AdminSystemMessageType.AUTOCONNECT_ON,
+                        AdminSystemCommand.SET_AUTOCONNECT, onOffOption.value());
             case OFF:
-                return getOrSendAdminCommandFuture(voidFutureOfAdminMessageTypes,
-                        AdminMessageType.AUTOCONNECT_OFF,
-                        AdminCommand.SET_AUTOCONNECT, onOffOption.value());
+                return getOrSendAdminSystemCommandFuture(voidFutureOfAdminSystemMessageTypes,
+                        AdminSystemMessageType.AUTOCONNECT_OFF,
+                        AdminSystemCommand.SET_AUTOCONNECT, onOffOption.value());
             default:
                 throw new UnsupportedOperationException();
         }
@@ -391,7 +392,7 @@ public class AdminFeed extends AbstractFeed {
      * @throws Exception thrown for {@link Exception}s
      */
     public void connect() throws Exception {
-        sendAdminCommand(AdminCommand.CONNECT);
+        sendAdminSystemCommand(AdminSystemCommand.CONNECT);
     }
 
     /**
@@ -406,7 +407,7 @@ public class AdminFeed extends AbstractFeed {
      * @throws Exception thrown for {@link Exception}s
      */
     public void disconnect() throws Exception {
-        sendAdminCommand(AdminCommand.DISCONNECT);
+        sendAdminSystemCommand(AdminSystemCommand.DISCONNECT);
     }
 
     /**
@@ -420,7 +421,7 @@ public class AdminFeed extends AbstractFeed {
      * @see #getClientStatisticsOfClientIDs()
      */
     public void setClientStatsOn() throws Exception {
-        sendAdminCommand(AdminCommand.CLIENTSTATS_ON);
+        sendAdminSystemCommand(AdminSystemCommand.CLIENTSTATS_ON);
     }
 
     /**
@@ -433,7 +434,7 @@ public class AdminFeed extends AbstractFeed {
      * @see #getClientStatisticsOfClientIDs()
      */
     public void setClientStatsOff() throws Exception {
-        sendAdminCommand(AdminCommand.CLIENTSTATS_OFF);
+        sendAdminSystemCommand(AdminSystemCommand.CLIENTSTATS_OFF);
         synchronized (messageReceivedLock) {
             clientStatisticsOfClientIDs.clear();
         }
