@@ -25,11 +25,15 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.*;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueExists;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.DASHED_DATE_SPACE_TIME;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeFormatters.DATE_SPACE_TIME;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeFormatters.TIME;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.*;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.DOUBLE;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.INTEGER;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.STRING;
 
 /**
  * {@link DerivativeFeed} is an {@link AbstractServerConnectionFeed} for derivative tick data (aka interval/bar data).
@@ -37,9 +41,9 @@ import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConv
 public class DerivativeFeed extends AbstractServerConnectionFeed {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DerivativeFeed.class);
-    private static final String FEED_NAME_SUFFIX = " Derivative Feed";
-    private static final IndexCSVMapper<Interval> INTERVAL_CSV_MAPPER;
-    private static final NestedListCSVMapper<WatchedInterval> WATCHED_INTERVALS_CSV_MAPPER;
+    protected static final String FEED_NAME_SUFFIX = " Derivative Feed";
+    protected static final IndexCSVMapper<Interval> INTERVAL_CSV_MAPPER;
+    protected static final NestedListCSVMapper<WatchedInterval> WATCHED_INTERVALS_CSV_MAPPER;
 
     static {
         // Add mappings with CSV indices analogous to line of execution
@@ -52,13 +56,13 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
         INTERVAL_CSV_MAPPER.addMapping(Interval::setHigh, DOUBLE);
         INTERVAL_CSV_MAPPER.addMapping(Interval::setLow, DOUBLE);
         INTERVAL_CSV_MAPPER.addMapping(Interval::setLast, DOUBLE);
-        INTERVAL_CSV_MAPPER.addMapping(Interval::setCumulativeVolume, INT);
-        INTERVAL_CSV_MAPPER.addMapping(Interval::setIntervalVolume, INT);
-        INTERVAL_CSV_MAPPER.addMapping(Interval::setNumberOfTrades, INT);
+        INTERVAL_CSV_MAPPER.addMapping(Interval::setCumulativeVolume, INTEGER);
+        INTERVAL_CSV_MAPPER.addMapping(Interval::setIntervalVolume, INTEGER);
+        INTERVAL_CSV_MAPPER.addMapping(Interval::setNumberOfTrades, INTEGER);
 
         WATCHED_INTERVALS_CSV_MAPPER = new NestedListCSVMapper<>(ArrayList::new, WatchedInterval::new, 3);
         WATCHED_INTERVALS_CSV_MAPPER.addMapping(WatchedInterval::setSymbol, STRING);
-        WATCHED_INTERVALS_CSV_MAPPER.addMapping(WatchedInterval::setInterval, INT);
+        WATCHED_INTERVALS_CSV_MAPPER.addMapping(WatchedInterval::setInterval, INTEGER);
         WATCHED_INTERVALS_CSV_MAPPER.addMapping(WatchedInterval::setRequestID, STRING);
     }
 

@@ -1,0 +1,48 @@
+{
+  "type": "string",
+  "title": "Enums for Level 1 feed message types. See <a href=\"https://www.iqfeed.net/dev/api/docs/docsBeta/Level1viaTCPIP.cfm\">Level 1 via TCP/IP</a>",
+  "enum": [
+    "F",
+    "P",
+    "Q",
+    "R",
+    "N",
+    "S",
+    "T",
+    "n"
+  ],
+  "javaEnums": [
+    {
+      "name": "FUNDAMENTAL_MESSAGE",
+      "title": "A fundamental message."
+    },
+    {
+      "name": "SUMMARY_MESSAGE",
+      "title": "A summary message."
+    },
+    {
+      "name": "UPDATE_MESSAGE",
+      "title": "An update message."
+    },
+    {
+      "name": "REGIONAL_UPDATE",
+      "title": "A regional update."
+    },
+    {
+      "name": "NEWS_HEADLINE_MESSAGE",
+      "title": "A news headline message."
+    },
+    {
+      "name": "SYSTEM_MESSAGE",
+      "title": "A system message."
+    },
+    {
+      "name": "TIMESTAMP_MESSAGE",
+      "title": "A timestamp message."
+    },
+    {
+      "name": "SYMBOL_NOT_WATCHED",
+      "title": "Symbol was not found or the user not authorized."
+    }
+  ]
+}

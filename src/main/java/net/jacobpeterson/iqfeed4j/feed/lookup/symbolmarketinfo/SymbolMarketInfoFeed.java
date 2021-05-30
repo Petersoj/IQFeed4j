@@ -1,16 +1,16 @@
 package net.jacobpeterson.iqfeed4j.feed.lookup.symbolmarketinfo;
 
-import net.jacobpeterson.iqfeed4j.feed.message.MultiMessageListener;
 import net.jacobpeterson.iqfeed4j.feed.lookup.AbstractLookupFeed;
-import net.jacobpeterson.iqfeed4j.model.feed.lookup.symbolmarketinfo.enums.SearchCodeType;
-import net.jacobpeterson.iqfeed4j.model.feed.lookup.symbolmarketinfo.enums.SearchField;
-import net.jacobpeterson.iqfeed4j.model.feed.lookup.symbolmarketinfo.enums.SymbolFilterType;
+import net.jacobpeterson.iqfeed4j.feed.message.MultiMessageListener;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.symbolmarketinfo.ListedMarket;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.symbolmarketinfo.NIACCode;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.symbolmarketinfo.SICCode;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.symbolmarketinfo.SecurityType;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.symbolmarketinfo.SymbolSearchResult;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.symbolmarketinfo.TradeCondition;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.symbolmarketinfo.enums.SearchCodeType;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.symbolmarketinfo.enums.SearchField;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.symbolmarketinfo.enums.SymbolFilterType;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.IndexCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.TrailingCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.string.LineEnding;
@@ -23,8 +23,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.google.common.base.Preconditions.*;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.INT;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.INTEGER;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.STRING;
 
 /**
@@ -33,62 +34,62 @@ import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConv
 public class SymbolMarketInfoFeed extends AbstractLookupFeed {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SymbolMarketInfoFeed.class);
-    private static final String FEED_NAME_SUFFIX = " Symbol and Market Info";
-    private static final TrailingCSVMapper<SymbolSearchResult> FILTER_SYMBOL_SEARCH_RESULT_CSV_MAPPER;
-    private static final TrailingCSVMapper<SymbolSearchResult> SIC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER;
-    private static final TrailingCSVMapper<SymbolSearchResult> NIAC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER;
-    private static final IndexCSVMapper<ListedMarket> LISTED_MARKET_CSV_MAPPER;
-    private static final IndexCSVMapper<SecurityType> SECURITY_TYPE_CSV_MAPPER;
-    private static final IndexCSVMapper<TradeCondition> TRADE_CONDITION_CSV_MAPPER;
-    private static final IndexCSVMapper<SICCode> SIC_CODE_CSV_MAPPER;
-    private static final IndexCSVMapper<NIACCode> NIAC_CODE_CSV_MAPPER;
+    protected static final String FEED_NAME_SUFFIX = " Symbol and Market Info";
+    protected static final TrailingCSVMapper<SymbolSearchResult> FILTER_SYMBOL_SEARCH_RESULT_CSV_MAPPER;
+    protected static final TrailingCSVMapper<SymbolSearchResult> SIC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER;
+    protected static final TrailingCSVMapper<SymbolSearchResult> NIAC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER;
+    protected static final IndexCSVMapper<ListedMarket> LISTED_MARKET_CSV_MAPPER;
+    protected static final IndexCSVMapper<SecurityType> SECURITY_TYPE_CSV_MAPPER;
+    protected static final IndexCSVMapper<TradeCondition> TRADE_CONDITION_CSV_MAPPER;
+    protected static final IndexCSVMapper<SICCode> SIC_CODE_CSV_MAPPER;
+    protected static final IndexCSVMapper<NIACCode> NIAC_CODE_CSV_MAPPER;
 
     static {
         // Add mappings with CSV indices analogous to line of execution
 
         FILTER_SYMBOL_SEARCH_RESULT_CSV_MAPPER = new TrailingCSVMapper<>(SymbolSearchResult::new);
         FILTER_SYMBOL_SEARCH_RESULT_CSV_MAPPER.addMapping(SymbolSearchResult::setSymbol, STRING);
-        FILTER_SYMBOL_SEARCH_RESULT_CSV_MAPPER.addMapping(SymbolSearchResult::setListedMarketID, INT);
-        FILTER_SYMBOL_SEARCH_RESULT_CSV_MAPPER.addMapping(SymbolSearchResult::setSecurityTypeID, INT);
+        FILTER_SYMBOL_SEARCH_RESULT_CSV_MAPPER.addMapping(SymbolSearchResult::setListedMarketID, INTEGER);
+        FILTER_SYMBOL_SEARCH_RESULT_CSV_MAPPER.addMapping(SymbolSearchResult::setSecurityTypeID, INTEGER);
         FILTER_SYMBOL_SEARCH_RESULT_CSV_MAPPER.setTrailingMapping(SymbolSearchResult::setDescription, STRING);
 
         SIC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER = new TrailingCSVMapper<>(SymbolSearchResult::new);
-        SIC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER.addMapping(SymbolSearchResult::setSICCode, INT);
+        SIC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER.addMapping(SymbolSearchResult::setSICCode, INTEGER);
         SIC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER.addMapping(SymbolSearchResult::setSymbol, STRING);
-        SIC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER.addMapping(SymbolSearchResult::setListedMarketID, INT);
-        SIC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER.addMapping(SymbolSearchResult::setSecurityTypeID, INT);
+        SIC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER.addMapping(SymbolSearchResult::setListedMarketID, INTEGER);
+        SIC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER.addMapping(SymbolSearchResult::setSecurityTypeID, INTEGER);
         SIC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER.setTrailingMapping(SymbolSearchResult::setDescription, STRING);
 
         NIAC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER = new TrailingCSVMapper<>(SymbolSearchResult::new);
-        NIAC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER.addMapping(SymbolSearchResult::setNIACCode, INT);
+        NIAC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER.addMapping(SymbolSearchResult::setNIACCode, INTEGER);
         NIAC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER.addMapping(SymbolSearchResult::setSymbol, STRING);
-        NIAC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER.addMapping(SymbolSearchResult::setListedMarketID, INT);
-        NIAC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER.addMapping(SymbolSearchResult::setSecurityTypeID, INT);
+        NIAC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER.addMapping(SymbolSearchResult::setListedMarketID, INTEGER);
+        NIAC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER.addMapping(SymbolSearchResult::setSecurityTypeID, INTEGER);
         NIAC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER.setTrailingMapping(SymbolSearchResult::setDescription, STRING);
 
         LISTED_MARKET_CSV_MAPPER = new IndexCSVMapper<>(ListedMarket::new);
-        LISTED_MARKET_CSV_MAPPER.addMapping(ListedMarket::setListedMarketID, INT);
+        LISTED_MARKET_CSV_MAPPER.addMapping(ListedMarket::setListedMarketID, INTEGER);
         LISTED_MARKET_CSV_MAPPER.addMapping(ListedMarket::setShortName, STRING);
         LISTED_MARKET_CSV_MAPPER.addMapping(ListedMarket::setLongName, STRING);
-        LISTED_MARKET_CSV_MAPPER.addMapping(ListedMarket::setGroupID, INT);
+        LISTED_MARKET_CSV_MAPPER.addMapping(ListedMarket::setGroupID, INTEGER);
         LISTED_MARKET_CSV_MAPPER.addMapping(ListedMarket::setShortGroupName, STRING);
 
         SECURITY_TYPE_CSV_MAPPER = new IndexCSVMapper<>(SecurityType::new);
-        SECURITY_TYPE_CSV_MAPPER.addMapping(SecurityType::setSecurityTypeID, INT);
+        SECURITY_TYPE_CSV_MAPPER.addMapping(SecurityType::setSecurityTypeID, INTEGER);
         SECURITY_TYPE_CSV_MAPPER.addMapping(SecurityType::setShortName, STRING);
         SECURITY_TYPE_CSV_MAPPER.addMapping(SecurityType::setLongName, STRING);
 
         TRADE_CONDITION_CSV_MAPPER = new IndexCSVMapper<>(TradeCondition::new);
-        TRADE_CONDITION_CSV_MAPPER.addMapping(TradeCondition::setTradeConditionID, INT);
+        TRADE_CONDITION_CSV_MAPPER.addMapping(TradeCondition::setTradeConditionID, INTEGER);
         TRADE_CONDITION_CSV_MAPPER.addMapping(TradeCondition::setShortName, STRING);
         TRADE_CONDITION_CSV_MAPPER.addMapping(TradeCondition::setLongName, STRING);
 
         SIC_CODE_CSV_MAPPER = new IndexCSVMapper<>(SICCode::new);
-        SIC_CODE_CSV_MAPPER.addMapping(SICCode::setSICCode, INT);
+        SIC_CODE_CSV_MAPPER.addMapping(SICCode::setSICCode, INTEGER);
         SIC_CODE_CSV_MAPPER.addMapping(SICCode::setDescription, STRING);
 
         NIAC_CODE_CSV_MAPPER = new IndexCSVMapper<>(NIACCode::new);
-        NIAC_CODE_CSV_MAPPER.addMapping(NIACCode::setNIACCode, INT);
+        NIAC_CODE_CSV_MAPPER.addMapping(NIACCode::setNIACCode, INTEGER);
         NIAC_CODE_CSV_MAPPER.addMapping(NIACCode::setDescription, STRING);
     }
 

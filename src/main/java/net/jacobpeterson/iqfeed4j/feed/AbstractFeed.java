@@ -27,7 +27,7 @@ public abstract class AbstractFeed implements Runnable {
     /**
      * Protocol versions are managed by the version control branches.
      */
-    public static final String CURRENTLY_SUPPORTED_PROTOCOL_VERSION = "6.1";
+    public static final String CURRENTLY_SUPPORTED_PROTOCOL_VERSION = "6.2";
 
     /**
      * A comma (,) delimiter {@link Splitter} that ignores commas in quotes using a Regex {@link Pattern}.
@@ -204,21 +204,16 @@ public abstract class AbstractFeed implements Runnable {
                     String[] csv = csvSplitter.splitToList(line).toArray(new String[0]);
 
                     // Confirm protocol version valid
-                    if (validateProtocolVersion) {
-                        if (valueEquals(csv, 0, FeedMessageType.SYSTEM.value()) &&
-                                valueEquals(csv, 1, FeedMessageType.CURRENT_PROTOCOL.value()) &&
-                                valueEquals(csv, 2, CURRENTLY_SUPPORTED_PROTOCOL_VERSION)) {
-                            LOGGER.debug("Protocol version validated: {}", (Object) csv);
+                    if (validateProtocolVersion && !protocolVersionValidated &&
+                            valueEquals(csv, 0, FeedMessageType.SYSTEM.value()) &&
+                            valueEquals(csv, 1, FeedMessageType.CURRENT_PROTOCOL.value()) &&
+                            valueEquals(csv, 2, CURRENTLY_SUPPORTED_PROTOCOL_VERSION)) {
+                        LOGGER.debug("Protocol version validated: {}", (Object) csv);
 
-                            protocolVersionValidated = true;
-                            onProtocolVersionValidated();
-                        } else {
-                            LOGGER.warn("Received message before protocol version was validated: {}", (Object) csv);
-                        }
-                    }
-
-                    // Call message handlers
-                    if (!validateProtocolVersion || protocolVersionValidated) {
+                        protocolVersionValidated = true;
+                        onProtocolVersionValidated();
+                    } else {
+                        // Call message handlers
                         onMessageReceived(csv);
                         if (customFeedMessageListener != null) {
                             customFeedMessageListener.onMessageReceived(csv);

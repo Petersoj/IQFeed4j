@@ -1,8 +1,8 @@
 package net.jacobpeterson.iqfeed4j.feed.lookup.marketsummary;
 
-import net.jacobpeterson.iqfeed4j.feed.message.MultiMessageListener;
 import net.jacobpeterson.iqfeed4j.feed.lookup.AbstractLookupFeed;
 import net.jacobpeterson.iqfeed4j.feed.lookup.symbolmarketinfo.SymbolMarketInfoFeed;
+import net.jacobpeterson.iqfeed4j.feed.message.MultiMessageListener;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.marketsummary.EndOfDaySnapshot;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.marketsummary.FiveMinuteSnapshot;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.marketsummary.FundamentalSnapshot;
@@ -21,12 +21,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.DATE;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.TIME;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.DOUBLE;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.INT;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.INTEGER;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.STRING;
 
 /**
@@ -35,19 +35,19 @@ import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConv
 public class MarketSummaryFeed extends AbstractLookupFeed {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MarketSummaryFeed.class);
-    private static final String FEED_NAME_SUFFIX = " Market Summary";
-    private static final NamedCSVMapper<EndOfDaySnapshot> END_OF_DAY_SNAPSHOT_CSV_MAPPER;
-    private static final NamedCSVMapper<FundamentalSnapshot> FUNDAMENTAL_SNAPSHOT_CSV_MAPPER;
-    private static final NamedCSVMapper<FiveMinuteSnapshot> FIVE_MINUTE_SNAPSHOT_CSV_MAPPER;
+    protected static final String FEED_NAME_SUFFIX = " Market Summary";
+    protected static final NamedCSVMapper<EndOfDaySnapshot> END_OF_DAY_SNAPSHOT_CSV_MAPPER;
+    protected static final NamedCSVMapper<FundamentalSnapshot> FUNDAMENTAL_SNAPSHOT_CSV_MAPPER;
+    protected static final NamedCSVMapper<FiveMinuteSnapshot> FIVE_MINUTE_SNAPSHOT_CSV_MAPPER;
 
     static {
         END_OF_DAY_SNAPSHOT_CSV_MAPPER = new NamedCSVMapper<>(EndOfDaySnapshot::new);
         END_OF_DAY_SNAPSHOT_CSV_MAPPER.setMapping("Symbol", EndOfDaySnapshot::setSymbol, STRING);
-        END_OF_DAY_SNAPSHOT_CSV_MAPPER.setMapping("Exchange", EndOfDaySnapshot::setExchange, INT);
-        END_OF_DAY_SNAPSHOT_CSV_MAPPER.setMapping("Type", EndOfDaySnapshot::setType, INT);
+        END_OF_DAY_SNAPSHOT_CSV_MAPPER.setMapping("Exchange", EndOfDaySnapshot::setExchange, INTEGER);
+        END_OF_DAY_SNAPSHOT_CSV_MAPPER.setMapping("Type", EndOfDaySnapshot::setType, INTEGER);
         END_OF_DAY_SNAPSHOT_CSV_MAPPER.setMapping("Last", EndOfDaySnapshot::setLast, DOUBLE);
         END_OF_DAY_SNAPSHOT_CSV_MAPPER.setMapping("TradeSize", EndOfDaySnapshot::setTradeSize, DOUBLE);
-        END_OF_DAY_SNAPSHOT_CSV_MAPPER.setMapping("TradedMarket", EndOfDaySnapshot::setTradedMarket, INT);
+        END_OF_DAY_SNAPSHOT_CSV_MAPPER.setMapping("TradedMarket", EndOfDaySnapshot::setTradedMarket, INTEGER);
         END_OF_DAY_SNAPSHOT_CSV_MAPPER.setMapping("TradeDate", EndOfDaySnapshot::setTradeDate, DATE);
         END_OF_DAY_SNAPSHOT_CSV_MAPPER.setMapping("TradeTime", EndOfDaySnapshot::setTradeTime, TIME);
         END_OF_DAY_SNAPSHOT_CSV_MAPPER.setMapping("Open", EndOfDaySnapshot::setOpen, DOUBLE);
@@ -55,10 +55,10 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
         END_OF_DAY_SNAPSHOT_CSV_MAPPER.setMapping("Low", EndOfDaySnapshot::setLow, DOUBLE);
         END_OF_DAY_SNAPSHOT_CSV_MAPPER.setMapping("Close", EndOfDaySnapshot::setClose, DOUBLE);
         END_OF_DAY_SNAPSHOT_CSV_MAPPER.setMapping("Bid", EndOfDaySnapshot::setBid, DOUBLE);
-        END_OF_DAY_SNAPSHOT_CSV_MAPPER.setMapping("BidMarket", EndOfDaySnapshot::setBidMarket, INT);
+        END_OF_DAY_SNAPSHOT_CSV_MAPPER.setMapping("BidMarket", EndOfDaySnapshot::setBidMarket, INTEGER);
         END_OF_DAY_SNAPSHOT_CSV_MAPPER.setMapping("BidSize", EndOfDaySnapshot::setBidSize, DOUBLE);
         END_OF_DAY_SNAPSHOT_CSV_MAPPER.setMapping("Ask", EndOfDaySnapshot::setAsk, DOUBLE);
-        END_OF_DAY_SNAPSHOT_CSV_MAPPER.setMapping("AskMarket", EndOfDaySnapshot::setAskMarket, INT);
+        END_OF_DAY_SNAPSHOT_CSV_MAPPER.setMapping("AskMarket", EndOfDaySnapshot::setAskMarket, INTEGER);
         END_OF_DAY_SNAPSHOT_CSV_MAPPER.setMapping("AskSize", EndOfDaySnapshot::setAskSize, DOUBLE);
         END_OF_DAY_SNAPSHOT_CSV_MAPPER.setMapping("Volume", EndOfDaySnapshot::setVolume, DOUBLE);
         END_OF_DAY_SNAPSHOT_CSV_MAPPER.setMapping("PDayVolume", EndOfDaySnapshot::setPDayVolume, DOUBLE);
@@ -90,13 +90,13 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
         FUNDAMENTAL_SNAPSHOT_CSV_MAPPER.setMapping("ExDivDate", FundamentalSnapshot::setExDivDate, DATE);
         FUNDAMENTAL_SNAPSHOT_CSV_MAPPER.setMapping("CurrentEps", FundamentalSnapshot::setCurrentEps, DOUBLE);
         FUNDAMENTAL_SNAPSHOT_CSV_MAPPER.setMapping("EstEps", FundamentalSnapshot::setEstEps, DOUBLE);
-        FUNDAMENTAL_SNAPSHOT_CSV_MAPPER.setMapping("SIC", FundamentalSnapshot::setSic, INT);
-        FUNDAMENTAL_SNAPSHOT_CSV_MAPPER.setMapping("Precision", FundamentalSnapshot::setPrecision, INT);
+        FUNDAMENTAL_SNAPSHOT_CSV_MAPPER.setMapping("SIC", FundamentalSnapshot::setSic, INTEGER);
+        FUNDAMENTAL_SNAPSHOT_CSV_MAPPER.setMapping("Precision", FundamentalSnapshot::setPrecision, INTEGER);
         FUNDAMENTAL_SNAPSHOT_CSV_MAPPER.setMapping("Display", FundamentalSnapshot::setDisplay, DOUBLE);
         FUNDAMENTAL_SNAPSHOT_CSV_MAPPER.setMapping("GrowthPercent", FundamentalSnapshot::setGrowthPercent, DOUBLE);
         FUNDAMENTAL_SNAPSHOT_CSV_MAPPER.setMapping("FiscalYearEnd", FundamentalSnapshot::setFiscalYearEnd, DATE);
         FUNDAMENTAL_SNAPSHOT_CSV_MAPPER.setMapping("Volatility", FundamentalSnapshot::setVolatility, DOUBLE);
-        FUNDAMENTAL_SNAPSHOT_CSV_MAPPER.setMapping("ListedMarket", FundamentalSnapshot::setListedMarket, INT);
+        FUNDAMENTAL_SNAPSHOT_CSV_MAPPER.setMapping("ListedMarket", FundamentalSnapshot::setListedMarket, INTEGER);
         FUNDAMENTAL_SNAPSHOT_CSV_MAPPER.setMapping("MaturityDate", FundamentalSnapshot::setMaturityDate, DATE);
         FUNDAMENTAL_SNAPSHOT_CSV_MAPPER.setMapping("OptionRoots", FundamentalSnapshot::setOptionRoots, STRING);
         FUNDAMENTAL_SNAPSHOT_CSV_MAPPER.setMapping("CouponRate", FundamentalSnapshot::setCouponRate, DOUBLE);
@@ -126,16 +126,16 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
         FUNDAMENTAL_SNAPSHOT_CSV_MAPPER.setMapping("LastSplitDate", FundamentalSnapshot::setLastSplitDate, DATE);
         FUNDAMENTAL_SNAPSHOT_CSV_MAPPER.setMapping("PrevSplit", FundamentalSnapshot::setPrevSplit, DOUBLE);
         FUNDAMENTAL_SNAPSHOT_CSV_MAPPER.setMapping("PrevSplitDate", FundamentalSnapshot::setPrevSplitDate, DATE);
-        FUNDAMENTAL_SNAPSHOT_CSV_MAPPER.setMapping("NAICS", FundamentalSnapshot::setNaics, INT);
+        FUNDAMENTAL_SNAPSHOT_CSV_MAPPER.setMapping("NAICS", FundamentalSnapshot::setNaics, INTEGER);
         FUNDAMENTAL_SNAPSHOT_CSV_MAPPER.setMapping("ShortInterest", FundamentalSnapshot::setShortInterest, DOUBLE);
 
         FIVE_MINUTE_SNAPSHOT_CSV_MAPPER = new NamedCSVMapper<>(FiveMinuteSnapshot::new);
         FIVE_MINUTE_SNAPSHOT_CSV_MAPPER.setMapping("Symbol", FiveMinuteSnapshot::setSymbol, STRING);
-        FIVE_MINUTE_SNAPSHOT_CSV_MAPPER.setMapping("Exchange", FiveMinuteSnapshot::setExchange, INT);
-        FIVE_MINUTE_SNAPSHOT_CSV_MAPPER.setMapping("Type", FiveMinuteSnapshot::setType, INT);
+        FIVE_MINUTE_SNAPSHOT_CSV_MAPPER.setMapping("Exchange", FiveMinuteSnapshot::setExchange, INTEGER);
+        FIVE_MINUTE_SNAPSHOT_CSV_MAPPER.setMapping("Type", FiveMinuteSnapshot::setType, INTEGER);
         FIVE_MINUTE_SNAPSHOT_CSV_MAPPER.setMapping("Last", FiveMinuteSnapshot::setLast, DOUBLE);
         FIVE_MINUTE_SNAPSHOT_CSV_MAPPER.setMapping("TradeSize", FiveMinuteSnapshot::setTradeSize, DOUBLE);
-        FIVE_MINUTE_SNAPSHOT_CSV_MAPPER.setMapping("TradedMarket", FiveMinuteSnapshot::setTradedMarket, INT);
+        FIVE_MINUTE_SNAPSHOT_CSV_MAPPER.setMapping("TradedMarket", FiveMinuteSnapshot::setTradedMarket, INTEGER);
         FIVE_MINUTE_SNAPSHOT_CSV_MAPPER.setMapping("TradeDate", FiveMinuteSnapshot::setTradeDate, DATE);
         FIVE_MINUTE_SNAPSHOT_CSV_MAPPER.setMapping("TradeTime", FiveMinuteSnapshot::setTradeTime, TIME);
         FIVE_MINUTE_SNAPSHOT_CSV_MAPPER.setMapping("Open", FiveMinuteSnapshot::setOpen, DOUBLE);
@@ -143,10 +143,10 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
         FIVE_MINUTE_SNAPSHOT_CSV_MAPPER.setMapping("Low", FiveMinuteSnapshot::setLow, DOUBLE);
         FIVE_MINUTE_SNAPSHOT_CSV_MAPPER.setMapping("Close", FiveMinuteSnapshot::setClose, DOUBLE);
         FIVE_MINUTE_SNAPSHOT_CSV_MAPPER.setMapping("Bid", FiveMinuteSnapshot::setBid, DOUBLE);
-        FIVE_MINUTE_SNAPSHOT_CSV_MAPPER.setMapping("BidMarket", FiveMinuteSnapshot::setBidMarket, INT);
+        FIVE_MINUTE_SNAPSHOT_CSV_MAPPER.setMapping("BidMarket", FiveMinuteSnapshot::setBidMarket, INTEGER);
         FIVE_MINUTE_SNAPSHOT_CSV_MAPPER.setMapping("BidSize", FiveMinuteSnapshot::setBidSize, DOUBLE);
         FIVE_MINUTE_SNAPSHOT_CSV_MAPPER.setMapping("Ask", FiveMinuteSnapshot::setAsk, DOUBLE);
-        FIVE_MINUTE_SNAPSHOT_CSV_MAPPER.setMapping("AskMarket", FiveMinuteSnapshot::setAskMarket, INT);
+        FIVE_MINUTE_SNAPSHOT_CSV_MAPPER.setMapping("AskMarket", FiveMinuteSnapshot::setAskMarket, INTEGER);
         FIVE_MINUTE_SNAPSHOT_CSV_MAPPER.setMapping("AskSize", FiveMinuteSnapshot::setAskSize, DOUBLE);
         FIVE_MINUTE_SNAPSHOT_CSV_MAPPER.setMapping("Volume", FiveMinuteSnapshot::setVolume, DOUBLE);
         FIVE_MINUTE_SNAPSHOT_CSV_MAPPER.setMapping("PDayVolume", FiveMinuteSnapshot::setPDayVolume, DOUBLE);

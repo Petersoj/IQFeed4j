@@ -1,17 +1,17 @@
 package net.jacobpeterson.iqfeed4j.feed.lookup.optionschains;
 
 import com.google.common.base.Splitter;
-import net.jacobpeterson.iqfeed4j.feed.message.SingleMessageFuture;
 import net.jacobpeterson.iqfeed4j.feed.lookup.AbstractLookupFeed;
+import net.jacobpeterson.iqfeed4j.feed.message.SingleMessageFuture;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.FutureContract;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.FutureSpread;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.OptionContract;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.enums.EquityOptionMonth;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.enums.FutureMonth;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.enums.NonStandardOptionTypes;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.enums.OptionFilterType;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.enums.OptionType;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.enums.PutsCallsOption;
-import net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.FutureContract;
-import net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.FutureSpread;
-import net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.OptionContract;
 import net.jacobpeterson.iqfeed4j.util.chars.CharUtil;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.ListCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.exception.IQFeedException;
@@ -32,7 +32,8 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
 
 /**
@@ -309,12 +310,12 @@ public class OptionChainsFeed extends AbstractLookupFeed {
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OptionChainsFeed.class);
-    private static final String FEED_NAME_SUFFIX = " Option Chains";
-    private static final Pattern COLON_REGEX = Pattern.compile(Pattern.quote(":"));
-    private static final ListCSVMapper<FutureContract> FUTURE_CONTRACT_CSV_MAPPER;
-    private static final ListCSVMapper<FutureSpread> FUTURE_SPREAD_CSV_MAPPER;
-    private static final ListCSVMapper<OptionContract> FUTURE_OPTION_CSV_MAPPER;
-    private static final ListCSVMapper<OptionContract> EQUITY_OPTION_CSV_MAPPER;
+    protected static final String FEED_NAME_SUFFIX = " Option Chains";
+    protected static final Pattern COLON_REGEX = Pattern.compile(Pattern.quote(":"));
+    protected static final ListCSVMapper<FutureContract> FUTURE_CONTRACT_CSV_MAPPER;
+    protected static final ListCSVMapper<FutureSpread> FUTURE_SPREAD_CSV_MAPPER;
+    protected static final ListCSVMapper<OptionContract> FUTURE_OPTION_CSV_MAPPER;
+    protected static final ListCSVMapper<OptionContract> EQUITY_OPTION_CSV_MAPPER;
 
     static {
         FUTURE_CONTRACT_CSV_MAPPER = new ListCSVMapper<>(() -> new ArrayList<>(30),

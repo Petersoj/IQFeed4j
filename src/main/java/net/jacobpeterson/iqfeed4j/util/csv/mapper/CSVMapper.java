@@ -8,7 +8,6 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
 import java.util.Locale;
 import java.util.concurrent.Callable;
-import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 /**
@@ -29,7 +28,7 @@ public abstract class CSVMapper<T> {
         public static final Function<String, Boolean> BOOLEAN = Boolean::valueOf;
         public static final Function<String, Byte> BYTE = Byte::valueOf;
         public static final Function<String, Short> SHORT = Short::valueOf;
-        public static final Function<String, Integer> INT = Integer::valueOf;
+        public static final Function<String, Integer> INTEGER = Integer::valueOf;
         public static final Function<String, Long> LONG = Long::valueOf;
         public static final Function<String, Float> FLOAT = Float::valueOf;
         public static final Function<String, Double> DOUBLE = Double::valueOf;
@@ -68,6 +67,12 @@ public abstract class CSVMapper<T> {
 
         /** Format of: <code>yyyy-MM-dd</code>. */
         public static final DateTimeFormatter DASHED_DATE = DateTimeFormatter.ISO_LOCAL_DATE;
+
+        /** Format of: <code>MM/dd/yyyy</code>. */
+        public static final DateTimeFormatter SLASHED_DATE = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+
+        /** Format of: <code>HH:mm:ss</code>. */
+        public static final DateTimeFormatter COLON_TIME = DateTimeFormatter.ISO_LOCAL_TIME;
     }
 
     /**
@@ -102,6 +107,14 @@ public abstract class CSVMapper<T> {
         /** Convertor using {@link DateTimeFormatters#DASHED_DATE} */
         public static final Function<String, LocalDate> DASHED_DATE =
                 (value) -> LocalDate.parse(value, DateTimeFormatters.DASHED_DATE);
+
+        /** Convertor using {@link DateTimeFormatters#SLASHED_DATE} */
+        public static final Function<String, LocalDate> SLASHED_DATE =
+                (value) -> LocalDate.parse(value, DateTimeFormatters.SLASHED_DATE);
+
+        /** Convertor using {@link DateTimeFormatters#COLON_TIME} */
+        public static final Function<String, LocalTime> COLON_TIME =
+                (value) -> LocalTime.parse(value, DateTimeFormatters.COLON_TIME);
     }
 
     protected final Callable<T> pojoInstantiator;
@@ -119,55 +132,11 @@ public abstract class CSVMapper<T> {
      * Maps the given CSV to a POJO.
      *
      * @param csv    the CSV
-     * @param offset offset to add to CSV indices when applying {@link CSVMapper.MappingFunction}
+     * @param offset offset to add to CSV indices when applying {@link CSVMapping}
      *
      * @return a new POJO
      *
      * @throws Exception thrown for a variety of {@link Exception}s
      */
     public abstract T map(String[] csv, int offset) throws Exception;
-
-    /**
-     * {@link CSVMapper.MappingFunction} holds functions for CSV to field mapping.
-     *
-     * @param <P> the type of the POJO field
-     */
-    protected final class MappingFunction<P> {
-
-        private final BiConsumer<T, String> mappingConsumer;
-
-        /**
-         * Instantiates a new {@link CSVMapper.MappingFunction}.
-         *
-         * @param fieldSetter            the field setter {@link BiConsumer}. The first argument is the POJO instance
-         *                               and the second argument is the converted field to be set in the instance.
-         * @param stringToFieldConverter the string to field converter {@link Function}. The return type is the
-         *                               converted POJO field instance and the argument is the CSV value {@link
-         *                               String}.
-         */
-        public MappingFunction(BiConsumer<T, P> fieldSetter, Function<String, P> stringToFieldConverter) {
-            mappingConsumer = (instance, value) -> fieldSetter.accept(instance, stringToFieldConverter.apply(value));
-        }
-
-        /**
-         * Instantiates a new {@link CSVMapper.MappingFunction}.
-         *
-         * @param csvValueConsumer a {@link BiConsumer} that will takes a POJO instance as the first argument, and a CSV
-         *                         {@link String} value as the second argument. This is so that fields inside the POJO
-         *                         can be directly set according to the passed in CSV {@link String} value.
-         */
-        public MappingFunction(BiConsumer<T, String> csvValueConsumer) {
-            mappingConsumer = csvValueConsumer;
-        }
-
-        /**
-         * Applies the mapping functions. Note this could throw a variety of {@link Exception}s.
-         *
-         * @param instance the POJO instance
-         * @param value    the CSV value
-         */
-        public void apply(T instance, String value) {
-            mappingConsumer.accept(instance, value);
-        }
-    }
 }

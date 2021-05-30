@@ -16,9 +16,9 @@ import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueNotWhitespace;
  */
 public class TrailingCSVMapper<T> extends CSVMapper<T> {
 
-    protected final HashMap<Integer, MappingFunction<?>> mappingFunctionsOfCSVIndices;
+    protected final HashMap<Integer, CSVMapping<T, ?>> csvMappingsOfCSVIndices;
     protected int trailingCSVIndex;
-    protected MappingFunction<?> trailingMappingFunction;
+    protected CSVMapping<T, ?> trailingCSVMapping;
 
     /**
      * Instantiates a new {@link TrailingCSVMapper}.
@@ -28,7 +28,7 @@ public class TrailingCSVMapper<T> extends CSVMapper<T> {
     public TrailingCSVMapper(Callable<T> pojoInstantiator) {
         super(pojoInstantiator);
 
-        mappingFunctionsOfCSVIndices = new HashMap<>();
+        csvMappingsOfCSVIndices = new HashMap<>();
     }
 
     /**
@@ -36,11 +36,11 @@ public class TrailingCSVMapper<T> extends CSVMapper<T> {
      * Function)} CSV index + 1.
      *
      * @param <P>                    the type of the POJO field
-     * @param fieldSetter            see {@link CSVMapper.MappingFunction} constructor doc
-     * @param stringToFieldConverter see {@link CSVMapper.MappingFunction} constructor doc
+     * @param fieldSetter            see {@link CSVMapping} constructor doc
+     * @param stringToFieldConverter see {@link CSVMapping} constructor doc
      */
     public <P> void addMapping(BiConsumer<T, P> fieldSetter, Function<String, P> stringToFieldConverter) {
-        int nextCSVIndex = mappingFunctionsOfCSVIndices.keySet().stream().max(Integer::compareTo).orElse(-1) + 1;
+        int nextCSVIndex = csvMappingsOfCSVIndices.keySet().stream().max(Integer::compareTo).orElse(-1) + 1;
         setMapping(nextCSVIndex, fieldSetter, stringToFieldConverter);
     }
 
@@ -49,13 +49,13 @@ public class TrailingCSVMapper<T> extends CSVMapper<T> {
      *
      * @param <P>                    the type of the POJO field
      * @param csvIndex               the CSV index
-     * @param fieldSetter            see {@link CSVMapper.MappingFunction} constructor doc
-     * @param stringToFieldConverter see {@link CSVMapper.MappingFunction} constructor doc
+     * @param fieldSetter            see {@link CSVMapping} constructor doc
+     * @param stringToFieldConverter see {@link CSVMapping} constructor doc
      */
     @SuppressWarnings("OptionalGetWithoutIsPresent") // Optional will always be present here
     public <P> void setMapping(int csvIndex, BiConsumer<T, P> fieldSetter, Function<String, P> stringToFieldConverter) {
-        mappingFunctionsOfCSVIndices.put(csvIndex, new MappingFunction<P>(fieldSetter, stringToFieldConverter));
-        trailingCSVIndex = mappingFunctionsOfCSVIndices.keySet().stream().max(Integer::compareTo).get() + 1;
+        csvMappingsOfCSVIndices.put(csvIndex, new CSVMapping<>(fieldSetter, stringToFieldConverter));
+        trailingCSVIndex = csvMappingsOfCSVIndices.keySet().stream().max(Integer::compareTo).get() + 1;
     }
 
     /**
@@ -64,7 +64,7 @@ public class TrailingCSVMapper<T> extends CSVMapper<T> {
      * @param csvIndex the CSV index
      */
     public void removeMapping(int csvIndex) {
-        mappingFunctionsOfCSVIndices.remove(csvIndex);
+        csvMappingsOfCSVIndices.remove(csvIndex);
     }
 
     /**
@@ -72,11 +72,11 @@ public class TrailingCSVMapper<T> extends CSVMapper<T> {
      * #setMapping(int, BiConsumer, Function)} CSV index + 1.
      *
      * @param <P>                    the type of the POJO field
-     * @param fieldSetter            see {@link CSVMapper.MappingFunction} constructor doc
-     * @param stringToFieldConverter see {@link CSVMapper.MappingFunction} constructor doc
+     * @param fieldSetter            see {@link CSVMapping} constructor doc
+     * @param stringToFieldConverter see {@link CSVMapping} constructor doc
      */
     public <P> void setTrailingMapping(BiConsumer<T, P> fieldSetter, Function<String, P> stringToFieldConverter) {
-        this.trailingMappingFunction = new MappingFunction<P>(fieldSetter, stringToFieldConverter);
+        this.trailingCSVMapping = new CSVMapping<>(fieldSetter, stringToFieldConverter);
     }
 
     /**
@@ -89,21 +89,21 @@ public class TrailingCSVMapper<T> extends CSVMapper<T> {
     public T map(String[] csv, int offset) throws Exception {
         T instance = pojoInstantiator.call();
 
-        // Loop through all added 'MappingFunctions' and apply them
-        for (int csvIndex : mappingFunctionsOfCSVIndices.keySet()) {
+        // Loop through all added 'CSVMapping's and apply them
+        for (int csvIndex : csvMappingsOfCSVIndices.keySet()) {
             if (!valueNotWhitespace(csv, csvIndex + offset)) { // Don't map empty CSV values
                 continue;
             }
 
             // apply() could throw a variety of exceptions
             try {
-                mappingFunctionsOfCSVIndices.get(csvIndex).apply(instance, csv[csvIndex + offset]);
+                csvMappingsOfCSVIndices.get(csvIndex).apply(instance, csv[csvIndex + offset]);
             } catch (Exception exception) {
                 throw new Exception("Error mapping at index " + csvIndex + " with offset " + offset, exception);
             }
         }
 
-        // Now apply 'trailingMappingFunction' on trailing CSV values
+        // Now apply 'trailingCSVMapping' on trailing CSV values
         if (valueExists(csv, trailingCSVIndex + offset)) {
             StringBuilder trailingCSVBuilder = new StringBuilder();
             for (int csvIndex = trailingCSVIndex + offset; csvIndex < csv.length; csvIndex++) {
@@ -118,7 +118,7 @@ public class TrailingCSVMapper<T> extends CSVMapper<T> {
             if (!trailingCSVString.isEmpty()) {
                 // apply() could throw a variety of exceptions
                 try {
-                    trailingMappingFunction.apply(instance, trailingCSVString);
+                    trailingCSVMapping.apply(instance, trailingCSVString);
                 } catch (Exception exception) {
                     throw new Exception("Error mapping trailing CSV values at index " +
                             trailingCSVIndex + " with offset " + offset, exception);

@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "title": "A timestamp message. See <a href=\"https://www.iqfeed.net/dev/api/docs/docsBeta/TimeMessageFormat.cfm\">Time stamp Message Format</a>",
+  "properties": {
+    "Timestamp": {
+      "existingJavaType": "java.time.LocalDateTime",
+      "title": "The timestamp."
+    }
+  }
+}

@@ -1,7 +1,7 @@
 package net.jacobpeterson.iqfeed4j.feed.lookup.news;
 
-import net.jacobpeterson.iqfeed4j.feed.message.MultiMessageListener;
 import net.jacobpeterson.iqfeed4j.feed.lookup.AbstractLookupFeed;
+import net.jacobpeterson.iqfeed4j.feed.message.MultiMessageListener;
 import net.jacobpeterson.iqfeed4j.model.feed.common.message.MessageLine;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.news.enums.XMLTextEmailOption;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.news.enums.XMLTextOption;

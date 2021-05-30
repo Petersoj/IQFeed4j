@@ -175,7 +175,7 @@
       "title": "NOTE: This field is valid for Futures and Future Options only."
     },
     "MessageContents": {
-      "existingJavaType": "java.util.List<net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateMessageContents>",
+      "existingJavaType": "java.util.List<net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateContent>",
       "title": "NOTE: you can get multiple codes in a single message but you will only get one trade identifier per message.\nNOTE: It is also possible to receive no codes in a message if the fields that updated were not trade or quote related."
     },
     "MostRecentTrade": {

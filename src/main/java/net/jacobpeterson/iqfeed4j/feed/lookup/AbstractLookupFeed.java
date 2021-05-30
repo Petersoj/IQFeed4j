@@ -2,8 +2,8 @@ package net.jacobpeterson.iqfeed4j.feed.lookup;
 
 import com.google.common.base.Splitter;
 import net.jacobpeterson.iqfeed4j.feed.AbstractFeed;
-import net.jacobpeterson.iqfeed4j.feed.message.MultiMessageListener;
 import net.jacobpeterson.iqfeed4j.feed.RequestIDFeedHelper;
+import net.jacobpeterson.iqfeed4j.feed.message.MultiMessageListener;
 import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedMessageType;
 import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedSpecialMessage;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper;

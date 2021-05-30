@@ -2,6 +2,7 @@ package net.jacobpeterson.iqfeed4j.feed.streaming.admin;
 
 import net.jacobpeterson.iqfeed4j.feed.AbstractFeed;
 import net.jacobpeterson.iqfeed4j.feed.message.SingleMessageFuture;
+import net.jacobpeterson.iqfeed4j.feed.streaming.StreamingCSVMappers;
 import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedCommand;
 import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedMessageType;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.admin.ClientStatistics;
@@ -22,10 +23,13 @@ import java.util.Map;
 import java.util.StringJoiner;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.*;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueExists;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueNotWhitespace;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.DATE_SPACE_TIME;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.MONTH3_DAY_TIME_AM_PM;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.*;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.DOUBLE;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.INTEGER;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.STRING;
 
 /**
  * {@link AdminFeed} represents the Admin {@link AbstractFeed}. Methods in this class are not synchronized.
@@ -35,42 +39,20 @@ public class AdminFeed extends AbstractFeed {
     private static final Logger LOGGER = LoggerFactory.getLogger(AdminFeed.class);
     protected static final String FEED_NAME_SUFFIX = " Admin Feed";
     protected static final IndexCSVMapper<ClientStatistics> CLIENT_STATISTICS_CSV_MAPPER;
-    protected static final IndexCSVMapper<FeedStatistics> FEED_STATISTICS_CSV_MAPPER;
 
     static {
         // Add mappings with CSV indices analogous to line of execution
 
         CLIENT_STATISTICS_CSV_MAPPER = new IndexCSVMapper<>(ClientStatistics::new);
         CLIENT_STATISTICS_CSV_MAPPER.addMapping(ClientStatistics::setType, Type::fromValue);
-        CLIENT_STATISTICS_CSV_MAPPER.addMapping(ClientStatistics::setClientID, INT);
+        CLIENT_STATISTICS_CSV_MAPPER.addMapping(ClientStatistics::setClientID, INTEGER);
         CLIENT_STATISTICS_CSV_MAPPER.addMapping(ClientStatistics::setClientName, STRING);
         CLIENT_STATISTICS_CSV_MAPPER.addMapping(ClientStatistics::setStartTime, DATE_SPACE_TIME);
-        CLIENT_STATISTICS_CSV_MAPPER.addMapping(ClientStatistics::setSymbols, INT);
-        CLIENT_STATISTICS_CSV_MAPPER.addMapping(ClientStatistics::setRegionalSymbols, INT);
+        CLIENT_STATISTICS_CSV_MAPPER.addMapping(ClientStatistics::setSymbols, INTEGER);
+        CLIENT_STATISTICS_CSV_MAPPER.addMapping(ClientStatistics::setRegionalSymbols, INTEGER);
         CLIENT_STATISTICS_CSV_MAPPER.addMapping(ClientStatistics::setKiloBytesReceived, DOUBLE);
         CLIENT_STATISTICS_CSV_MAPPER.addMapping(ClientStatistics::setKiloBytesSent, DOUBLE);
         CLIENT_STATISTICS_CSV_MAPPER.addMapping(ClientStatistics::setKiloBytesQueued, DOUBLE);
-
-        FEED_STATISTICS_CSV_MAPPER = new IndexCSVMapper<>(FeedStatistics::new);
-        FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setServerIP, STRING);
-        FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setServerPort, INT);
-        FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setMaxSymbols, INT);
-        FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setNumberOfSymbols, INT);
-        FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setClientsConnected, INT);
-        FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setSecondsSinceLastUpdate, INT);
-        FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setReconnections, INT);
-        FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setAttemptedReconnections, INT);
-        FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setStartTime, MONTH3_DAY_TIME_AM_PM);
-        FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setMarketTime, MONTH3_DAY_TIME_AM_PM);
-        FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setStatus, Status::fromValue);
-        FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setIQFeedVersion, STRING);
-        FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setLoginID, STRING);
-        FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setTotalKiloBytesReceived, DOUBLE);
-        FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setKiloBytesPerSecReceived, DOUBLE);
-        FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setAvgKiloBytesPerSecRecv, DOUBLE);
-        FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setTotalKiloBytesSent, DOUBLE);
-        FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setKiloBytesPerSecSent, DOUBLE);
-        FEED_STATISTICS_CSV_MAPPER.addMapping(FeedStatistics::setAvgKiloBytesPerSecSent, DOUBLE);
     }
 
     protected final Object messageReceivedLock;
@@ -149,7 +131,7 @@ public class AdminFeed extends AbstractFeed {
                         break;
                     case STATS:
                         try {
-                            FeedStatistics feedStatistics = FEED_STATISTICS_CSV_MAPPER.map(csv, 2);
+                            FeedStatistics feedStatistics = StreamingCSVMappers.FEED_STATISTICS_CSV_MAPPER.map(csv, 2);
                             lastFeedStatistics = feedStatistics;
 
                             if (feedStatisticsFuture != null) {

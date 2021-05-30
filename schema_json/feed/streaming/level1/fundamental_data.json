@@ -115,7 +115,7 @@
       "title": "The Split Factor 1."
     },
     "SplitFactor1Date": {
-      "existingJavaType": "java.lang.Double",
+      "existingJavaType": "java.time.LocalDate",
       "title": "The Split Factor 1 date."
     },
     "SplitFactor2": {
@@ -123,7 +123,7 @@
       "title": "The Split Factor 2."
     },
     "SplitFactor2Date": {
-      "existingJavaType": "java.lang.Double",
+      "existingJavaType": "java.time.LocalDate",
       "title": "The Split Factor 2 date."
     },
     "FormatCode": {

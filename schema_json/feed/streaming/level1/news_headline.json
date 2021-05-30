@@ -1,6 +1,6 @@
 {
   "type": "object",
-  "title": "Represents a News message. See <a href=\"https://www.iqfeed.net/dev/api/docs/docsBeta/StreamingNewsMessageFormat.cfm\">Streaming News Messages</a>",
+  "title": "Represents a news headline. See <a href=\"https://www.iqfeed.net/dev/api/docs/docsBeta/StreamingNewsMessageFormat.cfm\">Streaming News Messages</a>",
   "properties": {
     "DistributorCode": {
       "existingJavaType": "java.lang.String",

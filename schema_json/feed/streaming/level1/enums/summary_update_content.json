@@ -24,7 +24,7 @@
     },
     {
       "name": "OTHER_TRADE",
-      "title": "Any trade not accounted for by {@link SummaryUpdateMessageContents#LAST_QUALIFIED_TRADE} or {@link SummaryUpdateMessageContents#EXTENDED_TRADE}."
+      "title": "Any trade not accounted for by {@link SummaryUpdateContent#LAST_QUALIFIED_TRADE} or {@link SummaryUpdateContent#EXTENDED_TRADE}."
     },
     {
       "name": "BID_UPDATE"

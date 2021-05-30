@@ -50,7 +50,7 @@ public class ListCSVMapper<T> extends CSVMapper<T> {
      * Maps the given 'csv' list to a {@link List} of POJOs with the {@link #csvValueConsumer} applied.
      *
      * @param csv    the CSV
-     * @param offset offset to add to CSV indices when applying {@link CSVMapper.MappingFunction}
+     * @param offset offset to add to CSV indices when applying {@link CSVMapping}
      *
      * @return a new {@link List} of mapped POJOs
      *
