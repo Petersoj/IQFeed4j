@@ -257,7 +257,7 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
      *                              corresponding {@link MultiMessageListener}s
      * @param listener              the {@link MultiMessageListener}
      *
-     * @throws IOException the io exception
+     * @throws IOException thrown for {@link IOException}s
      */
     private <T> void requestGenericMultiMessage(String requestCode,
             Map<String, MultiMessageListener<T>> listenersOfRequestIDs, MultiMessageListener<T> listener)

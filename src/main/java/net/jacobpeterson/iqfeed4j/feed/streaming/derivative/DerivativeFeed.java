@@ -288,6 +288,7 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
                     intervalListenersOfWatchedSymbols.computeIfAbsent(symbol, k -> new ArrayList<>());
             intervalListeners.add(intervalListener);
         }
+
         String requestString = requestBuilder.toString();
         LOGGER.debug("Sending request: {}", requestString);
         sendMessage(requestString);
@@ -322,6 +323,7 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
                 intervalListeners.remove(intervalListener);
             }
         }
+
         String requestString = requestBuilder.toString();
         LOGGER.debug("Sending request: {}", requestString);
         sendMessage(requestString);
@@ -350,6 +352,7 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
         synchronized (messageReceivedLock) {
             watchedIntervalsFuture = new SingleMessageFuture<>();
         }
+
         String requestString = requestBuilder.toString();
         LOGGER.debug("Sending request: {}", requestString);
         sendMessage(requestString);
@@ -373,6 +376,7 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
             intervalListenersOfRequestIDs.clear();
             intervalListenersOfWatchedSymbols.clear();
         }
+
         String requestString = requestBuilder.toString();
         LOGGER.debug("Sending request: {}", requestString);
         sendMessage(requestString);

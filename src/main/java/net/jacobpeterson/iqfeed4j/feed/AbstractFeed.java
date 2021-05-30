@@ -115,7 +115,7 @@ public abstract class AbstractFeed implements Runnable {
             if (validateProtocolVersion) {
                 // Send protocol version command first
                 String protocolVersionCommand = String.format("%s,%s,%s%s",
-                        FeedMessageType.SYSTEM.value(), FeedCommand.SET_PROTOCOL.value(),
+                        FeedCommand.SYSTEM.value(), FeedCommand.SET_PROTOCOL.value(),
                         CURRENTLY_SUPPORTED_PROTOCOL_VERSION,
                         LineEnding.CR_LF.getASCIIString());
                 LOGGER.debug("Setting protocol version: {}", protocolVersionCommand);
@@ -124,7 +124,7 @@ public abstract class AbstractFeed implements Runnable {
 
             if (sendClientName) {
                 String clientNameCommand = String.format("%s,%s,%s%s",
-                        FeedMessageType.SYSTEM.value(), FeedCommand.SET_CLIENT_NAME.value(), feedName,
+                        FeedCommand.SYSTEM.value(), FeedCommand.SET_CLIENT_NAME.value(), feedName,
                         LineEnding.CR_LF.getASCIIString());
                 LOGGER.debug("Setting client name: {}", clientNameCommand);
                 sendMessage(clientNameCommand);

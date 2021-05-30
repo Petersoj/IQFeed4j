@@ -7,7 +7,6 @@
     "Q",
     "R",
     "N",
-    "S",
     "T",
     "n"
   ],
@@ -31,10 +30,6 @@
     {
       "name": "NEWS_HEADLINE_MESSAGE",
       "title": "A news headline message."
-    },
-    {
-      "name": "SYSTEM_MESSAGE",
-      "title": "A system message."
     },
     {
       "name": "TIMESTAMP_MESSAGE",

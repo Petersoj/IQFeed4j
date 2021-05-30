@@ -15,16 +15,20 @@ import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.SummaryUpdate.Mark
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.SummaryUpdate.MostRecentTradeAggressor;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.SummaryUpdate.RestrictedCode;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.Timestamp;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.Level1Command;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.Level1MessageType;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.Level1SystemMessageType;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateContent;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapping;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.IndexCSVMapper;
+import net.jacobpeterson.iqfeed4j.util.string.LineEnding;
 import net.jacobpeterson.iqfeed4j.util.tradecondition.TradeConditionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -32,9 +36,12 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static net.jacobpeterson.iqfeed4j.feed.streaming.level1.Level1Feed.CSVPOJOPopulators.splitFactorAndDate;
 import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.*;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.*;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.*;
 
@@ -328,12 +335,17 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     }
 
     protected final Object messageReceivedLock;
-    protected final List<FeedMessageListener<FundamentalData>> fundamentalDataListeners;
-    protected final List<FeedMessageListener<SummaryUpdate>> summaryUpdateListeners;
-    protected final List<FeedMessageListener<RegionalQuote>> regionalQuoteListeners;
-    protected final List<FeedMessageListener<NewsHeadline>> newsHeadlineListeners;
-    protected final List<FeedMessageListener<CustomerInformation>> customerInformationListeners;
+    protected final HashMap<String, FeedMessageListener<FundamentalData>> fundamentalDataListenersOfSymbols;
+    protected final HashMap<String, FeedMessageListener<SummaryUpdate>> summaryUpdateListenersOfSymbols;
+    protected final HashMap<String, FeedMessageListener<RegionalQuote>> regionalQuoteListenersOfSymbols;
+    protected final HashMap<String, FeedMessageListener<NewsHeadline>> newsHeadlineListenersOfSymbols;
+    protected final HashMap<String, FeedMessageListener<CustomerInformation>> customerInformationListenersOfSymbols;
+
     protected IndexCSVMapper<SummaryUpdate> summaryUpdateCSVMapper;
+
+    protected SingleMessageFuture<Void> serverReconnectFailedFuture;
+    protected SingleMessageFuture<List<String>> ipAddressesFuture;
+    protected List<String> ipAddresses;
     protected SingleMessageFuture<Timestamp> timestampFuture;
     protected Timestamp latestTimestamp;
 
@@ -348,16 +360,22 @@ public class Level1Feed extends AbstractServerConnectionFeed {
         super(level1FeedName + FEED_NAME_SUFFIX, hostname, port, COMMA_DELIMITED_SPLITTER, true, true);
 
         messageReceivedLock = new Object();
-        fundamentalDataListeners = new ArrayList<>();
-        summaryUpdateListeners = new ArrayList<>();
-        regionalQuoteListeners = new ArrayList<>();
-        newsHeadlineListeners = new ArrayList<>();
-        customerInformationListeners = new ArrayList<>();
+        fundamentalDataListenersOfSymbols = new HashMap<>();
+        summaryUpdateListenersOfSymbols = new HashMap<>();
+        regionalQuoteListenersOfSymbols = new HashMap<>();
+        newsHeadlineListenersOfSymbols = new HashMap<>();
+        customerInformationListenersOfSymbols = new HashMap<>();
     }
 
     @Override
     protected void onMessageReceived(String[] csv) {
         super.onMessageReceived(csv);
+
+        // Confirm message format
+        if (!valuePresent(csv, 0)) {
+            LOGGER.error("Received unknown message format: {}", (Object) csv);
+            return;
+        }
 
         if (valueEquals(csv, 0, FeedMessageType.ERROR.value())) {
             LOGGER.error("Received error message! {}", (Object) csv);
@@ -365,5 +383,219 @@ public class Level1Feed extends AbstractServerConnectionFeed {
         }
 
         // TODO
+
+        if (valueEquals(csv, 0, FeedMessageType.SYSTEM.value())) {
+            if (!valuePresent(csv, 1)) {
+                LOGGER.error("Received unknown System message: {}", (Object) csv);
+                return;
+            }
+
+            try {
+                Level1SystemMessageType systemMessageType = Level1SystemMessageType.fromValue(csv[1]);
+
+                switch (systemMessageType) {
+                    case KEY:
+                    case KEYOK:
+                        LOGGER.debug("Received unused KEY message: {}", (Object) csv);
+                        break;
+                    case SERVER_RECONNECT_FAILED:
+                        break;
+                    case SYMBOL_LIMIT_REACHED:
+                        break;
+                    case IP:
+                        break;
+                    case CUST:
+                        break;
+                    case STATS:
+                        break;
+                    case FUNDAMENTAL_FIELDNAMES:
+                        break;
+                    case UPDATE_FIELDNAMES:
+                        break;
+                    case CURRENT_UPDATE_FIELDNAMES:
+                        break;
+                    case CURRENT_LOG_LEVELS:
+                        break;
+                    case WATCHES:
+                        break;
+                    default:
+                        LOGGER.error("Unhandled message type: {}", systemMessageType);
+                }
+            } catch (Exception exception) {
+                LOGGER.error("Received unknown message type: {}", csv[1], exception);
+            }
+        } else {
+            try {
+                Level1MessageType messageType = Level1MessageType.fromValue(csv[0]);
+            } catch (Exception exception) {
+                LOGGER.error("Received unknown message type: {}", csv[1], exception);
+            }
+        }
     }
+
+    //
+    // START Feed commands
+    //
+
+    /**
+     * Begins watching a symbol for Level 1 updates.
+     *
+     * @param symbol                  the symbol that you wish to receive updates on
+     * @param fundamentalDataListener the {@link FeedMessageListener} of {@link FundamentalData} Note if a {@link
+     *                                FeedMessageListener} already exists for the given 'symbol', then it is overwritten
+     *                                with this one.
+     * @param summaryUpdateListener   the {@link FeedMessageListener} of {@link SummaryUpdate}s. Note if a {@link
+     *                                FeedMessageListener} already exists for the given 'symbol', then it is overwritten
+     *                                with this one.
+     *
+     * @throws IOException thrown for {@link IOException}s
+     */
+    public void requestWatch(String symbol, FeedMessageListener<FundamentalData> fundamentalDataListener,
+            FeedMessageListener<SummaryUpdate> summaryUpdateListener) throws IOException {
+        checkNotNull(symbol);
+        checkArgument(fundamentalDataListener != null || summaryUpdateListener != null,
+                "There must be at least one FundamentalData listener or SummaryUpdate listener!");
+
+        StringBuilder requestBuilder = new StringBuilder();
+        requestBuilder.append(Level1Command.WATCH.value());
+        requestBuilder.append(symbol);
+        requestBuilder.append(LineEnding.CR_LF.getASCIIString());
+
+        synchronized (messageReceivedLock) {
+            if (fundamentalDataListener != null) {
+                fundamentalDataListenersOfSymbols.put(symbol, fundamentalDataListener);
+            }
+            if (summaryUpdateListener != null) {
+                summaryUpdateListenersOfSymbols.put(symbol, summaryUpdateListener);
+            }
+        }
+
+        String requestString = requestBuilder.toString();
+        LOGGER.debug("Sending request: {}", requestString);
+        // If symbol is already being watched, nothing happens
+        sendMessage(requestString);
+    }
+
+    /**
+     * Begins a trades only watch on a symbol for Level 1 updates.
+     *
+     * @param symbol                  the symbol that you wish to receive updates on
+     * @param fundamentalDataListener the {@link FeedMessageListener} of {@link FundamentalData} Note if a {@link
+     *                                FeedMessageListener} already exists for the given 'symbol', then it is overwritten
+     *                                with this one.
+     * @param summaryUpdateListener   the {@link FeedMessageListener} of {@link SummaryUpdate}s. Note if a {@link
+     *                                FeedMessageListener} already exists for the given 'symbol', then it is overwritten
+     *                                with this one.
+     *
+     * @throws IOException thrown for {@link IOException}s
+     */
+    public void requestWatchTrades(String symbol, FeedMessageListener<FundamentalData> fundamentalDataListener,
+            FeedMessageListener<SummaryUpdate> summaryUpdateListener) throws IOException {
+        checkNotNull(symbol);
+        checkArgument(fundamentalDataListener != null || summaryUpdateListener != null,
+                "There must be at least one FundamentalData listener or SummaryUpdate listener!");
+
+        StringBuilder requestBuilder = new StringBuilder();
+        requestBuilder.append(Level1Command.WATCH_TRADES.value());
+        requestBuilder.append(symbol);
+        requestBuilder.append(LineEnding.CR_LF.getASCIIString());
+
+        synchronized (messageReceivedLock) {
+            if (fundamentalDataListener != null) {
+                fundamentalDataListenersOfSymbols.put(symbol, fundamentalDataListener);
+            }
+            if (summaryUpdateListener != null) {
+                summaryUpdateListenersOfSymbols.put(symbol, summaryUpdateListener);
+            }
+        }
+
+        String requestString = requestBuilder.toString();
+        LOGGER.debug("Sending request: {}", requestString);
+        sendMessage(requestString);
+    }
+
+    /**
+     * Terminates Level 1 updates for the symbol specified (including regionals).
+     *
+     * @param symbol the symbol that you wish to terminate updates on
+     *
+     * @throws IOException thrown for {@link IOException}s
+     */
+    public void requestUnwatch(String symbol) throws IOException {
+        checkNotNull(symbol);
+
+        StringBuilder requestBuilder = new StringBuilder();
+        requestBuilder.append(Level1Command.UNWATCH.value());
+        requestBuilder.append(symbol);
+        requestBuilder.append(LineEnding.CR_LF.getASCIIString());
+
+        synchronized (messageReceivedLock) {
+            fundamentalDataListenersOfSymbols.remove(symbol);
+            summaryUpdateListenersOfSymbols.remove(symbol);
+            regionalQuoteListenersOfSymbols.remove(symbol);
+        }
+
+        String requestString = requestBuilder.toString();
+        LOGGER.debug("Sending request: {}", requestString);
+        sendMessage(requestString);
+    }
+
+    /**
+     * Forces a refresh for {@link FundamentalData} and a summary {@link SummaryUpdate} message from the server for the
+     * symbol specified.
+     * <br>
+     * NOTE: This can not be used as a method to get a snapshot of data from the feed. You must already be watching the
+     * symbol or the server ignores this request.
+     *
+     * @param symbol the symbol that you wish to receive the update on
+     *
+     * @throws IOException thrown for {@link IOException}s
+     */
+    public void requestForceRefresh(String symbol) throws IOException {
+        checkNotNull(symbol);
+
+        StringBuilder requestBuilder = new StringBuilder();
+        requestBuilder.append(Level1Command.FORCE_WATCH_REFRESH.value());
+        requestBuilder.append(symbol);
+        requestBuilder.append(LineEnding.CR_LF.getASCIIString());
+
+        String requestString = requestBuilder.toString();
+        LOGGER.debug("Sending request: {}", requestString);
+        sendMessage(requestString);
+    }
+
+    /**
+     * Requests a {@link Timestamp} be sent.
+     *
+     * @return the {@link SingleMessageFuture} of the {@link Timestamp}
+     *
+     * @throws IOException thrown for {@link IOException}s
+     */
+    public SingleMessageFuture<Timestamp> requestTimestamp() throws IOException {
+        synchronized (messageReceivedLock) {
+            if (timestampFuture != null) {
+                return timestampFuture;
+            }
+        }
+
+        StringBuilder requestBuilder = new StringBuilder();
+        requestBuilder.append(Level1Command.TIMESTAMP.value());
+        requestBuilder.append(LineEnding.CR_LF.getASCIIString());
+
+        synchronized (messageReceivedLock) {
+            timestampFuture = new SingleMessageFuture<>();
+        }
+
+        String requestString = requestBuilder.toString();
+        LOGGER.debug("Sending request: {}", requestString);
+        sendMessage(requestString);
+
+        return timestampFuture;
+    }
+
+    // TODO
+
+    //
+    // END Feed commands
+    //
 }

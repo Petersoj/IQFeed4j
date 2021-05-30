@@ -1,0 +1,28 @@
+{
+  "type": "string",
+  "title": "Enums for Level 1 feed commands. See <a href=\"https://www.iqfeed.net/dev/api/docs/docsBeta/Level1SystemMessage.cfm\">Level 1 Port System Messages</a>",
+  "enum": [
+    "w",
+    "t",
+    "r",
+    "f",
+    "T"
+  ],
+  "javaEnums": [
+    {
+      "name": "WATCH"
+    },
+    {
+      "name": "WATCH_TRADES"
+    },
+    {
+      "name": "UNWATCH"
+    },
+    {
+      "name": "FORCE_WATCH_REFRESH"
+    },
+    {
+      "name": "TIMESTAMP"
+    }
+  ]
+}
