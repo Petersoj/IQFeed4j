@@ -3,7 +3,9 @@ package net.jacobpeterson.iqfeed4j.feed.streaming.level1;
 import net.jacobpeterson.iqfeed4j.feed.message.FeedMessageListener;
 import net.jacobpeterson.iqfeed4j.feed.message.SingleMessageFuture;
 import net.jacobpeterson.iqfeed4j.feed.streaming.AbstractServerConnectionFeed;
+import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedCommand;
 import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedMessageType;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.admin.enums.AdminSystemCommand;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.CustomerInformation;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.CustomerInformation.ServiceType;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.FundamentalData;
@@ -17,6 +19,7 @@ import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.SummaryUpdate.Rest
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.Timestamp;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.Level1Command;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.Level1MessageType;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.Level1SystemCommand;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.Level1SystemMessageType;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateContent;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField;
@@ -32,6 +35,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -39,11 +43,85 @@ import java.util.stream.IntStream;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static net.jacobpeterson.iqfeed4j.feed.streaming.level1.Level1Feed.CSVPOJOPopulators.splitFactorAndDate;
-import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.*;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.ASK;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.ASK_CHANGE;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.ASK_MARKET_CENTER;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.ASK_SIZE;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.ASK_TIME;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.AVAILABLE_REGIONS;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.AVERAGE_MATURITY;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.BID;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.BID_CHANGE;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.BID_MARKET_CENTER;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.BID_SIZE;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.BID_TIME;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.CHANGE;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.CHANGE_FROM_OPEN;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.CLOSE;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.CLOSE_RANGE_1;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.CLOSE_RANGE_2;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.DAYS_TO_EXPIRATION;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.DECIMAL_PRECISION;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.DELAY;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.EXCHANGE_ID;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.EXTENDED_TRADE;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.EXTENDED_TRADE_DATE;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.EXTENDED_TRADE_MARKET_CENTER;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.EXTENDED_TRADE_SIZE;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.EXTENDED_TRADE_TIME;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.EXTENDED_TRADING_CHANGE;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.EXTENDED_TRADING_DIFFERENCE;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.FINANCIAL_STATUS_INDICATOR;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.FRACTION_DISPLAY_CODE;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.HIGH;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.LAST;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.LAST_DATE;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.LAST_MARKET_CENTER;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.LAST_SIZE;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.LAST_TIME;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.LOW;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.MARKET_CAPITALIZATION;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.MARKET_OPEN;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.MESSAGE_CONTENTS;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.MOST_RECENT_TRADE;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.MOST_RECENT_TRADE_AGGRESSOR;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.MOST_RECENT_TRADE_CONDITIONS;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.MOST_RECENT_TRADE_DATE;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.MOST_RECENT_TRADE_DAY_CODE;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.MOST_RECENT_TRADE_MARKET_CENTER;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.MOST_RECENT_TRADE_SIZE;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.MOST_RECENT_TRADE_TIME;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.NET_ASSET_VALUE;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.NUMBER_OF_TRADES_TODAY;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.OPEN;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.OPEN_INTEREST;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.OPEN_RANGE_1;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.OPEN_RANGE_2;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.PERCENT_CHANGE;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.PERCENT_OFF_AVERAGE_VOLUME;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.PREVIOUS_DAY_VOLUME;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.PRICE_EARNINGS_RATIO;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.RANGE;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.RESTRICTED_CODE;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.SETTLE;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.SETTLEMENT_DATE;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.SEVEN_DAY_YIELD;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.SPREAD;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.SYMBOL;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.TICK;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.TICK_ID;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.TOTAL_VOLUME;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.VOLATILITY;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.VWAP;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.*;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.*;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.COLON_TIME;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.DATE;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.DATE_SPACE_TIME;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.SLASHED_DATE;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.DOUBLE;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.INTEGER;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.STRING;
 
 /**
  * {@link Level1Feed} is an {@link AbstractServerConnectionFeed} for Level 1 market data.
@@ -591,6 +669,41 @@ public class Level1Feed extends AbstractServerConnectionFeed {
         sendMessage(requestString);
 
         return timestampFuture;
+    }
+
+    /**
+     * Sends a {@link FeedCommand#SYSTEM} {@link Level1SystemCommand}.
+     *
+     * @param level1SystemCommand the {@link AdminSystemCommand}
+     * @param arguments           the arguments. Null for no arguments.
+     *
+     * @throws IOException thrown for {@link IOException}s
+     */
+    private void sendLevel1SystemCommand(Level1SystemCommand level1SystemCommand, String... arguments)
+            throws IOException {
+        StringJoiner joiner = new StringJoiner(",", "", LineEnding.CR_LF.getASCIIString());
+        joiner.add(FeedCommand.SYSTEM.value());
+        joiner.add(level1SystemCommand.value());
+        if (arguments != null && arguments.length != 0) {
+            for (String argument : arguments) {
+                joiner.add(argument);
+            }
+        }
+
+        String command = joiner.toString();
+        LOGGER.debug("Sending Level 1 command message: {}", command);
+        sendMessage(command);
+    }
+
+    /**
+     * Enables or disables the once-per-second {@link Timestamp}s.
+     *
+     * @param toggle true to enable, false to disable
+     *
+     * @throws IOException thrown for {@link IOException}s
+     */
+    public void enableTimestamps(boolean toggle) throws IOException {
+        sendLevel1SystemCommand(toggle ? Level1SystemCommand.TIMESTAMPSON : Level1SystemCommand.TIMESTAMPSOFF);
     }
 
     // TODO

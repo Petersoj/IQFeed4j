@@ -2,6 +2,8 @@
   "type": "string",
   "title": "Enums for Level 1 feed System commands. See <a href=\"https://www.iqfeed.net/dev/api/docs/docsBeta/Level1SystemMessage.cfm\">Level 1 Port System Messages</a>",
   "enum": [
+    "TIMESTAMPSOFF",
+    "TIMESTAMPSON",
     "REGON",
     "REGOFF",
     "NEWSON",
@@ -18,6 +20,12 @@
     "DISCONNECT"
   ],
   "javaEnums": [
+    {
+      "title": "Disables the once per second timestamp."
+    },
+    {
+      "title": "Timestamps default to on, but in the event you have stopped them manually, this will restart them into the stream."
+    },
     {
       "title": "Enable Regional Quotes (\"R\" messages) for the symbol specified."
     },
