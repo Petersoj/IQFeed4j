@@ -97,9 +97,7 @@ public class NewsFeed extends AbstractLookupFeed {
         synchronized (messageReceivedLock) {
             messageLineListenersOfRequestIDs.put(requestID, messageLineListener);
         }
-        String requestString = requestBuilder.toString();
-        LOGGER.debug("Sending request: {}", requestString);
-        sendMessage(requestString);
+        sendAndLogMessage(requestBuilder.toString());
     }
 
     /**
@@ -166,9 +164,7 @@ public class NewsFeed extends AbstractLookupFeed {
         synchronized (messageReceivedLock) {
             messageLineListenersOfRequestIDs.put(requestID, messageLineListener);
         }
-        String requestString = requestBuilder.toString();
-        LOGGER.debug("Sending request: {}", requestString);
-        sendMessage(requestString);
+        sendAndLogMessage(requestBuilder.toString());
     }
 
     /**
@@ -212,9 +208,7 @@ public class NewsFeed extends AbstractLookupFeed {
         synchronized (messageReceivedLock) {
             messageLineListenersOfRequestIDs.put(requestID, messageLineListener);
         }
-        String requestString = requestBuilder.toString();
-        LOGGER.debug("Sending request: {}", requestString);
-        sendMessage(requestString);
+        sendAndLogMessage(requestBuilder.toString());
     }
 
     /**
@@ -266,9 +260,7 @@ public class NewsFeed extends AbstractLookupFeed {
         synchronized (messageReceivedLock) {
             messageLineListenersOfRequestIDs.put(requestID, messageLineListener);
         }
-        String requestString = requestBuilder.toString();
-        LOGGER.debug("Sending request: {}", requestString);
-        sendMessage(requestString);
+        sendAndLogMessage(requestBuilder.toString());
     }
 
     //

@@ -187,18 +187,16 @@ public class AdminFeed extends AbstractFeed {
      * @throws IOException thrown for {@link IOException}s
      */
     private void sendAdminSystemCommand(AdminSystemCommand adminSystemCommand, String... arguments) throws IOException {
-        StringJoiner joiner = new StringJoiner(",", "", LineEnding.CR_LF.getASCIIString());
-        joiner.add(FeedCommand.SYSTEM.value());
-        joiner.add(adminSystemCommand.value());
+        StringJoiner commandJoiner = new StringJoiner(",", "", LineEnding.CR_LF.getASCIIString());
+        commandJoiner.add(FeedCommand.SYSTEM.value());
+        commandJoiner.add(adminSystemCommand.value());
         if (arguments != null && arguments.length != 0) {
             for (String argument : arguments) {
-                joiner.add(argument);
+                commandJoiner.add(argument);
             }
         }
 
-        String command = joiner.toString();
-        LOGGER.debug("Sending Admin command message: {}", command);
-        sendMessage(command);
+        sendAndLogMessage(commandJoiner.toString());
     }
 
     /**

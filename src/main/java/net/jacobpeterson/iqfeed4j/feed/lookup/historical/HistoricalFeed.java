@@ -177,9 +177,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         synchronized (messageReceivedLock) {
             tickListenersOfRequestIDs.put(requestID, ticksListener);
         }
-        String requestString = requestBuilder.toString();
-        LOGGER.debug("Sending request: {}", requestString);
-        sendMessage(requestString);
+        sendAndLogMessage(requestBuilder.toString());
     }
 
     /**
@@ -238,9 +236,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         synchronized (messageReceivedLock) {
             tickListenersOfRequestIDs.put(requestID, ticksListener);
         }
-        String requestString = requestBuilder.toString();
-        LOGGER.debug("Sending request: {}", requestString);
-        sendMessage(requestString);
+        sendAndLogMessage(requestBuilder.toString());
     }
 
     /**
@@ -310,9 +306,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         synchronized (messageReceivedLock) {
             tickListenersOfRequestIDs.put(requestID, ticksListener);
         }
-        String requestString = requestBuilder.toString();
-        LOGGER.debug("Sending request: {}", requestString);
-        sendMessage(requestString);
+        sendAndLogMessage(requestBuilder.toString());
     }
 
     /**
@@ -361,9 +355,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         synchronized (messageReceivedLock) {
             intervalListenersOfRequestIDs.put(requestID, intervalsListener);
         }
-        String requestString = requestBuilder.toString();
-        LOGGER.debug("Sending request: {}", requestString);
-        sendMessage(requestString);
+        sendAndLogMessage(requestBuilder.toString());
     }
 
     /**
@@ -432,9 +424,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         synchronized (messageReceivedLock) {
             intervalListenersOfRequestIDs.put(requestID, intervalsListener);
         }
-        String requestString = requestBuilder.toString();
-        LOGGER.debug("Sending request: {}", requestString);
-        sendMessage(requestString);
+        sendAndLogMessage(requestBuilder.toString());
     }
 
     /**
@@ -515,9 +505,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         synchronized (messageReceivedLock) {
             intervalListenersOfRequestIDs.put(requestID, intervalsListener);
         }
-        String requestString = requestBuilder.toString();
-        LOGGER.debug("Sending request: {}", requestString);
-        sendMessage(requestString);
+        sendAndLogMessage(requestBuilder.toString());
     }
 
     /**
@@ -564,9 +552,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         synchronized (messageReceivedLock) {
             datedIntervalListenersOfRequestIDs.put(requestID, datedIntervalsListener);
         }
-        String requestString = requestBuilder.toString();
-        LOGGER.debug("Sending request: {}", requestString);
-        sendMessage(requestString);
+        sendAndLogMessage(requestBuilder.toString());
     }
 
     /**
@@ -630,9 +616,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         synchronized (messageReceivedLock) {
             datedIntervalListenersOfRequestIDs.put(requestID, datedIntervalsListener);
         }
-        String requestString = requestBuilder.toString();
-        LOGGER.debug("Sending request: {}", requestString);
-        sendMessage(requestString);
+        sendAndLogMessage(requestBuilder.toString());
     }
 
     /**
@@ -679,9 +663,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         synchronized (messageReceivedLock) {
             datedIntervalListenersOfRequestIDs.put(requestID, datedIntervalsListener);
         }
-        String requestString = requestBuilder.toString();
-        LOGGER.debug("Sending request: {}", requestString);
-        sendMessage(requestString);
+        sendAndLogMessage(requestBuilder.toString());
     }
 
     /**
@@ -728,9 +710,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         synchronized (messageReceivedLock) {
             datedIntervalListenersOfRequestIDs.put(requestID, datedIntervalsListener);
         }
-        String requestString = requestBuilder.toString();
-        LOGGER.debug("Sending request: {}", requestString);
-        sendMessage(requestString);
+        sendAndLogMessage(requestBuilder.toString());
     }
 
     //

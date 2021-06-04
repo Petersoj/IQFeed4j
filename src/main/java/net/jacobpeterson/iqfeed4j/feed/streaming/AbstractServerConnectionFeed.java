@@ -5,7 +5,6 @@ import net.jacobpeterson.iqfeed4j.feed.AbstractFeed;
 import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedMessageType;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.common.enums.ServerConnectionStatus;
 
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
 
 /**
@@ -32,35 +31,25 @@ public abstract class AbstractServerConnectionFeed extends AbstractFeed {
     }
 
     /**
-     * {@inheritDoc}
-     * <br>
-     * Note that this will check/set {@link #serverConnectionStatus}.
-     */
-    @Override
-    protected void onMessageReceived(String[] csv) {
-        if (serverConnectionStatus == null) {
-            serverConnectionStatus = getServerConnectionStatusMessage(csv);
-        }
-    }
-
-    /**
-     * Checks if a CSV message is a {@link FeedMessageType#SYSTEM} message and returns a {@link ServerConnectionStatus}
-     * if it is present.
+     * Checks and sets {@link #serverConnectionStatus} if a {@link ServerConnectionStatus} if it is present. Note this
+     * will not check if the CSV message is a {@link FeedMessageType#SYSTEM} message so that should be done before
+     * calling this method.
      *
      * @param csv the CSV
      *
-     * @return the {@link ServerConnectionStatus} or null if it's not present
+     * @return true if the message was a {@link ServerConnectionStatus} message, false otherwise
      */
-    protected ServerConnectionStatus getServerConnectionStatusMessage(String[] csv) {
-        if (valueEquals(csv, 0, FeedMessageType.SYSTEM.value()) && valuePresent(csv, 1)) {
+    protected boolean checkServerConnectionStatusMessage(String[] csv) {
+        if (valuePresent(csv, 1)) {
             try {
-                return ServerConnectionStatus.fromValue(csv[1]);
+                serverConnectionStatus = ServerConnectionStatus.fromValue(csv[1]);
+                return true;
             } catch (Exception ignored) {
-                return null;
+                return false;
             }
         }
 
-        return null;
+        return false;
     }
 
     /**

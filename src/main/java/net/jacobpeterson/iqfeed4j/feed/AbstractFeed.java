@@ -263,9 +263,21 @@ public abstract class AbstractFeed implements Runnable {
      *
      * @throws IOException thrown for {@link IOException}s
      */
-    protected synchronized void sendMessage(String message) throws IOException {
+    protected void sendMessage(String message) throws IOException {
         feedWriter.write(message);
         feedWriter.flush();
+    }
+
+    /**
+     * Calls {@link #sendMessage(String)} and logs the given 'message'.
+     *
+     * @param message the message
+     *
+     * @throws IOException thrown for {@link IOException}s
+     */
+    protected void sendAndLogMessage(String message) throws IOException {
+        LOGGER.debug("Sending message: {}", message);
+        sendMessage(message);
     }
 
     /**

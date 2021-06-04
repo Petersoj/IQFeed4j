@@ -90,8 +90,6 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
 
     @Override
     protected void onMessageReceived(String[] csv) {
-        super.onMessageReceived(csv);
-
         if (valueEquals(csv, 0, FeedMessageType.ERROR.value())) {
             LOGGER.error("Received error message! {}", (Object) csv);
             return;
@@ -100,6 +98,10 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
         synchronized (messageReceivedLock) {
             // Handle derivative 'SYSTEM' messages
             if (valueEquals(csv, 0, FeedMessageType.SYSTEM.value())) {
+                if (checkServerConnectionStatusMessage(csv)) {
+                    return;
+                }
+
                 try {
                     DerivativeSystemMessageType derivativeSystemMessage = DerivativeSystemMessageType.fromValue(csv[1]);
 
@@ -289,9 +291,7 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
             intervalListeners.add(intervalListener);
         }
 
-        String requestString = requestBuilder.toString();
-        LOGGER.debug("Sending request: {}", requestString);
-        sendMessage(requestString);
+        sendAndLogMessage(requestBuilder.toString());
     }
 
     /**
@@ -324,9 +324,7 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
             }
         }
 
-        String requestString = requestBuilder.toString();
-        LOGGER.debug("Sending request: {}", requestString);
-        sendMessage(requestString);
+        sendAndLogMessage(requestBuilder.toString());
     }
 
     /**
@@ -353,9 +351,7 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
             watchedIntervalsFuture = new SingleMessageFuture<>();
         }
 
-        String requestString = requestBuilder.toString();
-        LOGGER.debug("Sending request: {}", requestString);
-        sendMessage(requestString);
+        sendAndLogMessage(requestBuilder.toString());
 
         return watchedIntervalsFuture;
     }
@@ -377,9 +373,7 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
             intervalListenersOfWatchedSymbols.clear();
         }
 
-        String requestString = requestBuilder.toString();
-        LOGGER.debug("Sending request: {}", requestString);
-        sendMessage(requestString);
+        sendAndLogMessage(requestBuilder.toString());
     }
 
     //

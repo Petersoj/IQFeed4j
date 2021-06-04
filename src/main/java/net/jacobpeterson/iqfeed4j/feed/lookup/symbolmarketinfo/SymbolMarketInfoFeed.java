@@ -209,9 +209,7 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
         synchronized (messageReceivedLock) {
             symbolSearchResultListenersOfRequestIDs.put(requestID, symbolSearchResultListener);
         }
-        String requestString = requestBuilder.toString();
-        LOGGER.debug("Sending request: {}", requestString);
-        sendMessage(requestString);
+        sendAndLogMessage(requestBuilder.toString());
     }
 
     /**
@@ -243,9 +241,7 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
         synchronized (messageReceivedLock) {
             symbolSearchResultListenersOfRequestIDs.put(requestID, symbolSearchResultListener);
         }
-        String requestString = requestBuilder.toString();
-        LOGGER.debug("Sending request: {}", requestString);
-        sendMessage(requestString);
+        sendAndLogMessage(requestBuilder.toString());
     }
 
     /**
@@ -274,9 +270,7 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
         synchronized (messageReceivedLock) {
             listenersOfRequestIDs.put(requestID, listener);
         }
-        String requestString = requestBuilder.toString();
-        LOGGER.debug("Sending request: {}", requestString);
-        sendMessage(requestString);
+        sendAndLogMessage(requestBuilder.toString());
     }
 
     /**

@@ -486,9 +486,7 @@ public class OptionChainsFeed extends AbstractLookupFeed {
             futureContractListFuturesOfRequestIDs.put(requestID, future);
         }
 
-        String requestString = requestBuilder.toString();
-        LOGGER.debug("Sending request: {}", requestString);
-        sendMessage(requestString);
+        sendAndLogMessage(requestBuilder.toString());
 
         return future;
     }
@@ -545,9 +543,7 @@ public class OptionChainsFeed extends AbstractLookupFeed {
             futureSpreadListFuturesOfRequestIDs.put(requestID, future);
         }
 
-        String requestString = requestBuilder.toString();
-        LOGGER.debug("Sending request: {}", requestString);
-        sendMessage(requestString);
+        sendAndLogMessage(requestBuilder.toString());
 
         return future;
     }
@@ -608,9 +604,7 @@ public class OptionChainsFeed extends AbstractLookupFeed {
             futureOptionListFuturesOfRequestIDs.put(requestID, future);
         }
 
-        String requestString = requestBuilder.toString();
-        LOGGER.debug("Sending request: {}", requestString);
-        sendMessage(requestString);
+        sendAndLogMessage(requestBuilder.toString());
 
         return future;
     }
@@ -749,9 +743,7 @@ public class OptionChainsFeed extends AbstractLookupFeed {
             equityOptionListFuturesOfRequestIDs.put(requestID, future);
         }
 
-        String requestString = requestBuilder.toString();
-        LOGGER.debug("Sending request: {}", requestString);
-        sendMessage(requestString);
+        sendAndLogMessage(requestBuilder.toString());
 
         return future;
     }
