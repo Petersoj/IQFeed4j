@@ -1,11 +1,13 @@
 package net.jacobpeterson.iqfeed4j.feed.streaming.level1;
 
+import com.google.common.base.Preconditions;
 import net.jacobpeterson.iqfeed4j.feed.message.FeedMessageListener;
 import net.jacobpeterson.iqfeed4j.feed.message.SingleMessageFuture;
 import net.jacobpeterson.iqfeed4j.feed.streaming.AbstractServerConnectionFeed;
 import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedCommand;
 import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedMessageType;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.admin.enums.AdminSystemCommand;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.common.FeedStatistics;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.CustomerInformation;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.CustomerInformation.ServiceType;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.FundamentalData;
@@ -16,7 +18,9 @@ import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.SummaryUpdate;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.SummaryUpdate.MarketOpen;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.SummaryUpdate.MostRecentTradeAggressor;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.SummaryUpdate.RestrictedCode;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.SummaryUpdateFieldName;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.Timestamp;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.WatchedSymbol;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.Level1Command;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.Level1MessageType;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.Level1SystemCommand;
@@ -25,6 +29,7 @@ import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdat
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapping;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.IndexCSVMapper;
+import net.jacobpeterson.iqfeed4j.util.csv.mapper.ListCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.string.LineEnding;
 import net.jacobpeterson.iqfeed4j.util.tradecondition.TradeConditionUtil;
 import org.slf4j.Logger;
@@ -32,6 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -46,8 +52,13 @@ import static net.jacobpeterson.iqfeed4j.feed.streaming.level1.Level1Feed.CSVPOJ
 import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.*;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.*;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.*;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.COLON_TIME;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.DATE;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.DATE_SPACE_TIME;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.SLASHED_DATE;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.DOUBLE;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.INTEGER;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.STRING;
 
 /**
  * {@link Level1Feed} is an {@link AbstractServerConnectionFeed} for Level 1 market data.
@@ -78,12 +89,14 @@ public class Level1Feed extends AbstractServerConnectionFeed {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Level1Feed.class);
     protected static final String FEED_NAME_SUFFIX = " Level 1 Feed";
-    protected static final HashMap<SummaryUpdateField,
-            CSVMapping<SummaryUpdate, ?>> CSV_MAPPINGS_OF_SUMMARY_UPDATE_FIELDS;
+    protected static final HashMap<SummaryUpdateField, CSVMapping<SummaryUpdate, ?>>
+            CSV_MAPPINGS_OF_SUMMARY_UPDATE_FIELDS;
     protected static final IndexCSVMapper<FundamentalData> FUNDAMENTAL_DATA_CSV_MAPPER;
     protected static final IndexCSVMapper<RegionalQuote> REGIONAL_QUOTE_CSV_MAPPER;
     protected static final IndexCSVMapper<NewsHeadline> NEWS_HEADLINE_CSV_MAPPER;
     protected static final IndexCSVMapper<CustomerInformation> CUSTOMER_INFORMATION_CSV_MAPPER;
+    protected static final ListCSVMapper<SummaryUpdateFieldName> SUMMARY_UPDATE_FIELD_NAMES_CSV_MAPPER;
+    protected static final ListCSVMapper<WatchedSymbol> WATCHED_SYMBOLS_CSV_MAPPER;
 
     static {
         // We aren't using 'NamedCSVMapper' since it's slower due to traversing two 'Maps' so instead, we are
@@ -336,14 +349,18 @@ public class Level1Feed extends AbstractServerConnectionFeed {
         CUSTOMER_INFORMATION_CSV_MAPPER.addMapping(CustomerInformation::setFlags, STRING);
         CUSTOMER_INFORMATION_CSV_MAPPER.addMapping(CustomerInformation::setAccountExpirationDate, DATE);
 
+        SUMMARY_UPDATE_FIELD_NAMES_CSV_MAPPER = new ListCSVMapper<>(ArrayList::new, SummaryUpdateFieldName::new,
+                ((instance, csvValue) -> instance.setSummaryUpdateField(SummaryUpdateField.fromValue(csvValue))),
+                null);
+
+        WATCHED_SYMBOLS_CSV_MAPPER = new ListCSVMapper<>(ArrayList::new, WatchedSymbol::new,
+                WatchedSymbol::setSymbol, null);
     }
 
     protected final Object messageReceivedLock;
     protected final HashMap<String, FeedMessageListener<FundamentalData>> fundamentalDataListenersOfSymbols;
     protected final HashMap<String, FeedMessageListener<SummaryUpdate>> summaryUpdateListenersOfSymbols;
     protected final HashMap<String, FeedMessageListener<RegionalQuote>> regionalQuoteListenersOfSymbols;
-    protected final HashMap<String, FeedMessageListener<NewsHeadline>> newsHeadlineListenersOfSymbols;
-    protected final HashMap<String, FeedMessageListener<CustomerInformation>> customerInformationListenersOfSymbols;
 
     protected IndexCSVMapper<SummaryUpdate> summaryUpdateCSVMapper;
 
@@ -352,6 +369,13 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     protected List<String> ipAddresses;
     protected SingleMessageFuture<Timestamp> timestampFuture;
     protected Timestamp latestTimestamp;
+    protected SingleMessageFuture<FeedStatistics> feedStatisticsFuture;
+    protected Timestamp latestFeedStatistics;
+    protected FeedMessageListener<NewsHeadline> newsHeadlineListener;
+    protected SingleMessageFuture<List<SummaryUpdateFieldName>> fundamentalFieldNamesFuture;
+    protected SingleMessageFuture<List<SummaryUpdateFieldName>> allUpdateFieldNamesFuture;
+    protected SingleMessageFuture<List<SummaryUpdateFieldName>> currentUpdateFieldNamesFuture;
+    protected SingleMessageFuture<List<WatchedSymbol>> watchedSymbolsFuture;
 
     /**
      * Instantiates a new {@link Level1Feed}.
@@ -367,8 +391,6 @@ public class Level1Feed extends AbstractServerConnectionFeed {
         fundamentalDataListenersOfSymbols = new HashMap<>();
         summaryUpdateListenersOfSymbols = new HashMap<>();
         regionalQuoteListenersOfSymbols = new HashMap<>();
-        newsHeadlineListenersOfSymbols = new HashMap<>();
-        customerInformationListenersOfSymbols = new HashMap<>();
     }
 
     @Override
@@ -393,6 +415,8 @@ public class Level1Feed extends AbstractServerConnectionFeed {
             if (checkServerConnectionStatusMessage(csv)) {
                 return;
             }
+
+            // TODO
 
             try {
                 Level1SystemMessageType systemMessageType = Level1SystemMessageType.fromValue(csv[1]);
@@ -620,7 +644,219 @@ public class Level1Feed extends AbstractServerConnectionFeed {
         sendLevel1SystemCommand(toggle ? Level1SystemCommand.TIMESTAMPSON : Level1SystemCommand.TIMESTAMPSOFF);
     }
 
-    // TODO
+    /**
+     * Begins watching a symbol for Level 1 {@link RegionalQuote} updates.
+     *
+     * @param symbol                the symbol that you wish to receive updates on
+     * @param regionalQuoteListener the {@link FeedMessageListener} of {@link RegionalQuote}s.Note if a {@link
+     *                              FeedMessageListener} already exists for the given 'symbol', then it is overwritten
+     *                              with this one.
+     *
+     * @throws IOException thrown for {@link IOException}s
+     */
+    public void requestRegionalQuoteWatch(String symbol, FeedMessageListener<RegionalQuote> regionalQuoteListener)
+            throws IOException {
+        Preconditions.checkNotNull(symbol);
+        Preconditions.checkNotNull(regionalQuoteListener);
+
+        synchronized (messageReceivedLock) {
+            regionalQuoteListenersOfSymbols.put(symbol, regionalQuoteListener);
+        }
+
+        sendLevel1SystemCommand(Level1SystemCommand.REGON, symbol);
+    }
+
+    /**
+     * Stops watching a symbol for Level 1 {@link RegionalQuote} updates.
+     *
+     * @param symbol the symbol that you wish to stop receiving updates on
+     *
+     * @throws IOException thrown for {@link IOException}s
+     */
+    public void requestRegionalQuoteUnwatch(String symbol) throws IOException {
+        Preconditions.checkNotNull(symbol);
+
+        synchronized (messageReceivedLock) {
+            regionalQuoteListenersOfSymbols.remove(symbol);
+        }
+
+        sendLevel1SystemCommand(Level1SystemCommand.REGOFF, symbol);
+    }
+
+    /**
+     * Enables or disables streaming {@link NewsHeadline}s.
+     *
+     * @param toggle true to enable, false to disable
+     *
+     * @throws IOException thrown for {@link IOException}s
+     */
+    public void enableNews(boolean toggle) throws IOException {
+        sendLevel1SystemCommand(toggle ? Level1SystemCommand.NEWSON : Level1SystemCommand.NEWSOFF);
+    }
+
+    /**
+     * Requests {@link FeedStatistics} be sent.
+     *
+     * @return the {@link SingleMessageFuture} of the {@link FeedStatistics}
+     *
+     * @throws IOException thrown for {@link IOException}s
+     */
+    public SingleMessageFuture<FeedStatistics> requestFeedStatistics() throws IOException {
+        synchronized (messageReceivedLock) {
+            if (feedStatisticsFuture != null) {
+                return feedStatisticsFuture;
+            }
+
+            feedStatisticsFuture = new SingleMessageFuture<>();
+        }
+
+        sendLevel1SystemCommand(Level1SystemCommand.REQUEST_STATS);
+
+        return feedStatisticsFuture;
+    }
+
+    /**
+     * Request a list of all available {@link SummaryUpdateField}s for fundamental messages.
+     *
+     * @return the {@link SingleMessageFuture} of the {@link SummaryUpdateFieldName}s
+     *
+     * @throws IOException thrown for {@link IOException}s
+     */
+    public SingleMessageFuture<List<SummaryUpdateFieldName>> requestFundamentalFieldNames() throws IOException {
+        synchronized (messageReceivedLock) {
+            if (fundamentalFieldNamesFuture != null) {
+                return fundamentalFieldNamesFuture;
+            }
+
+            fundamentalFieldNamesFuture = new SingleMessageFuture<>();
+        }
+
+        sendLevel1SystemCommand(Level1SystemCommand.REQUEST_FUNDAMENTAL_FIELDNAMES);
+
+        return fundamentalFieldNamesFuture;
+    }
+
+    /**
+     * Request a list of all available {@link SummaryUpdateField}s for summary/update messages for the currently set
+     * IQFeed protocol.
+     *
+     * @return the {@link SingleMessageFuture} of the {@link SummaryUpdateFieldName}s
+     *
+     * @throws IOException thrown for {@link IOException}s
+     */
+    public SingleMessageFuture<List<SummaryUpdateFieldName>> requestAllUpdateFieldNames() throws IOException {
+        synchronized (messageReceivedLock) {
+            if (allUpdateFieldNamesFuture != null) {
+                return allUpdateFieldNamesFuture;
+            }
+
+            allUpdateFieldNamesFuture = new SingleMessageFuture<>();
+        }
+
+        sendLevel1SystemCommand(Level1SystemCommand.REQUEST_ALL_UPDATE_FIELDNAMES);
+
+        return allUpdateFieldNamesFuture;
+    }
+
+    /**
+     * Request a list of all available {@link SummaryUpdateField}s for summary/update messages for this connection.
+     *
+     * @return the {@link SingleMessageFuture} of the {@link SummaryUpdateFieldName}s
+     *
+     * @throws IOException thrown for {@link IOException}s
+     */
+    public SingleMessageFuture<List<SummaryUpdateFieldName>> requestCurrentUpdateFieldNames() throws IOException {
+        synchronized (messageReceivedLock) {
+            if (currentUpdateFieldNamesFuture != null) {
+                return currentUpdateFieldNamesFuture;
+            }
+
+            currentUpdateFieldNamesFuture = new SingleMessageFuture<>();
+        }
+
+        sendLevel1SystemCommand(Level1SystemCommand.REQUEST_CURRENT_UPDATE_FIELDNAMES);
+
+        return currentUpdateFieldNamesFuture;
+    }
+
+    /**
+     * Change your fieldset for this connection. This fieldset applies to all {@link SummaryUpdate} messages you receive
+     * on this connection.
+     * <br>
+     * NOTE: The {@link SummaryUpdateField#SYMBOL} is not selectable and will always be the first field of a {@link
+     * SummaryUpdate}.
+     *
+     * @param summaryUpdateFields the {@link SummaryUpdateField}s
+     *
+     * @throws IOException thrown for {@link IOException}s
+     */
+    public void selectUpdateFieldNames(SummaryUpdateField... summaryUpdateFields) throws IOException {
+        sendLevel1SystemCommand(Level1SystemCommand.SELECT_UPDATE_FIELDS,
+                Arrays.stream(summaryUpdateFields).map(SummaryUpdateField::value).distinct().toArray(String[]::new));
+    }
+
+    // TODO SET LOG LEVELS
+
+    /**
+     * Request a list of all symbols currently watched on this connection.
+     *
+     * @return the {@link SingleMessageFuture} of the {@link WatchedSymbol}s
+     *
+     * @throws IOException thrown for {@link IOException}s
+     */
+    public SingleMessageFuture<List<WatchedSymbol>> requestWatchedSymbols() throws IOException {
+        synchronized (messageReceivedLock) {
+            if (currentUpdateFieldNamesFuture != null) {
+                return watchedSymbolsFuture;
+            }
+
+            watchedSymbolsFuture = new SingleMessageFuture<>();
+        }
+
+        sendLevel1SystemCommand(Level1SystemCommand.REQUEST_WATCHES);
+
+        return watchedSymbolsFuture;
+    }
+
+    /**
+     * Unwatch all currently watched symbols.
+     *
+     * @throws IOException thrown for {@link IOException}s
+     */
+    public void requestUnwatchAll() throws IOException {
+        synchronized (messageReceivedLock) {
+            fundamentalDataListenersOfSymbols.clear();
+            summaryUpdateListenersOfSymbols.clear();
+            regionalQuoteListenersOfSymbols.clear();
+        }
+
+        sendLevel1SystemCommand(Level1SystemCommand.UNWATCH_ALL);
+    }
+
+    /**
+     * Tells IQFeed to initiate a connection to the Level 1 server. This happens automatically upon launching the feed
+     * unless the ProductID and/or Product version have not been set. This message is ignored if the feed is already
+     * connected.
+     *
+     * @throws IOException thrown for {@link IOException}s
+     */
+    public void connect() throws IOException {
+        sendLevel1SystemCommand(Level1SystemCommand.CONNECT);
+    }
+
+    /**
+     * Tells IQFeed to disconnect from the Level 1 server. This happens automatically as soon as the last client
+     * connection to IQConnect is terminated and the ClientsConnected value in the S,STATS message returns to zero
+     * (after having incremented above zero). This message is ignored if the feed is already disconnected.
+     * <br>
+     * NOTE: This will terminate all Level 1 updates for ALL apps connected to IQConnect on this Computer and should
+     * only be used if you are certain no other applications are receiving data.
+     *
+     * @throws IOException thrown for {@link IOException}s
+     */
+    public void disconnect() throws IOException {
+        sendLevel1SystemCommand(Level1SystemCommand.DISCONNECT);
+    }
 
     //
     // END Feed commands

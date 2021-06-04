@@ -16,7 +16,9 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.Map;
 
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.*;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueNotWhitespace;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
 
 /**
  * {@link AbstractLookupFeed} represents a {@link AbstractFeed} for Lookup data.

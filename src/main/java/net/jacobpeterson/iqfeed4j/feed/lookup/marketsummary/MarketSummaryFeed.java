@@ -324,6 +324,7 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
         synchronized (messageReceivedLock) {
             endOfDaySnapshotListenersOfRequestIDs.put(requestID, endOfDaySnapshotListener);
         }
+
         sendAndLogMessage(requestBuilder.toString());
     }
 
@@ -361,6 +362,7 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
         synchronized (messageReceivedLock) {
             fundamentalSnapshotListenersOfRequestIDs.put(requestID, fundamentalSnapshotListener);
         }
+
         sendAndLogMessage(requestBuilder.toString());
     }
 
@@ -395,6 +397,7 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
         synchronized (messageReceivedLock) {
             fiveMinuteSnapshotListenersOfRequestIDs.put(requestID, fiveMinuteSnapshotListener);
         }
+
         sendAndLogMessage(requestBuilder.toString());
     }
 

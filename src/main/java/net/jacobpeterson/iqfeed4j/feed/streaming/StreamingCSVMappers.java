@@ -5,7 +5,9 @@ import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.IndexCSVMapper;
 
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.MONTH3_DAY_TIME_AM_PM;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.*;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.DOUBLE;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.INTEGER;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.STRING;
 
 /**
  * {@link StreamingCSVMappers} contains {@link CSVMapper}s for streaming feeds.

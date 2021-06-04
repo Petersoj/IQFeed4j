@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "title": "This represents watched symbol. See <a href=\"https://www.iqfeed.net/dev/api/docs/docsBeta/Level1viaTCPIP.cfm\">Level 1 via TCP/IP</a>",
+  "properties": {
+    "symbol": {
+      "existingJavaType": "java.lang.String",
+      "title": "The symbol."
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "title": "This represents a {@link net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField} name. See <a href=\"https://www.iqfeed.net/dev/api/docs/docsBeta/DynamicFieldsets.cfm\">Dynamic Fieldsets</a>",
+  "properties": {
+    "summaryUpdateField": {
+      "existingJavaType": "net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField",
+      "title": "The {@link net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField}."
+    }
+  }
+}

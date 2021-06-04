@@ -97,6 +97,7 @@ public class NewsFeed extends AbstractLookupFeed {
         synchronized (messageReceivedLock) {
             messageLineListenersOfRequestIDs.put(requestID, messageLineListener);
         }
+
         sendAndLogMessage(requestBuilder.toString());
     }
 
@@ -164,6 +165,7 @@ public class NewsFeed extends AbstractLookupFeed {
         synchronized (messageReceivedLock) {
             messageLineListenersOfRequestIDs.put(requestID, messageLineListener);
         }
+
         sendAndLogMessage(requestBuilder.toString());
     }
 
@@ -208,6 +210,7 @@ public class NewsFeed extends AbstractLookupFeed {
         synchronized (messageReceivedLock) {
             messageLineListenersOfRequestIDs.put(requestID, messageLineListener);
         }
+
         sendAndLogMessage(requestBuilder.toString());
     }
 
@@ -260,6 +263,7 @@ public class NewsFeed extends AbstractLookupFeed {
         synchronized (messageReceivedLock) {
             messageLineListenersOfRequestIDs.put(requestID, messageLineListener);
         }
+
         sendAndLogMessage(requestBuilder.toString());
     }
 

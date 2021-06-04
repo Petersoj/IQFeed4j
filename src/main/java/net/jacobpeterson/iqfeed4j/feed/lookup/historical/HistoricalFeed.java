@@ -177,6 +177,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         synchronized (messageReceivedLock) {
             tickListenersOfRequestIDs.put(requestID, ticksListener);
         }
+
         sendAndLogMessage(requestBuilder.toString());
     }
 
@@ -236,6 +237,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         synchronized (messageReceivedLock) {
             tickListenersOfRequestIDs.put(requestID, ticksListener);
         }
+
         sendAndLogMessage(requestBuilder.toString());
     }
 
@@ -306,6 +308,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         synchronized (messageReceivedLock) {
             tickListenersOfRequestIDs.put(requestID, ticksListener);
         }
+
         sendAndLogMessage(requestBuilder.toString());
     }
 
@@ -355,6 +358,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         synchronized (messageReceivedLock) {
             intervalListenersOfRequestIDs.put(requestID, intervalsListener);
         }
+
         sendAndLogMessage(requestBuilder.toString());
     }
 
@@ -424,6 +428,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         synchronized (messageReceivedLock) {
             intervalListenersOfRequestIDs.put(requestID, intervalsListener);
         }
+
         sendAndLogMessage(requestBuilder.toString());
     }
 
@@ -505,6 +510,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         synchronized (messageReceivedLock) {
             intervalListenersOfRequestIDs.put(requestID, intervalsListener);
         }
+
         sendAndLogMessage(requestBuilder.toString());
     }
 
@@ -552,6 +558,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         synchronized (messageReceivedLock) {
             datedIntervalListenersOfRequestIDs.put(requestID, datedIntervalsListener);
         }
+
         sendAndLogMessage(requestBuilder.toString());
     }
 
@@ -616,6 +623,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         synchronized (messageReceivedLock) {
             datedIntervalListenersOfRequestIDs.put(requestID, datedIntervalsListener);
         }
+
         sendAndLogMessage(requestBuilder.toString());
     }
 
@@ -663,6 +671,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         synchronized (messageReceivedLock) {
             datedIntervalListenersOfRequestIDs.put(requestID, datedIntervalsListener);
         }
+
         sendAndLogMessage(requestBuilder.toString());
     }
 
@@ -710,6 +719,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         synchronized (messageReceivedLock) {
             datedIntervalListenersOfRequestIDs.put(requestID, datedIntervalsListener);
         }
+
         sendAndLogMessage(requestBuilder.toString());
     }
 
