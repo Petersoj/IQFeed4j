@@ -489,18 +489,23 @@ public class Level1Feed extends AbstractServerConnectionFeed {
 
                     switch (messageType) {
                         case FUNDAMENTAL_MESSAGE:
+                            handleFundamentalMessage(csv);
                             break;
                         case SUMMARY_MESSAGE:
-                            break;
                         case UPDATE_MESSAGE:
+                            handleSummaryUpdateMessage(csv, messageType);
                             break;
                         case REGIONAL_UPDATE:
+                            handleRegionalUpdateMessage(csv);
                             break;
                         case NEWS_HEADLINE_MESSAGE:
+                            handleNewsHeadlineMessage(csv);
                             break;
                         case TIMESTAMP_MESSAGE:
+                            handleTimestampMessage(csv);
                             break;
                         case SYMBOL_NOT_WATCHED:
+                            handleSymbolNotWatched(csv);
                             break;
                         default:
                             LOGGER.error("Unhandled message type: {}", messageType);
@@ -607,8 +612,106 @@ public class Level1Feed extends AbstractServerConnectionFeed {
         }
     }
 
-    private <T> void handleFeedMessageListenerMessage() {
+    private void handleFundamentalMessage(String[] csv) {
+        try {
+            FundamentalData fundamentalData = FUNDAMENTAL_DATA_CSV_MAPPER.map(csv, 1);
+            FeedMessageListener<FundamentalData> listener =
+                    fundamentalDataListenersOfSymbols.get(fundamentalData.getSymbol());
+            if (listener == null) {
+                LOGGER.error("Received FundamentalData, but no listener for symbol {} exists!",
+                        fundamentalData.getSymbol());
+            } else {
+                listener.onMessageReceived(fundamentalData);
+            }
+        } catch (Exception exception) {
+            LOGGER.error("Could not handle FundamentalData message!", exception);
+        }
+    }
 
+    private void handleSummaryUpdateMessage(String[] csv, Level1MessageType messageType) {
+        try {
+            SummaryUpdate summaryUpdate = summaryUpdateCSVMapper.map(csv, 1);
+            FeedMessageListener<SummaryUpdate> listener =
+                    summaryUpdateListenersOfSymbols.get(summaryUpdate.getSymbol());
+            if (listener == null) {
+                LOGGER.error("Received SummaryUpdate, but no listener for symbol {} exists!",
+                        summaryUpdate.getSymbol());
+            } else {
+                switch (messageType) {
+                    case SUMMARY_MESSAGE:
+                        summaryUpdate.setType(SummaryUpdate.Type.SUMMARY);
+                        break;
+                    case UPDATE_MESSAGE:
+                        summaryUpdate.setType(SummaryUpdate.Type.UPDATE);
+                        break;
+                }
+
+                listener.onMessageReceived(summaryUpdate);
+            }
+        } catch (Exception exception) {
+            LOGGER.error("Could not handle SummaryUpdate message!", exception);
+        }
+    }
+
+    private void handleRegionalUpdateMessage(String[] csv) {
+        try {
+            RegionalQuote regionalQuote = REGIONAL_QUOTE_CSV_MAPPER.map(csv, 1);
+            FeedMessageListener<RegionalQuote> listener =
+                    regionalQuoteListenersOfSymbols.get(regionalQuote.getSymbol());
+            if (listener == null) {
+                LOGGER.error("Received FundamentalData, but no listener for symbol {} exists!",
+                        regionalQuote.getSymbol());
+            } else {
+                listener.onMessageReceived(regionalQuote);
+            }
+        } catch (Exception exception) {
+            LOGGER.error("Could not handle FundamentalData message!", exception);
+        }
+    }
+
+    private void handleNewsHeadlineMessage(String[] csv) {
+        try {
+            NewsHeadline newsHeadline = NEWS_HEADLINE_CSV_MAPPER.map(csv, 1);
+            if (newsHeadlineListener == null) {
+                LOGGER.error("Received NewsHeadline, but no listener exists!");
+            } else {
+                newsHeadlineListener.onMessageReceived(newsHeadline);
+            }
+        } catch (Exception exception) {
+            LOGGER.error("Could not handle NewsHeadline message!", exception);
+        }
+    }
+
+    private void handleTimestampMessage(String[] csv) {
+        try {
+            LocalDateTime timestamp = TIMESTAMP_CSV_MAPPER.map(csv, 1);
+            latestTimestamp = timestamp;
+
+            if (timestampFuture != null) {
+                timestampFuture.complete(timestamp);
+                timestampFuture = null;
+            } else {
+                LOGGER.error("Could not complete {} future!", Level1MessageType.TIMESTAMP_MESSAGE);
+            }
+        } catch (Exception exception) {
+            if (timestampFuture != null) {
+                timestampFuture.completeExceptionally(exception);
+                timestampFuture = null;
+            } else {
+                LOGGER.error("Could not complete {} future!", Level1MessageType.TIMESTAMP_MESSAGE);
+            }
+        }
+    }
+
+    private void handleSymbolNotWatched(String[] csv) {
+        if (level1FeedEventListener != null) {
+            if (!valueExists(csv, 2)) {
+                LOGGER.error("System message needs more arguments!");
+            } else {
+                String symbol = csv[2];
+                level1FeedEventListener.onSymbolNotWatched(symbol);
+            }
+        }
     }
 
     //

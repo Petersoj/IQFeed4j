@@ -19,4 +19,11 @@ public abstract class Level1FeedEventListener {
      * @param symbol the symbol
      */
     public abstract void onSymbolLimitReached(String symbol);
+
+    /**
+     * Called when a request symbol was not found or the user is not authorized.
+     *
+     * @param symbol the symbol
+     */
+    public abstract void onSymbolNotWatched(String symbol);
 }
