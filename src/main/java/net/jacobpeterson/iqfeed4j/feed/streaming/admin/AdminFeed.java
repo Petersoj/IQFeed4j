@@ -12,7 +12,7 @@ import net.jacobpeterson.iqfeed4j.model.feed.streaming.admin.enums.AdminSystemMe
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.admin.enums.OnOffOption;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.common.FeedStatistics;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.common.FeedStatistics.Status;
-import net.jacobpeterson.iqfeed4j.util.csv.mapper.IndexCSVMapper;
+import net.jacobpeterson.iqfeed4j.util.csv.mapper.index.IndexCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.string.LineEnding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,10 +26,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueExists;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueNotWhitespace;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.DATE_SPACE_TIME;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.DOUBLE;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.INTEGER;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.STRING;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.DateTimeConverters.DATE_SPACE_TIME;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.PrimitiveConvertors.DOUBLE;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.PrimitiveConvertors.INTEGER;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.PrimitiveConvertors.STRING;
 
 /**
  * {@link AdminFeed} represents the Admin {@link AbstractFeed}. Methods in this class are not synchronized.

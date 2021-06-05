@@ -13,7 +13,7 @@ import net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.enums.OptionFil
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.enums.OptionType;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.enums.PutsCallsOption;
 import net.jacobpeterson.iqfeed4j.util.chars.CharUtil;
-import net.jacobpeterson.iqfeed4j.util.csv.mapper.ListCSVMapper;
+import net.jacobpeterson.iqfeed4j.util.csv.mapper.list.ListCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.exception.IQFeedException;
 import net.jacobpeterson.iqfeed4j.util.exception.NoDataException;
 import net.jacobpeterson.iqfeed4j.util.exception.SyntaxException;

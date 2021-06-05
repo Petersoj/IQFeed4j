@@ -1,4 +1,6 @@
-package net.jacobpeterson.iqfeed4j.util.csv.mapper;
+package net.jacobpeterson.iqfeed4j.util.csv.mapper.list;
+
+import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapping;
 
 import java.util.HashMap;
 import java.util.List;
@@ -14,7 +16,7 @@ import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueNotWhitespace;
  * {@link NestedListCSVMapper} mappings are based on a nested CSV lists inside a CSV list (e.g. a group of 3 CSV values
  * that repeated in a CSV list).
  */
-public class NestedListCSVMapper<T> extends CSVMapper<T> {
+public class NestedListCSVMapper<T> extends AbstractListCSVMapper<T> {
 
     protected final Callable<? extends List<T>> listInstantiator;
     protected final HashMap<Integer, CSVMapping<T, ?>> csvMappingsOfCSVIndices;
@@ -72,24 +74,12 @@ public class NestedListCSVMapper<T> extends CSVMapper<T> {
     }
 
     /**
-     * Use {@link #mapToList(String[], int)}.
+     * {@inheritDoc}
+     * <br>
+     * Note: this will map to a list of POJOs using the mappings added via {@link #setMapping(int, BiConsumer,
+     * Function)}. This will iterate through the list at {@link #nestedListLength} length.
      */
     @Override
-    public T map(String[] csv, int offset) throws Exception {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Maps the given 'csv' list to a {@link List} of POJOs using the mappings added via {@link #setMapping(int,
-     * BiConsumer, Function)}. This will iterate through the list at {@link #nestedListLength} length.
-     *
-     * @param csv    the CSV
-     * @param offset offset to add to CSV indices when applying {@link CSVMapping}
-     *
-     * @return a new {@link List} of mapped POJOs
-     *
-     * @throws Exception thrown for a variety of {@link Exception}s
-     */
     public List<T> mapToList(String[] csv, int offset) throws Exception {
         List<T> mappedList = listInstantiator.call();
 

@@ -1,4 +1,7 @@
-package net.jacobpeterson.iqfeed4j.util.csv.mapper;
+package net.jacobpeterson.iqfeed4j.util.csv.mapper.map;
+
+import net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper;
+import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapping;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,7 +16,7 @@ import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueNotWhitespace;
  * <br>
  * {@link NamedCSVMapper} mappings are based off of named CSV indices.
  */
-public class NamedCSVMapper<T> extends CSVMapper<T> {
+public class NamedCSVMapper<T> extends AbstractCSVMapper<T> {
 
     private final HashMap<String, CSVMapping<T, ?>> csvMappingsOfCSVIndexNames;
 
@@ -48,14 +51,6 @@ public class NamedCSVMapper<T> extends CSVMapper<T> {
      */
     public void removeMapping(String csvIndexName) {
         csvMappingsOfCSVIndexNames.remove(csvIndexName);
-    }
-
-    /**
-     * Use {@link #map(String[], int, Map)}.
-     */
-    @Override
-    public T map(String[] csv, int offset) throws Exception {
-        throw new UnsupportedOperationException();
     }
 
     /**

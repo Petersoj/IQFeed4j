@@ -1,4 +1,6 @@
-package net.jacobpeterson.iqfeed4j.util.csv.mapper;
+package net.jacobpeterson.iqfeed4j.util.csv.mapper.index;
+
+import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapping;
 
 import java.util.HashMap;
 import java.util.concurrent.Callable;
@@ -9,10 +11,8 @@ import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueNotWhitespace;
 
 /**
  * {@inheritDoc}
- * <br>
- * {@link IndexCSVMapper} mappings are based off of predefined CSV indices.
  */
-public class IndexCSVMapper<T> extends CSVMapper<T> {
+public class IndexCSVMapper<T> extends AbstractIndexCSVMapper<T> {
 
     protected final HashMap<Integer, CSVMapping<T, ?>> csvMappingsOfCSVIndices;
 

@@ -9,8 +9,8 @@ import net.jacobpeterson.iqfeed4j.model.feed.lookup.historical.Tick;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.historical.enums.DataDirection;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.historical.enums.PartialDatapoint;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.historical.enums.TimeLabelPlacement;
-import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeFormatters;
-import net.jacobpeterson.iqfeed4j.util.csv.mapper.IndexCSVMapper;
+import net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.DateTimeFormatters;
+import net.jacobpeterson.iqfeed4j.util.csv.mapper.index.IndexCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.string.LineEnding;
 import net.jacobpeterson.iqfeed4j.util.tradecondition.TradeConditionUtil;
 import org.slf4j.Logger;
@@ -24,13 +24,13 @@ import java.util.HashMap;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.DASHED_DATE;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.DASHED_DATE_SPACE_TIME;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.DASHED_DATE_SPACE_TIME_FRACTIONAL;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.DOUBLE;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.INTEGER;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.LONG;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.SHORT;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.DateTimeConverters.DASHED_DATE;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.DateTimeConverters.DASHED_DATE_SPACE_TIME;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.DateTimeConverters.DASHED_DATE_SPACE_TIME_FRACTIONAL;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.PrimitiveConvertors.DOUBLE;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.PrimitiveConvertors.INTEGER;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.PrimitiveConvertors.LONG;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.PrimitiveConvertors.SHORT;
 
 /**
  * {@link HistoricalFeed} is an {@link AbstractLookupFeed} for historical data.

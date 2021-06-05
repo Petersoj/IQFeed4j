@@ -9,8 +9,8 @@ import net.jacobpeterson.iqfeed4j.model.feed.streaming.derivative.Interval;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.derivative.WatchedInterval;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.derivative.enums.DerivativeMessageType;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.derivative.enums.DerivativeSystemMessageType;
-import net.jacobpeterson.iqfeed4j.util.csv.mapper.IndexCSVMapper;
-import net.jacobpeterson.iqfeed4j.util.csv.mapper.NestedListCSVMapper;
+import net.jacobpeterson.iqfeed4j.util.csv.mapper.index.IndexCSVMapper;
+import net.jacobpeterson.iqfeed4j.util.csv.mapper.list.NestedListCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.map.MapUtil;
 import net.jacobpeterson.iqfeed4j.util.string.LineEnding;
 import org.slf4j.Logger;
@@ -28,12 +28,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueExists;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.DASHED_DATE_SPACE_TIME;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeFormatters.DATE_SPACE_TIME;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeFormatters.TIME;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.DOUBLE;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.INTEGER;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.STRING;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.DateTimeConverters.DASHED_DATE_SPACE_TIME;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.DateTimeFormatters.DATE_SPACE_TIME;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.DateTimeFormatters.TIME;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.PrimitiveConvertors.DOUBLE;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.PrimitiveConvertors.INTEGER;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.PrimitiveConvertors.STRING;
 
 /**
  * {@link DerivativeFeed} is an {@link AbstractServerConnectionFeed} for derivative tick data (aka interval/bar data).

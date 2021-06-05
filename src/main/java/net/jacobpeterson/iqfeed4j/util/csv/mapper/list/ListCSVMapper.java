@@ -1,4 +1,4 @@
-package net.jacobpeterson.iqfeed4j.util.csv.mapper;
+package net.jacobpeterson.iqfeed4j.util.csv.mapper.list;
 
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -12,7 +12,7 @@ import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueNotWhitespace;
  * <br>
  * {@link ListCSVMapper} maps a CSV list to a POJO {@link List}.
  */
-public class ListCSVMapper<T> extends CSVMapper<T> {
+public class ListCSVMapper<T> extends AbstractListCSVMapper<T> {
 
     protected final Callable<? extends List<T>> listInstantiator;
     protected final BiConsumer<T, String> csvValueConsumer;
@@ -23,9 +23,9 @@ public class ListCSVMapper<T> extends CSVMapper<T> {
      *
      * @param listInstantiator a {@link Callable} to instantiate a new {@link List}
      * @param pojoInstantiator a {@link Callable} to instantiate a new POJO
-     * @param csvValueConsumer a {@link BiConsumer} that will takes a new POJO instance as the first argument, and the
-     *                         CSV list {@link String} value as the second argument. This is so that fields inside the
-     *                         POJO can be set according to the passed in CSV list {@link String} value.
+     * @param csvValueConsumer a {@link BiConsumer} that takes a new POJO instance as the first argument, and the CSV
+     *                         list {@link String} value as the second argument. This is so that fields inside the POJO
+     *                         can be set according to the passed in CSV list {@link String} value.
      * @param skipPattern      when a CSV value matches this given {@link Pattern} in {@link #mapToList(String[], int)},
      *                         then it is skipped (<code>null</code> to not check)
      */
@@ -39,23 +39,11 @@ public class ListCSVMapper<T> extends CSVMapper<T> {
     }
 
     /**
-     * Use {@link #mapToList(String[], int)}.
+     * {@inheritDoc}
+     * <br>
+     * Note: this will map to a list of POJOs with the {@link #csvValueConsumer} applied.
      */
     @Override
-    public T map(String[] csv, int offset) throws Exception {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Maps the given 'csv' list to a {@link List} of POJOs with the {@link #csvValueConsumer} applied.
-     *
-     * @param csv    the CSV
-     * @param offset offset to add to CSV indices when applying {@link CSVMapping}
-     *
-     * @return a new {@link List} of mapped POJOs
-     *
-     * @throws Exception thrown for a variety of {@link Exception}s
-     */
     public List<T> mapToList(String[] csv, int offset) throws Exception {
         List<T> mappedList = listInstantiator.call();
 

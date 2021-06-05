@@ -5,8 +5,7 @@ import net.jacobpeterson.iqfeed4j.feed.message.MultiMessageListener;
 import net.jacobpeterson.iqfeed4j.model.feed.common.message.MessageLine;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.news.enums.XMLTextEmailOption;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.news.enums.XMLTextOption;
-import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper;
-import net.jacobpeterson.iqfeed4j.util.csv.mapper.TrailingCSVMapper;
+import net.jacobpeterson.iqfeed4j.util.csv.mapper.index.TrailingIndexCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.string.LineEnding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +19,8 @@ import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeFormatters.DATE;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.DateTimeFormatters.DATE;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.PrimitiveConvertors.STRING;
 
 /**
  * {@link NewsFeed} is an {@link AbstractLookupFeed} for news data.
@@ -30,11 +30,11 @@ public class NewsFeed extends AbstractLookupFeed {
     private static final Logger LOGGER = LoggerFactory.getLogger(NewsFeed.class);
     protected static final String FEED_NAME_SUFFIX = " News";
 
-    protected static final TrailingCSVMapper<MessageLine> MESSAGE_LINE_CSV_MAPPER;
+    protected static final TrailingIndexCSVMapper<MessageLine> MESSAGE_LINE_CSV_MAPPER;
 
     static {
-        MESSAGE_LINE_CSV_MAPPER = new TrailingCSVMapper<>(MessageLine::new);
-        MESSAGE_LINE_CSV_MAPPER.setTrailingMapping(MessageLine::setLine, CSVMapper.PrimitiveConvertors.STRING);
+        MESSAGE_LINE_CSV_MAPPER = new TrailingIndexCSVMapper<>(MessageLine::new);
+        MESSAGE_LINE_CSV_MAPPER.setTrailingMapping(MessageLine::setLine, STRING);
     }
 
     protected final Object messageReceivedLock;

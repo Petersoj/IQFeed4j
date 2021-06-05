@@ -1,4 +1,6 @@
-package net.jacobpeterson.iqfeed4j.util.csv.mapper;
+package net.jacobpeterson.iqfeed4j.util.csv.mapper.index;
+
+import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapping;
 
 import java.util.HashMap;
 import java.util.concurrent.Callable;
@@ -11,21 +13,21 @@ import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueNotWhitespace;
 /**
  * {@inheritDoc}
  * <br>
- * {@link TrailingCSVMapper} mappings are based off of predefined CSV indices, but with the ability to add a CSV mapping
+ * {@link TrailingIndexCSVMapper} mappings are based off of predefined CSV indices, but with the ability to add a CSV mapping
  * that accumulates all CSV values after a certain index into one mapping.
  */
-public class TrailingCSVMapper<T> extends CSVMapper<T> {
+public class TrailingIndexCSVMapper<T> extends AbstractIndexCSVMapper<T> {
 
     protected final HashMap<Integer, CSVMapping<T, ?>> csvMappingsOfCSVIndices;
     protected int trailingCSVIndex;
     protected CSVMapping<T, ?> trailingCSVMapping;
 
     /**
-     * Instantiates a new {@link TrailingCSVMapper}.
+     * Instantiates a new {@link TrailingIndexCSVMapper}.
      *
      * @param pojoInstantiator a {@link Callable} to instantiate a new POJO
      */
-    public TrailingCSVMapper(Callable<T> pojoInstantiator) {
+    public TrailingIndexCSVMapper(Callable<T> pojoInstantiator) {
         super(pojoInstantiator);
 
         csvMappingsOfCSVIndices = new HashMap<>();

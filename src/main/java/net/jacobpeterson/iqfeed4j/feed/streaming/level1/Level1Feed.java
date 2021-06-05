@@ -12,16 +12,12 @@ import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.CustomerInformatio
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.CustomerInformation.ServiceType;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.FundamentalData;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.FundamentalData.OptionsMultipleDeliverables;
-import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.FundamentalDataFieldName;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.NewsHeadline;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.RegionalQuote;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.SummaryUpdate;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.SummaryUpdate.MarketOpen;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.SummaryUpdate.MostRecentTradeAggressor;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.SummaryUpdate.RestrictedCode;
-import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.SummaryUpdateFieldName;
-import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.Timestamp;
-import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.WatchedSymbol;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.Level1Command;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.Level1MessageType;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.Level1SystemCommand;
@@ -29,10 +25,13 @@ import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.Level1System
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.LogLevel;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateContent;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField;
-import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper;
+import net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapping;
-import net.jacobpeterson.iqfeed4j.util.csv.mapper.IndexCSVMapper;
-import net.jacobpeterson.iqfeed4j.util.csv.mapper.ListCSVMapper;
+import net.jacobpeterson.iqfeed4j.util.csv.mapper.index.DirectIndexCSVMapper;
+import net.jacobpeterson.iqfeed4j.util.csv.mapper.index.IndexCSVMapper;
+import net.jacobpeterson.iqfeed4j.util.csv.mapper.list.AbstractListCSVMapper;
+import net.jacobpeterson.iqfeed4j.util.csv.mapper.list.DirectListCSVMapper;
+import net.jacobpeterson.iqfeed4j.util.csv.mapper.list.ListCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.string.LineEnding;
 import net.jacobpeterson.iqfeed4j.util.tradecondition.TradeConditionUtil;
 import org.slf4j.Logger;
@@ -40,6 +39,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -55,13 +55,10 @@ import static net.jacobpeterson.iqfeed4j.feed.streaming.level1.Level1Feed.CSVPOJ
 import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.*;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.COLON_TIME;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.DATE;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.DATE_SPACE_TIME;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.SLASHED_DATE;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.DOUBLE;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.INTEGER;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.STRING;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.DateTimeConverters.*;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.PrimitiveConvertors.DOUBLE;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.PrimitiveConvertors.INTEGER;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.PrimitiveConvertors.STRING;
 
 /**
  * {@link Level1Feed} is an {@link AbstractServerConnectionFeed} for Level 1 market data.
@@ -92,17 +89,20 @@ public class Level1Feed extends AbstractServerConnectionFeed {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Level1Feed.class);
     protected static final String FEED_NAME_SUFFIX = " Level 1 Feed";
+    protected static final DirectListCSVMapper<String> STRING_LIST_CSV_MAPPER;
     protected static final HashMap<SummaryUpdateField, CSVMapping<SummaryUpdate, ?>>
             CSV_MAPPINGS_OF_SUMMARY_UPDATE_FIELDS;
     protected static final IndexCSVMapper<FundamentalData> FUNDAMENTAL_DATA_CSV_MAPPER;
     protected static final IndexCSVMapper<RegionalQuote> REGIONAL_QUOTE_CSV_MAPPER;
     protected static final IndexCSVMapper<NewsHeadline> NEWS_HEADLINE_CSV_MAPPER;
     protected static final IndexCSVMapper<CustomerInformation> CUSTOMER_INFORMATION_CSV_MAPPER;
-    protected static final ListCSVMapper<FundamentalDataFieldName> FUNDAMENTAL_DATA_FIELD_NAMES_CSV_MAPPER;
-    protected static final ListCSVMapper<SummaryUpdateFieldName> SUMMARY_UPDATE_FIELD_NAMES_CSV_MAPPER;
-    protected static final ListCSVMapper<WatchedSymbol> WATCHED_SYMBOLS_CSV_MAPPER;
+    protected static final DirectListCSVMapper<SummaryUpdateField> SUMMARY_UPDATE_FIELDS_CSV_MAPPER;
+    protected static final DirectListCSVMapper<LogLevel> LOG_LEVELS_CSV_MAPPER;
+    protected static final DirectIndexCSVMapper<LocalDateTime> TIMESTAMP_CSV_MAPPER;
 
     static {
+        STRING_LIST_CSV_MAPPER = new DirectListCSVMapper<>(ArrayList::new, STRING);
+
         // We aren't using 'NamedCSVMapper' since it's slower due to traversing two 'Maps' so instead, we are
         // storing 'CSVMapping's based on 'SummaryUpdateField's due to "Dynamic Fieldsets" that can be set.
         CSV_MAPPINGS_OF_SUMMARY_UPDATE_FIELDS = new HashMap<>();
@@ -353,15 +353,11 @@ public class Level1Feed extends AbstractServerConnectionFeed {
         CUSTOMER_INFORMATION_CSV_MAPPER.addMapping(CustomerInformation::setFlags, STRING);
         CUSTOMER_INFORMATION_CSV_MAPPER.addMapping(CustomerInformation::setAccountExpirationDate, DATE);
 
-        FUNDAMENTAL_DATA_FIELD_NAMES_CSV_MAPPER = new ListCSVMapper<>(ArrayList::new, FundamentalDataFieldName::new,
-                FundamentalDataFieldName::setName, null);
+        SUMMARY_UPDATE_FIELDS_CSV_MAPPER = new DirectListCSVMapper<>(ArrayList::new, SummaryUpdateField::fromValue);
 
-        SUMMARY_UPDATE_FIELD_NAMES_CSV_MAPPER = new ListCSVMapper<>(ArrayList::new, SummaryUpdateFieldName::new,
-                ((instance, csvValue) -> instance.setSummaryUpdateField(SummaryUpdateField.fromValue(csvValue))),
-                null);
+        LOG_LEVELS_CSV_MAPPER = new DirectListCSVMapper<>(ArrayList::new, LogLevel::fromValue);
 
-        WATCHED_SYMBOLS_CSV_MAPPER = new ListCSVMapper<>(ArrayList::new, WatchedSymbol::new,
-                WatchedSymbol::setSymbol, null);
+        TIMESTAMP_CSV_MAPPER = new DirectIndexCSVMapper<>(0, DATE_SPACE_COLON_TIME);
     }
 
     protected final Object messageReceivedLock;
@@ -371,16 +367,16 @@ public class Level1Feed extends AbstractServerConnectionFeed {
 
     protected IndexCSVMapper<SummaryUpdate> summaryUpdateCSVMapper;
 
-    protected SingleMessageFuture<Timestamp> timestampFuture;
-    protected Timestamp latestTimestamp;
+    protected SingleMessageFuture<LocalDateTime> timestampFuture;
+    protected LocalDateTime latestTimestamp;
     protected SingleMessageFuture<FeedStatistics> feedStatisticsFuture;
     protected FeedStatistics latestFeedStatistics;
     protected FeedMessageListener<NewsHeadline> newsHeadlineListener;
-    protected SingleMessageFuture<List<FundamentalDataFieldName>> fundamentalFieldNamesFuture;
-    protected SingleMessageFuture<List<SummaryUpdateFieldName>> allUpdateFieldNamesFuture;
-    protected SingleMessageFuture<List<SummaryUpdateFieldName>> currentUpdateFieldNamesFuture;
+    protected SingleMessageFuture<List<String>> fundamentalFieldNamesFuture;
+    protected SingleMessageFuture<List<SummaryUpdateField>> allUpdateFieldNamesFuture;
+    protected SingleMessageFuture<List<SummaryUpdateField>> currentUpdateFieldNamesFuture;
     protected SingleMessageFuture<List<LogLevel>> logLevelsFuture;
-    protected SingleMessageFuture<List<WatchedSymbol>> watchedSymbolsFuture;
+    protected SingleMessageFuture<List<String>> watchedSymbolsFuture;
 
     /**
      * Instantiates a new {@link Level1Feed}.
@@ -445,23 +441,23 @@ public class Level1Feed extends AbstractServerConnectionFeed {
                         break;
                     case FUNDAMENTAL_FIELDNAMES:
                         if (handleListCSVSystemMessageFuture(systemMessageType, fundamentalFieldNamesFuture,
-                                FUNDAMENTAL_DATA_FIELD_NAMES_CSV_MAPPER, csv, 2)) {
+                                STRING_LIST_CSV_MAPPER, csv, 2)) {
                             fundamentalFieldNamesFuture = null;
                         }
                         break;
                     case UPDATE_FIELDNAMES:
                         if (handleListCSVSystemMessageFuture(systemMessageType, allUpdateFieldNamesFuture,
-                                SUMMARY_UPDATE_FIELD_NAMES_CSV_MAPPER, csv, 2)) {
+                                SUMMARY_UPDATE_FIELDS_CSV_MAPPER, csv, 2)) {
                             allUpdateFieldNamesFuture = null;
                         }
                         break;
                     case CURRENT_UPDATE_FIELDNAMES:
                         break;
                     case CURRENT_LOG_LEVELS:
-                        // if (handleListCSVSystemMessageFuture(systemMessageType, logLevelsFuture,
-                        //         SUMMARY_UPDATE_FIELD_NAMES_CSV_MAPPER, csv, 2)) {
-                        //     allUpdateFieldNamesFuture = null;
-                        // }
+                        if (handleListCSVSystemMessageFuture(systemMessageType, logLevelsFuture,
+                                LOG_LEVELS_CSV_MAPPER, csv, 2)) {
+                            allUpdateFieldNamesFuture = null;
+                        }
                         break;
                     case WATCHES:
                         break;
@@ -500,7 +496,7 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     }
 
     /**
-     * Handles a {@link SingleMessageFuture} for a CSV with a {@link ListCSVMapper} {@link CSVMapper}.
+     * Handles a {@link SingleMessageFuture} for a CSV with a {@link ListCSVMapper} {@link AbstractCSVMapper}.
      *
      * @param <T>               the type of {@link SingleMessageFuture}
      * @param systemMessageType the {@link Level1SystemMessageType}
@@ -512,7 +508,8 @@ public class Level1Feed extends AbstractServerConnectionFeed {
      * @return true if the {@link SingleMessageFuture} wasn't null, false otherwise
      */
     private <T> boolean handleListCSVSystemMessageFuture(Level1SystemMessageType systemMessageType,
-            SingleMessageFuture<List<T>> future, ListCSVMapper<T> listCSVMapper, String[] csv, int mappingOffset) {
+            SingleMessageFuture<List<T>> future, AbstractListCSVMapper<T> listCSVMapper, String[] csv,
+            int mappingOffset) {
         if (future != null) {
             try {
                 future.complete(listCSVMapper.mapToList(csv, mappingOffset));
@@ -652,13 +649,13 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     }
 
     /**
-     * Requests a {@link Timestamp} be sent.
+     * Requests a {@link LocalDateTime} timestamp to be sent.
      *
-     * @return the {@link SingleMessageFuture} of the {@link Timestamp}
+     * @return the {@link SingleMessageFuture} of the {@link LocalDateTime} timestamp
      *
      * @throws IOException thrown for {@link IOException}s
      */
-    public SingleMessageFuture<Timestamp> requestTimestamp() throws IOException {
+    public SingleMessageFuture<LocalDateTime> requestTimestamp() throws IOException {
         synchronized (messageReceivedLock) {
             if (timestampFuture != null) {
                 return timestampFuture;
@@ -701,7 +698,7 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     }
 
     /**
-     * Enables or disables the once-per-second {@link Timestamp}s.
+     * Enables or disables the once-per-second {@link LocalDateTime} timestamp.
      *
      * @param toggle true to enable, false to disable
      *
@@ -785,11 +782,11 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     /**
      * Request a list of all available {@link SummaryUpdateField}s for fundamental messages.
      *
-     * @return the {@link SingleMessageFuture} of the {@link FundamentalDataFieldName}s
+     * @return the {@link SingleMessageFuture} of the {@link String} field names
      *
      * @throws IOException thrown for {@link IOException}s
      */
-    public SingleMessageFuture<List<FundamentalDataFieldName>> requestFundamentalFieldNames() throws IOException {
+    public SingleMessageFuture<List<String>> requestFundamentalFieldNames() throws IOException {
         synchronized (messageReceivedLock) {
             if (fundamentalFieldNamesFuture != null) {
                 return fundamentalFieldNamesFuture;
@@ -807,11 +804,11 @@ public class Level1Feed extends AbstractServerConnectionFeed {
      * Request a list of all available {@link SummaryUpdateField}s for summary/update messages for the currently set
      * IQFeed protocol.
      *
-     * @return the {@link SingleMessageFuture} of the {@link SummaryUpdateFieldName}s
+     * @return the {@link SingleMessageFuture} of the {@link SummaryUpdateField}s
      *
      * @throws IOException thrown for {@link IOException}s
      */
-    public SingleMessageFuture<List<SummaryUpdateFieldName>> requestAllUpdateFieldNames() throws IOException {
+    public SingleMessageFuture<List<SummaryUpdateField>> requestAllUpdateFieldNames() throws IOException {
         synchronized (messageReceivedLock) {
             if (allUpdateFieldNamesFuture != null) {
                 return allUpdateFieldNamesFuture;
@@ -828,11 +825,11 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     /**
      * Request a list of all available {@link SummaryUpdateField}s for summary/update messages for this connection.
      *
-     * @return the {@link SingleMessageFuture} of the {@link SummaryUpdateFieldName}s
+     * @return the {@link SingleMessageFuture} of the {@link SummaryUpdateField}s
      *
      * @throws IOException thrown for {@link IOException}s
      */
-    public SingleMessageFuture<List<SummaryUpdateFieldName>> requestCurrentUpdateFieldNames() throws IOException {
+    public SingleMessageFuture<List<SummaryUpdateField>> requestCurrentUpdateFieldNames() throws IOException {
         synchronized (messageReceivedLock) {
             if (currentUpdateFieldNamesFuture != null) {
                 return currentUpdateFieldNamesFuture;
@@ -855,12 +852,12 @@ public class Level1Feed extends AbstractServerConnectionFeed {
      *
      * @param summaryUpdateFields the {@link SummaryUpdateField}s
      *
-     * @return the {@link SingleMessageFuture} of the {@link SummaryUpdateFieldName}s for summary/update messages for
-     * this connection
+     * @return the {@link SingleMessageFuture} of the {@link SummaryUpdateField}s for summary/update messages for this
+     * connection
      *
      * @throws IOException thrown for {@link IOException}s
      */
-    public SingleMessageFuture<List<SummaryUpdateFieldName>> selectUpdateFieldNames(
+    public SingleMessageFuture<List<SummaryUpdateField>> selectUpdateFieldNames(
             SummaryUpdateField... summaryUpdateFields) throws IOException {
         synchronized (messageReceivedLock) {
             if (currentUpdateFieldNamesFuture == null) {
@@ -899,11 +896,11 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     /**
      * Request a list of all symbols currently watched on this connection.
      *
-     * @return the {@link SingleMessageFuture} of the {@link WatchedSymbol}s
+     * @return the {@link SingleMessageFuture} of the {@link String} symbols
      *
      * @throws IOException thrown for {@link IOException}s
      */
-    public SingleMessageFuture<List<WatchedSymbol>> requestWatchedSymbols() throws IOException {
+    public SingleMessageFuture<List<String>> requestWatchedSymbols() throws IOException {
         synchronized (messageReceivedLock) {
             if (currentUpdateFieldNamesFuture != null) {
                 return watchedSymbolsFuture;
@@ -964,9 +961,9 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     /**
      * Gets {@link #latestTimestamp}.
      *
-     * @return the latest {@link Timestamp}
+     * @return the latest {@link LocalDateTime} timestamp
      */
-    public Timestamp getLatestTimestamp() {
+    public LocalDateTime getLatestTimestamp() {
         return latestTimestamp;
     }
 

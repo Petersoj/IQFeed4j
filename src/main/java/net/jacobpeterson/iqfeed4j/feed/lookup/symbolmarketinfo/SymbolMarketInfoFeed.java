@@ -11,8 +11,8 @@ import net.jacobpeterson.iqfeed4j.model.feed.lookup.symbolmarketinfo.TradeCondit
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.symbolmarketinfo.enums.SearchCodeType;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.symbolmarketinfo.enums.SearchField;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.symbolmarketinfo.enums.SymbolFilterType;
-import net.jacobpeterson.iqfeed4j.util.csv.mapper.IndexCSVMapper;
-import net.jacobpeterson.iqfeed4j.util.csv.mapper.TrailingCSVMapper;
+import net.jacobpeterson.iqfeed4j.util.csv.mapper.index.IndexCSVMapper;
+import net.jacobpeterson.iqfeed4j.util.csv.mapper.index.TrailingIndexCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.string.LineEnding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,8 +25,8 @@ import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.INTEGER;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.STRING;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.PrimitiveConvertors.INTEGER;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.PrimitiveConvertors.STRING;
 
 /**
  * {@link SymbolMarketInfoFeed} is an {@link AbstractLookupFeed} for symbol and market lookup data.
@@ -35,9 +35,9 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SymbolMarketInfoFeed.class);
     protected static final String FEED_NAME_SUFFIX = " Symbol and Market Info";
-    protected static final TrailingCSVMapper<SymbolSearchResult> FILTER_SYMBOL_SEARCH_RESULT_CSV_MAPPER;
-    protected static final TrailingCSVMapper<SymbolSearchResult> SIC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER;
-    protected static final TrailingCSVMapper<SymbolSearchResult> NIAC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER;
+    protected static final TrailingIndexCSVMapper<SymbolSearchResult> FILTER_SYMBOL_SEARCH_RESULT_CSV_MAPPER;
+    protected static final TrailingIndexCSVMapper<SymbolSearchResult> SIC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER;
+    protected static final TrailingIndexCSVMapper<SymbolSearchResult> NIAC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER;
     protected static final IndexCSVMapper<ListedMarket> LISTED_MARKET_CSV_MAPPER;
     protected static final IndexCSVMapper<SecurityType> SECURITY_TYPE_CSV_MAPPER;
     protected static final IndexCSVMapper<TradeCondition> TRADE_CONDITION_CSV_MAPPER;
@@ -47,20 +47,20 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
     static {
         // Add mappings with CSV indices analogous to line of execution
 
-        FILTER_SYMBOL_SEARCH_RESULT_CSV_MAPPER = new TrailingCSVMapper<>(SymbolSearchResult::new);
+        FILTER_SYMBOL_SEARCH_RESULT_CSV_MAPPER = new TrailingIndexCSVMapper<>(SymbolSearchResult::new);
         FILTER_SYMBOL_SEARCH_RESULT_CSV_MAPPER.addMapping(SymbolSearchResult::setSymbol, STRING);
         FILTER_SYMBOL_SEARCH_RESULT_CSV_MAPPER.addMapping(SymbolSearchResult::setListedMarketID, INTEGER);
         FILTER_SYMBOL_SEARCH_RESULT_CSV_MAPPER.addMapping(SymbolSearchResult::setSecurityTypeID, INTEGER);
         FILTER_SYMBOL_SEARCH_RESULT_CSV_MAPPER.setTrailingMapping(SymbolSearchResult::setDescription, STRING);
 
-        SIC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER = new TrailingCSVMapper<>(SymbolSearchResult::new);
+        SIC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER = new TrailingIndexCSVMapper<>(SymbolSearchResult::new);
         SIC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER.addMapping(SymbolSearchResult::setSICCode, INTEGER);
         SIC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER.addMapping(SymbolSearchResult::setSymbol, STRING);
         SIC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER.addMapping(SymbolSearchResult::setListedMarketID, INTEGER);
         SIC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER.addMapping(SymbolSearchResult::setSecurityTypeID, INTEGER);
         SIC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER.setTrailingMapping(SymbolSearchResult::setDescription, STRING);
 
-        NIAC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER = new TrailingCSVMapper<>(SymbolSearchResult::new);
+        NIAC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER = new TrailingIndexCSVMapper<>(SymbolSearchResult::new);
         NIAC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER.addMapping(SymbolSearchResult::setNIACCode, INTEGER);
         NIAC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER.addMapping(SymbolSearchResult::setSymbol, STRING);
         NIAC_CODE_SYMBOL_SEARCH_RESULT_CSV_MAPPER.addMapping(SymbolSearchResult::setListedMarketID, INTEGER);

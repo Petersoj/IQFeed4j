@@ -11,11 +11,11 @@ import java.util.concurrent.Callable;
 import java.util.function.Function;
 
 /**
- * {@link CSVMapper} maps CSV {@link String} values to POJO fields.
+ * {@link AbstractCSVMapper} maps CSV {@link String} values to various types/objects.
  *
- * @param <T> the type of the POJO
+ * @param <T> the type of CSV mapping
  */
-public abstract class CSVMapper<T> {
+public abstract class AbstractCSVMapper<T> {
 
     /**
      * {@link PrimitiveConvertors} contains common {@link Function}s with the argument being the CSV {@link String}
@@ -73,6 +73,9 @@ public abstract class CSVMapper<T> {
 
         /** Format of: <code>HH:mm:ss</code>. */
         public static final DateTimeFormatter COLON_TIME = DateTimeFormatter.ISO_LOCAL_TIME;
+
+        /** Format of: <code>yyyyMMdd HH:mm:ss</code>. */
+        public static final DateTimeFormatter DATE_SPACE_COLON_TIME = DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss");
     }
 
     /**
@@ -115,28 +118,20 @@ public abstract class CSVMapper<T> {
         /** Convertor using {@link DateTimeFormatters#COLON_TIME} */
         public static final Function<String, LocalTime> COLON_TIME =
                 (value) -> LocalTime.parse(value, DateTimeFormatters.COLON_TIME);
+
+        /** Convertor using {@link DateTimeFormatters#DATE_SPACE_COLON_TIME} */
+        public static final Function<String, LocalDateTime> DATE_SPACE_COLON_TIME =
+                (value) -> LocalDateTime.parse(value, DateTimeFormatters.DATE_SPACE_COLON_TIME);
     }
 
     protected final Callable<T> pojoInstantiator;
 
     /**
-     * Instantiates a new {@link CSVMapper}.
+     * Instantiates a new {@link AbstractCSVMapper}.
      *
      * @param pojoInstantiator a {@link Callable} to instantiate a new POJO
      */
-    public CSVMapper(Callable<T> pojoInstantiator) {
+    public AbstractCSVMapper(Callable<T> pojoInstantiator) {
         this.pojoInstantiator = pojoInstantiator;
     }
-
-    /**
-     * Maps the given CSV to a POJO.
-     *
-     * @param csv    the CSV
-     * @param offset offset to add to CSV indices when applying {@link CSVMapping}
-     *
-     * @return a new POJO
-     *
-     * @throws Exception thrown for a variety of {@link Exception}s
-     */
-    public abstract T map(String[] csv, int offset) throws Exception;
 }

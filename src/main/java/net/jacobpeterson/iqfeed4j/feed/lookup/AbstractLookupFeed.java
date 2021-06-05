@@ -6,7 +6,7 @@ import net.jacobpeterson.iqfeed4j.feed.RequestIDFeedHelper;
 import net.jacobpeterson.iqfeed4j.feed.message.MultiMessageListener;
 import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedMessageType;
 import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedSpecialMessage;
-import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper;
+import net.jacobpeterson.iqfeed4j.util.csv.mapper.index.AbstractIndexCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.exception.IQFeedException;
 import net.jacobpeterson.iqfeed4j.util.exception.NoDataException;
 import net.jacobpeterson.iqfeed4j.util.exception.SyntaxException;
@@ -46,20 +46,20 @@ public abstract class AbstractLookupFeed extends AbstractFeed {
 
     /**
      * Handles a standard message for a {@link MultiMessageListener} by: checking for request error messages, handling
-     * {@link FeedSpecialMessage#END_OF_MESSAGE} messages, and performing {@link CSVMapper#map(String[], int)} on the
-     * 'CSV' to call {@link MultiMessageListener#onMessageReceived(Object)}.
+     * {@link FeedSpecialMessage#END_OF_MESSAGE} messages, and performing {@link AbstractIndexCSVMapper#map(String[],
+     * int)} on the 'CSV' to call {@link MultiMessageListener#onMessageReceived(Object)}.
      *
      * @param <T>                   the type of {@link MultiMessageListener}
      * @param csv                   the CSV
      * @param requestID             the Request ID
      * @param listenersOfRequestIDs the {@link Map} with the keys being the Request IDs and the values being the
      *                              corresponding {@link MultiMessageListener}s
-     * @param csvMapper             the {@link CSVMapper} for the message
+     * @param indexCSVMapper        the {@link AbstractIndexCSVMapper} for the message
      *
      * @return true if the 'requestID' was a key inside 'listenersOfRequestIDs', false otherwise
      */
     protected <T> boolean handleStandardMultiMessage(String[] csv, String requestID,
-            Map<String, MultiMessageListener<T>> listenersOfRequestIDs, CSVMapper<T> csvMapper) {
+            Map<String, MultiMessageListener<T>> listenersOfRequestIDs, AbstractIndexCSVMapper<T> indexCSVMapper) {
         MultiMessageListener<T> listener = listenersOfRequestIDs.get(requestID);
 
         if (listener == null) {
@@ -83,7 +83,7 @@ public abstract class AbstractLookupFeed extends AbstractFeed {
             listener.onEndOfMultiMessage();
         } else {
             try {
-                T message = csvMapper.map(csv, 1);
+                T message = indexCSVMapper.map(csv, 1);
                 listener.onMessageReceived(message);
             } catch (Exception exception) {
                 listener.onMessageException(exception);

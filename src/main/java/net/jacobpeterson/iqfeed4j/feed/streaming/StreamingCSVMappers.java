@@ -1,16 +1,16 @@
 package net.jacobpeterson.iqfeed4j.feed.streaming;
 
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.common.FeedStatistics;
-import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper;
-import net.jacobpeterson.iqfeed4j.util.csv.mapper.IndexCSVMapper;
+import net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper;
+import net.jacobpeterson.iqfeed4j.util.csv.mapper.index.IndexCSVMapper;
 
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.DateTimeConverters.MONTH3_DAY_TIME_AM_PM;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.DOUBLE;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.INTEGER;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapper.PrimitiveConvertors.STRING;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.DateTimeConverters.MONTH3_DAY_TIME_AM_PM;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.PrimitiveConvertors.DOUBLE;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.PrimitiveConvertors.INTEGER;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.PrimitiveConvertors.STRING;
 
 /**
- * {@link StreamingCSVMappers} contains {@link CSVMapper}s for streaming feeds.
+ * {@link StreamingCSVMappers} contains {@link AbstractCSVMapper}s for streaming feeds.
  */
 public final class StreamingCSVMappers {
 
