@@ -148,7 +148,7 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
                         default:
                             LOGGER.error("Unhandled message type: {}", derivativeSystemMessage);
                     }
-                } catch (Exception ignored) {} // Only handle 'DerivativeSystemMessage's here and ignore exceptions
+                } catch (IllegalArgumentException ignored) {} // Only handle 'DerivativeSystemMessage's here
 
                 return;
             }

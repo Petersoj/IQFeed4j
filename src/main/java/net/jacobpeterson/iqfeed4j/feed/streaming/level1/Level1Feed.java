@@ -8,23 +8,13 @@ import net.jacobpeterson.iqfeed4j.feed.streaming.StreamingCSVMappers;
 import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedCommand;
 import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedMessageType;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.common.FeedStatistics;
-import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.CustomerInformation;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.*;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.CustomerInformation.ServiceType;
-import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.FundamentalData;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.FundamentalData.OptionsMultipleDeliverables;
-import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.NewsHeadline;
-import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.RegionalQuote;
-import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.SummaryUpdate;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.SummaryUpdate.MarketOpen;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.SummaryUpdate.MostRecentTradeAggressor;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.SummaryUpdate.RestrictedCode;
-import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.Level1Command;
-import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.Level1MessageType;
-import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.Level1SystemCommand;
-import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.Level1SystemMessageType;
-import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.LogLevel;
-import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateContent;
-import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.*;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapping;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.index.DirectIndexCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.index.IndexCSVMapper;
@@ -39,11 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.StringJoiner;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -395,6 +381,22 @@ public class Level1Feed extends AbstractServerConnectionFeed {
         summaryUpdateListenersOfSymbols = new HashMap<>();
         regionalQuoteListenersOfSymbols = new HashMap<>();
 
+        level1FeedEventListener = new Level1FeedEventListener() {
+            @Override
+            public void onServerReconnectFailed() {
+                LOGGER.warn("Server reconnection has failed!");
+            }
+
+            @Override
+            public void onSymbolLimitReached(String symbol) {
+                LOGGER.warn("Symbol limit reached with symbol: {}!", symbol);
+            }
+
+            @Override
+            public void onSymbolNotWatched(String symbol) {
+                LOGGER.warn("{} symbol not watched!", symbol);
+            }
+        };
         currentUpdateFieldNamesFuture = new SingleMessageFuture<>(); // For initial 'CURRENT_UPDATE_FIELDNAMES' message
     }
 
@@ -659,22 +661,22 @@ public class Level1Feed extends AbstractServerConnectionFeed {
             FeedMessageListener<RegionalQuote> listener =
                     regionalQuoteListenersOfSymbols.get(regionalQuote.getSymbol());
             if (listener == null) {
-                LOGGER.error("Received FundamentalData, but no listener for symbol {} exists!",
+                LOGGER.error("Received RegionalQuote, but no listener for symbol {} exists!",
                         regionalQuote.getSymbol());
             } else {
                 listener.onMessageReceived(regionalQuote);
             }
         } catch (Exception exception) {
-            LOGGER.error("Could not handle FundamentalData message!", exception);
+            LOGGER.error("Could not handle RegionalQuote message!", exception);
         }
     }
 
     private void handleNewsHeadlineMessage(String[] csv) {
         try {
-            NewsHeadline newsHeadline = NEWS_HEADLINE_CSV_MAPPER.map(csv, 1);
             if (newsHeadlineListener == null) {
                 LOGGER.error("Received NewsHeadline, but no listener exists!");
             } else {
+                NewsHeadline newsHeadline = NEWS_HEADLINE_CSV_MAPPER.map(csv, 1);
                 newsHeadlineListener.onMessageReceived(newsHeadline);
             }
         } catch (Exception exception) {
@@ -690,15 +692,11 @@ public class Level1Feed extends AbstractServerConnectionFeed {
             if (timestampFuture != null) {
                 timestampFuture.complete(timestamp);
                 timestampFuture = null;
-            } else {
-                LOGGER.error("Could not complete {} future!", Level1MessageType.TIMESTAMP_MESSAGE);
             }
         } catch (Exception exception) {
             if (timestampFuture != null) {
                 timestampFuture.completeExceptionally(exception);
                 timestampFuture = null;
-            } else {
-                LOGGER.error("Could not complete {} future!", Level1MessageType.TIMESTAMP_MESSAGE);
             }
         }
     }

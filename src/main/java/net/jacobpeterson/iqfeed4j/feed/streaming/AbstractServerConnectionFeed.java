@@ -41,7 +41,7 @@ public abstract class AbstractServerConnectionFeed extends AbstractFeed {
         try {
             serverConnectionStatus = ServerConnectionStatus.fromValue(systemMessageType);
             return true;
-        } catch (Exception ignored) {
+        } catch (IllegalArgumentException ignored) {
             return false;
         }
     }
