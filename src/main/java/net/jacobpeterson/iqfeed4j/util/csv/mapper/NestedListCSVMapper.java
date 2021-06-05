@@ -97,6 +97,7 @@ public class NestedListCSVMapper<T> extends CSVMapper<T> {
             T instance = pojoInstantiator.call();
 
             // Loop through all added 'CSVMapping's and apply them
+            boolean valueWasMapped = false;
             for (int mappedCSVIndex : csvMappingsOfCSVIndices.keySet()) {
                 if (!valueNotWhitespace(csv, csvIndex + mappedCSVIndex)) { // Don't map empty CSV values
                     continue;
@@ -105,13 +106,16 @@ public class NestedListCSVMapper<T> extends CSVMapper<T> {
                 // apply() could throw a variety of exceptions
                 try {
                     csvMappingsOfCSVIndices.get(mappedCSVIndex).apply(instance, csv[csvIndex + mappedCSVIndex]);
+                    valueWasMapped = true;
                 } catch (Exception exception) {
                     throw new Exception("Error mapping at index " + (csvIndex - offset) + " with offset " + offset +
                             " at mapped CSV index " + mappedCSVIndex, exception);
                 }
             }
 
-            mappedList.add(instance);
+            if (valueWasMapped) {
+                mappedList.add(instance);
+            }
         }
 
         return mappedList;

@@ -14,7 +14,7 @@ public class TradeConditionUtil {
      *
      * @param tradeConditionString the non-delimited list of hexadecimal trade conditions
      *
-     * @return a new {@link List} or null if no digits were converted
+     * @return a new {@link List} or <code>null</code> if no digits were converted
      */
     public static List<Integer> listFromTradeConditionString(String tradeConditionString) {
         if (tradeConditionString == null || tradeConditionString.isEmpty()) {

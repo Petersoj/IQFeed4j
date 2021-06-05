@@ -1,0 +1,68 @@
+{
+  "type": "string",
+  "title": "Enums for log levels. See <a href=\"https://www.iqfeed.net/dev/api/docs/docsBeta/IQConnectLogging.cfm\">IQConnect Logging</a>",
+  "enum": [
+    "Admin",
+    "L1Data",
+    "L1Request",
+    "L1System",
+    "L1Error",
+    "L2Data",
+    "L2Request",
+    "L2System",
+    "L2Error",
+    "LookupData",
+    "LookupRequest",
+    "LookupError",
+    "Information",
+    "Debug",
+    "Connectivity"
+  ],
+  "javaEnums": [
+    {
+      "title": "Admin log entries are non-data and non-request related log entries. Enabled by default."
+    },
+    {
+      "title": "L1Data log entries consists of all data transferred over the Level 1 Port."
+    },
+    {
+      "title": "L1Request log entries consists of all requests received from client apps on the Level 1 Port."
+    },
+    {
+      "title": "L1System log entries consists of all system messages received from and sent to the client on the Level 1 Port."
+    },
+    {
+      "title": "L1Error log entries consists of all errors sent to the client on the Level 1 Port."
+    },
+    {
+      "title": "L2Data log entries consists of all data transferred over the Level 2 Port."
+    },
+    {
+      "title": "L2Request log entries consists of all requests received from client apps on the Level 2 Port."
+    },
+    {
+      "title": "L2System log entries consists of all system messages received from and sent to the client on the Level 2 Port."
+    },
+    {
+      "title": "L2Error log entries consists of all errors sent to the client on the Level 2 Port."
+    },
+    {
+      "title": "LookupData log entries consists of all data transferred over the Lookup Port."
+    },
+    {
+      "title": "LookupRequest log entries consists of all requests received from client apps on the Lookup Port."
+    },
+    {
+      "title": "LookupError log entries consists of all errors sent to the client on the Lookup Port."
+    },
+    {
+      "title": "Information logging enables basic information, such as username and product id to be logged to the file. Enabled by default."
+    },
+    {
+      "title": "Debug logs enable more granular logging to aid in troubleshooting issues."
+    },
+    {
+      "title": "Connectivity log entries are related to the connection/reconnection between IQConnect and the server. Enabled by default."
+    }
+  ]
+}

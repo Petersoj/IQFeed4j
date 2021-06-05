@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "title": "Represents a {@link net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.FundamentalData} message field name. See <a href=\"https://www.iqfeed.net/dev/api/docs/docsBeta/Level1FundamentalMessage.cfm\">Fundamental Message Format</a>",
+  "properties": {
+    "name": {
+      "existingJavaType": "java.lang.String",
+      "title": "The field name."
+    }
+  }
+}

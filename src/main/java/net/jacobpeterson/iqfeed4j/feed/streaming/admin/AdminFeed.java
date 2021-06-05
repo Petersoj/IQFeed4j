@@ -94,9 +94,9 @@ public class AdminFeed extends AbstractFeed {
 
         synchronized (messageReceivedLock) {
             try {
-                AdminSystemMessageType parsedAdminSystemMessageType = AdminSystemMessageType.fromValue(csv[1]);
+                AdminSystemMessageType adminSystemMessageType = AdminSystemMessageType.fromValue(csv[1]);
 
-                switch (parsedAdminSystemMessageType) {
+                switch (adminSystemMessageType) {
                     // Complete Void Futures
                     case REGISTER_CLIENT_APP_COMPLETED:
                     case REMOVE_CLIENT_APP_COMPLETED:
@@ -104,79 +104,98 @@ public class AdminFeed extends AbstractFeed {
                     case LOGIN_INFO_NOT_SAVED:
                     case AUTOCONNECT_ON:
                     case AUTOCONNECT_OFF:
-                        SingleMessageFuture<Void> voidFuture =
-                                voidFutureOfAdminSystemMessageTypes.get(parsedAdminSystemMessageType);
-                        if (voidFuture != null) {
-                            voidFuture.complete(null);
-                            voidFutureOfAdminSystemMessageTypes.put(parsedAdminSystemMessageType, null);
-                        } else {
-                            LOGGER.error("Could not complete {} future!", parsedAdminSystemMessageType);
-                        }
+                        handleVoidFutureMessage(adminSystemMessageType);
                         break;
                     // Complete String Futures
                     case CURRENT_LOGINID:
                     case CURRENT_PASSWORD:
-                        SingleMessageFuture<String> stringFuture =
-                                stringFutureOfAdminSystemMessageTypes.get(parsedAdminSystemMessageType);
-                        if (stringFuture != null) {
-                            if (valueExists(csv, 2)) {
-                                stringFuture.complete(csv[2]);
-                            } else {
-                                stringFuture.completeExceptionally(new RuntimeException("CSV response value missing!"));
-                            }
-                            stringFutureOfAdminSystemMessageTypes.put(parsedAdminSystemMessageType, null);
-                        } else {
-                            LOGGER.error("Could not complete {} future!", parsedAdminSystemMessageType);
-                        }
+                        handleStringFutureMessage(adminSystemMessageType, csv);
                         break;
                     case STATS:
-                        try {
-                            FeedStatistics feedStatistics = StreamingCSVMappers.FEED_STATISTICS_CSV_MAPPER.map(csv, 2);
-                            lastFeedStatistics = feedStatistics;
-
-                            if (feedStatisticsFuture != null) {
-                                feedStatisticsFuture.complete(feedStatistics);
-                                feedStatisticsFuture = null;
-                            } else {
-                                LOGGER.error("Could not complete {} future!", parsedAdminSystemMessageType);
-                            }
-                        } catch (Exception exception) {
-                            if (feedStatisticsFuture != null) {
-                                feedStatisticsFuture.completeExceptionally(exception);
-                                feedStatisticsFuture = null;
-                            } else {
-                                LOGGER.error("Could not complete {} future!", parsedAdminSystemMessageType);
-                            }
-                        }
+                        handleStatsMessage(csv);
                         break;
                     case CLIENTSTATS:
-                        try {
-                            ClientStatistics clientStatistics = CLIENT_STATISTICS_CSV_MAPPER.map(csv, 2);
-                            clientStatisticsOfClientIDs.put(clientStatistics.getClientID(), clientStatistics);
-
-                            if (clientStatisticsFuture != null) {
-                                clientStatisticsFuture.complete(clientStatistics);
-                                clientStatisticsFuture = null;
-                            } else {
-                                LOGGER.error("Could not complete {} future!", parsedAdminSystemMessageType);
-                            }
-                        } catch (Exception exception) {
-                            if (clientStatisticsFuture != null) {
-                                clientStatisticsFuture.completeExceptionally(exception);
-                                clientStatisticsFuture = null;
-                            } else {
-                                LOGGER.error("Could not complete {} future!", parsedAdminSystemMessageType);
-                            }
-                        }
+                        handleClientStatsMessage(csv);
                         break;
                     default:
-                        LOGGER.error("Unhandled message type: {}", parsedAdminSystemMessageType);
+                        LOGGER.error("Unhandled message type: {}", adminSystemMessageType);
                 }
             } catch (Exception exception) {
                 LOGGER.error("Received unknown message type: {}", csv[1], exception);
             }
         }
     }
+
+    private void handleVoidFutureMessage(AdminSystemMessageType adminSystemMessageType) {
+        SingleMessageFuture<Void> voidFuture = voidFutureOfAdminSystemMessageTypes.get(adminSystemMessageType);
+        if (voidFuture != null) {
+            voidFuture.complete(null);
+            voidFutureOfAdminSystemMessageTypes.put(adminSystemMessageType, null);
+        } else {
+            LOGGER.error("Could not complete {} future!", adminSystemMessageType);
+        }
+    }
+
+    private void handleStringFutureMessage(AdminSystemMessageType adminSystemMessageType, String[] csv) {
+        SingleMessageFuture<String> stringFuture =
+                stringFutureOfAdminSystemMessageTypes.get(adminSystemMessageType);
+        if (stringFuture != null) {
+            if (valueExists(csv, 2)) {
+                stringFuture.complete(csv[2]);
+            } else {
+                stringFuture.completeExceptionally(new RuntimeException("CSV response value missing!"));
+            }
+            stringFutureOfAdminSystemMessageTypes.put(adminSystemMessageType, null);
+        } else {
+            LOGGER.error("Could not complete {} future!", adminSystemMessageType);
+        }
+    }
+
+    private void handleStatsMessage(String[] csv) {
+        try {
+            FeedStatistics feedStatistics = StreamingCSVMappers.FEED_STATISTICS_CSV_MAPPER.map(csv, 2);
+            lastFeedStatistics = feedStatistics;
+
+            if (feedStatisticsFuture != null) {
+                feedStatisticsFuture.complete(feedStatistics);
+                feedStatisticsFuture = null;
+            } else {
+                LOGGER.error("Could not complete {} future!", AdminSystemMessageType.STATS);
+            }
+        } catch (Exception exception) {
+            if (feedStatisticsFuture != null) {
+                feedStatisticsFuture.completeExceptionally(exception);
+                feedStatisticsFuture = null;
+            } else {
+                LOGGER.error("Could not complete {} future!", AdminSystemMessageType.STATS);
+            }
+        }
+    }
+
+    private void handleClientStatsMessage(String[] csv) {
+        try {
+            ClientStatistics clientStatistics = CLIENT_STATISTICS_CSV_MAPPER.map(csv, 2);
+            clientStatisticsOfClientIDs.put(clientStatistics.getClientID(), clientStatistics);
+
+            if (clientStatisticsFuture != null) {
+                clientStatisticsFuture.complete(clientStatistics);
+                clientStatisticsFuture = null;
+            } else {
+                LOGGER.error("Could not complete {} future!", AdminSystemMessageType.CLIENTSTATS);
+            }
+        } catch (Exception exception) {
+            if (clientStatisticsFuture != null) {
+                clientStatisticsFuture.completeExceptionally(exception);
+                clientStatisticsFuture = null;
+            } else {
+                LOGGER.error("Could not complete {} future!", AdminSystemMessageType.CLIENTSTATS);
+            }
+        }
+    }
+
+    //
+    // START Feed commands
+    //
 
     /**
      * Sends a {@link FeedCommand#SYSTEM} {@link AdminSystemCommand}.
@@ -230,10 +249,6 @@ public class AdminFeed extends AbstractFeed {
             return messageFuture;
         }
     }
-
-    //
-    // START Feed commands
-    //
 
     /**
      * Registers your application with the feed. Users will not be able to login to the feed until an application is

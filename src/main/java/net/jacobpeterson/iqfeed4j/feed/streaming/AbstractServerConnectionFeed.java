@@ -5,8 +5,6 @@ import net.jacobpeterson.iqfeed4j.feed.AbstractFeed;
 import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedMessageType;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.common.enums.ServerConnectionStatus;
 
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
-
 /**
  * {@link AbstractServerConnectionFeed} is an {@link AbstractFeed} for feeds that receive the <code>S,SERVER
  * CONNECTED&gt;LF&lt;</code> or <code>S,SERVER DISCONNECTED&gt;LF&lt;</code> messages.
@@ -31,25 +29,21 @@ public abstract class AbstractServerConnectionFeed extends AbstractFeed {
     }
 
     /**
-     * Checks and sets {@link #serverConnectionStatus} if a {@link ServerConnectionStatus} if it is present. Note this
-     * will not check if the CSV message is a {@link FeedMessageType#SYSTEM} message so that should be done before
-     * calling this method.
+     * Checks and sets {@link #serverConnectionStatus} if a {@link ServerConnectionStatus} is present. Note this will
+     * not check if the CSV message is a {@link FeedMessageType#SYSTEM} message so that should be done before calling
+     * this method.
      *
-     * @param csv the CSV
+     * @param systemMessageType the {@link FeedMessageType#SYSTEM} message type
      *
      * @return true if the message was a {@link ServerConnectionStatus} message, false otherwise
      */
-    protected boolean checkServerConnectionStatusMessage(String[] csv) {
-        if (valuePresent(csv, 1)) {
-            try {
-                serverConnectionStatus = ServerConnectionStatus.fromValue(csv[1]);
-                return true;
-            } catch (Exception ignored) {
-                return false;
-            }
+    protected boolean checkServerConnectionStatusMessage(String systemMessageType) {
+        try {
+            serverConnectionStatus = ServerConnectionStatus.fromValue(systemMessageType);
+            return true;
+        } catch (Exception ignored) {
+            return false;
         }
-
-        return false;
     }
 
     /**

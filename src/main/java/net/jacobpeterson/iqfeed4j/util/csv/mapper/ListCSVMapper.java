@@ -27,7 +27,7 @@ public class ListCSVMapper<T> extends CSVMapper<T> {
      *                         CSV list {@link String} value as the second argument. This is so that fields inside the
      *                         POJO can be set according to the passed in CSV list {@link String} value.
      * @param skipPattern      when a CSV value matches this given {@link Pattern} in {@link #mapToList(String[], int)},
-     *                         then it is skipped (null to not check)
+     *                         then it is skipped (<code>null</code> to not check)
      */
     public ListCSVMapper(Callable<? extends List<T>> listInstantiator, Callable<T> pojoInstantiator,
             BiConsumer<T, String> csvValueConsumer, Pattern skipPattern) {

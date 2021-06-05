@@ -70,6 +70,7 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
     protected final RequestIDFeedHelper requestIDFeedHelper;
     protected final HashMap<String, IntervalListener> intervalListenersOfRequestIDs;
     protected final HashMap<String, List<IntervalListener>> intervalListenersOfWatchedSymbols;
+    protected DerivativeFeedEventListener derivativeFeedEventListener;
     protected SingleMessageFuture<List<WatchedInterval>> watchedIntervalsFuture;
 
     /**
@@ -81,6 +82,23 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
      */
     public DerivativeFeed(String derivativeFeedName, String hostname, int port) {
         super(derivativeFeedName + FEED_NAME_SUFFIX, hostname, port, COMMA_DELIMITED_SPLITTER, false, true);
+
+        this.derivativeFeedEventListener = new DerivativeFeedEventListener() {
+            @Override
+            public void onSymbolNotWatched(String symbol) {
+                LOGGER.warn("{} symbol not watched!", symbol);
+            }
+
+            @Override
+            public void onSymbolLimitReached(String symbol) {
+                LOGGER.warn("Symbol limit reached with symbol: {}!", symbol);
+            }
+
+            @Override
+            public void onReplacedPreviouslyWatchedSymbol(String symbol, String requestID) {
+                LOGGER.info("Symbol {} replaced for Request ID: {}", symbol, requestID);
+            }
+        };
 
         messageReceivedLock = new Object();
         requestIDFeedHelper = new RequestIDFeedHelper();
@@ -96,14 +114,21 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
         }
 
         synchronized (messageReceivedLock) {
-            // Handle derivative 'SYSTEM' messages
             if (valueEquals(csv, 0, FeedMessageType.SYSTEM.value())) {
-                if (checkServerConnectionStatusMessage(csv)) {
+                if (!valuePresent(csv, 1)) {
+                    LOGGER.error("Received unknown System message: {}", (Object) csv);
+                    return;
+                }
+
+                String systemMessageTypeString = csv[1];
+
+                if (checkServerConnectionStatusMessage(systemMessageTypeString)) {
                     return;
                 }
 
                 try {
-                    DerivativeSystemMessageType derivativeSystemMessage = DerivativeSystemMessageType.fromValue(csv[1]);
+                    DerivativeSystemMessageType derivativeSystemMessage =
+                            DerivativeSystemMessageType.fromValue(systemMessageTypeString);
 
                     if (!valueExists(csv, 2)) {
                         LOGGER.error("System message needs more arguments!");
@@ -112,54 +137,16 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
 
                     switch (derivativeSystemMessage) {
                         case SYMBOL_LIMIT_REACHED:
+                            handleSymbolLimitReachedMessage(csv);
+                            break;
                         case REPLACED_PREVIOUSLY_WATCHED_INTERVAL:
-                            String symbol = csv[2];
-
-                            List<IntervalListener> intervalListeners = intervalListenersOfWatchedSymbols.get(symbol);
-                            if (intervalListeners == null) {
-                                LOGGER.warn("Received {} System message, but no listener could be found for symbol: {}",
-                                        derivativeSystemMessage, symbol);
-                                return;
-                            }
-
-                            switch (derivativeSystemMessage) {
-                                case SYMBOL_LIMIT_REACHED:
-                                    intervalListeners.forEach(listener -> listener.onSymbolLimitReached(symbol));
-                                    break;
-                                case REPLACED_PREVIOUSLY_WATCHED_INTERVAL:
-                                    if (valueExists(csv, 3)) {
-                                        String requestID = csv[3];
-                                        IntervalListener intervalListener =
-                                                intervalListenersOfRequestIDs.get(requestID);
-                                        if (intervalListener == null) {
-                                            LOGGER.warn("Received {} System message, but no listener could " +
-                                                    "be found for Request ID: {}", derivativeSystemMessage, requestID);
-                                            return;
-                                        }
-                                        intervalListener.onReplacedPreviouslyWatchedSymbol(symbol, requestID);
-                                    } else {
-                                        intervalListeners.forEach(listener ->
-                                                listener.onReplacedPreviouslyWatchedSymbol(symbol, null));
-                                    }
-                                    break;
-                            }
+                            handleReplacedPreviouslyWatchedSymbolMessage(csv);
                             break;
                         case WATCHED_INTERVALS:
-                            if (watchedIntervalsFuture != null) {
-                                try {
-                                    watchedIntervalsFuture.complete(WATCHED_INTERVALS_CSV_MAPPER.mapToList(csv, 2));
-                                } catch (Exception exception) {
-                                    watchedIntervalsFuture.completeExceptionally(exception);
-                                }
-
-                                watchedIntervalsFuture = null;
-                            } else {
-                                LOGGER.error("Received {} System message, but with no Future to handle it!",
-                                        derivativeSystemMessage);
-                            }
+                            handleWatchedIntervalsMessage(csv);
                             break;
                         default:
-                            throw new UnsupportedOperationException();
+                            LOGGER.error("Unhandled message type: {}", derivativeSystemMessage);
                     }
                 } catch (Exception ignored) {} // Only handle 'DerivativeSystemMessage's here and ignore exceptions
 
@@ -168,38 +155,70 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
 
             // Check for 'BW' request responses
             if (valueEquals(csv, 0, DerivativeMessageType.SYMBOL_NOT_WATCHED.value())) {
-                if (!valuePresent(csv, 1)) {
-                    LOGGER.error("Invalid message received: {}", (Object) csv);
-                    return;
-                }
-
-                String symbol = csv[1];
-                List<IntervalListener> intervalListeners = intervalListenersOfWatchedSymbols.get(symbol);
-                if (intervalListeners == null) {
-                    LOGGER.warn("Received '{}' message, but no listeners could be found for symbol: {}",
-                            DerivativeMessageType.SYMBOL_NOT_WATCHED.value(), symbol);
-                    return;
-                }
-                intervalListeners.forEach(listener -> listener.onSymbolNotWatched(symbol));
+                handleSymbolNotWatchedMessage(csv);
             } else if (valueExists(csv, 0)) {
-                String requestID = csv[0]; // All interval messages on this feed should start with a Request ID
-
-                IntervalListener intervalListener = intervalListenersOfRequestIDs.get(requestID);
-                if (intervalListener == null) {
-                    LOGGER.warn("Received Interval message, but no listener could be found for Request ID: {}",
-                            requestID);
-                    return;
-                }
-
-                try {
-                    Interval interval = INTERVAL_CSV_MAPPER.map(csv, 1);
-                    intervalListener.onMessageReceived(interval);
-                } catch (Exception exception) {
-                    intervalListener.onMessageException(exception);
-                }
+                handleIntervalMessage(csv);
             } else {
                 LOGGER.error("Received unknown message: {}", (Object) csv);
             }
+        }
+    }
+
+    private void handleSymbolLimitReachedMessage(String[] csv) {
+        if (derivativeFeedEventListener != null) {
+            String symbol = csv[2];
+            derivativeFeedEventListener.onSymbolLimitReached(symbol);
+        }
+    }
+
+    private void handleReplacedPreviouslyWatchedSymbolMessage(String[] csv) {
+        if (derivativeFeedEventListener != null) {
+            String symbol = csv[2];
+            derivativeFeedEventListener.onReplacedPreviouslyWatchedSymbol(symbol, valueExists(csv, 3) ? csv[3] : null);
+        }
+    }
+
+    private void handleWatchedIntervalsMessage(String[] csv) {
+        if (watchedIntervalsFuture != null) {
+            try {
+                watchedIntervalsFuture.complete(WATCHED_INTERVALS_CSV_MAPPER.mapToList(csv, 2));
+            } catch (Exception exception) {
+                watchedIntervalsFuture.completeExceptionally(exception);
+            }
+
+            watchedIntervalsFuture = null;
+        } else {
+            LOGGER.error("Received {} System message, but with no Future to handle it!",
+                    DerivativeSystemMessageType.WATCHED_INTERVALS);
+        }
+    }
+
+    private void handleSymbolNotWatchedMessage(String[] csv) {
+        if (!valuePresent(csv, 1)) {
+            LOGGER.error("Invalid message received: {}", (Object) csv);
+            return;
+        }
+
+        if (derivativeFeedEventListener != null) {
+            String symbol = csv[1];
+            derivativeFeedEventListener.onSymbolNotWatched(symbol);
+        }
+    }
+
+    private void handleIntervalMessage(String[] csv) {
+        String requestID = csv[0]; // All interval messages on this feed should start with a Request ID
+
+        IntervalListener intervalListener = intervalListenersOfRequestIDs.get(requestID);
+        if (intervalListener == null) {
+            LOGGER.warn("Received Interval message, but no listener could be found for Request ID: {}", requestID);
+            return;
+        }
+
+        try {
+            Interval interval = INTERVAL_CSV_MAPPER.map(csv, 1);
+            intervalListener.onMessageReceived(interval);
+        } catch (Exception exception) {
+            intervalListener.onMessageException(exception);
         }
     }
 
@@ -420,6 +439,26 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
                     .map(Map.Entry::getKey)
                     .findFirst()
                     .orElse(null);
+        }
+    }
+
+    /**
+     * Gets {@link #derivativeFeedEventListener}.
+     *
+     * @return the {@link DerivativeFeedEventListener}
+     */
+    public DerivativeFeedEventListener getDerivativeFeedEventListener() {
+        return derivativeFeedEventListener;
+    }
+
+    /**
+     * Sets {@link #derivativeFeedEventListener}.
+     *
+     * @param derivativeFeedEventListener the {@link DerivativeFeedEventListener}
+     */
+    public void setDerivativeFeedEventListener(DerivativeFeedEventListener derivativeFeedEventListener) {
+        synchronized (messageReceivedLock) {
+            this.derivativeFeedEventListener = derivativeFeedEventListener;
         }
     }
 }
