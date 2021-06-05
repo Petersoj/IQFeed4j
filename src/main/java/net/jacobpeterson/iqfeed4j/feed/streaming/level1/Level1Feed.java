@@ -4,9 +4,9 @@ import com.google.common.base.Preconditions;
 import net.jacobpeterson.iqfeed4j.feed.message.FeedMessageListener;
 import net.jacobpeterson.iqfeed4j.feed.message.SingleMessageFuture;
 import net.jacobpeterson.iqfeed4j.feed.streaming.AbstractServerConnectionFeed;
+import net.jacobpeterson.iqfeed4j.feed.streaming.StreamingCSVMappers;
 import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedCommand;
 import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedMessageType;
-import net.jacobpeterson.iqfeed4j.model.feed.streaming.admin.enums.AdminSystemCommand;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.common.FeedStatistics;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.CustomerInformation;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.CustomerInformation.ServiceType;
@@ -25,7 +25,6 @@ import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.Level1System
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.LogLevel;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateContent;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField;
-import net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapping;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.index.DirectIndexCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.index.IndexCSVMapper;
@@ -54,6 +53,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static net.jacobpeterson.iqfeed4j.feed.streaming.level1.Level1Feed.CSVPOJOPopulators.splitFactorAndDate;
 import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.*;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueExists;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.DateTimeConverters.*;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.PrimitiveConvertors.DOUBLE;
@@ -348,8 +348,8 @@ public class Level1Feed extends AbstractServerConnectionFeed {
         CUSTOMER_INFORMATION_CSV_MAPPER.addMapping(CustomerInformation::setPort, INTEGER);
         CUSTOMER_INFORMATION_CSV_MAPPER.setMapping(4, CustomerInformation::setVersion, STRING);
         CUSTOMER_INFORMATION_CSV_MAPPER.setMapping(6, CustomerInformation::setVerboseExchanges,
-                (value) -> Arrays.asList(value.split(" ")));
-        CUSTOMER_INFORMATION_CSV_MAPPER.addMapping(CustomerInformation::setMaxSymbols, INTEGER);
+                (value) -> Arrays.asList(value.trim().split(" ")));
+        CUSTOMER_INFORMATION_CSV_MAPPER.setMapping(8, CustomerInformation::setMaxSymbols, INTEGER);
         CUSTOMER_INFORMATION_CSV_MAPPER.addMapping(CustomerInformation::setFlags, STRING);
         CUSTOMER_INFORMATION_CSV_MAPPER.addMapping(CustomerInformation::setAccountExpirationDate, DATE);
 
@@ -365,13 +365,15 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     protected final HashMap<String, FeedMessageListener<SummaryUpdate>> summaryUpdateListenersOfSymbols;
     protected final HashMap<String, FeedMessageListener<RegionalQuote>> regionalQuoteListenersOfSymbols;
 
+    protected Level1FeedEventListener level1FeedEventListener;
     protected IndexCSVMapper<SummaryUpdate> summaryUpdateCSVMapper;
 
+    protected FeedMessageListener<NewsHeadline> newsHeadlineListener;
     protected SingleMessageFuture<LocalDateTime> timestampFuture;
     protected LocalDateTime latestTimestamp;
+    protected CustomerInformation customerInformation;
     protected SingleMessageFuture<FeedStatistics> feedStatisticsFuture;
     protected FeedStatistics latestFeedStatistics;
-    protected FeedMessageListener<NewsHeadline> newsHeadlineListener;
     protected SingleMessageFuture<List<String>> fundamentalFieldNamesFuture;
     protected SingleMessageFuture<List<SummaryUpdateField>> allUpdateFieldNamesFuture;
     protected SingleMessageFuture<List<SummaryUpdateField>> currentUpdateFieldNamesFuture;
@@ -392,6 +394,8 @@ public class Level1Feed extends AbstractServerConnectionFeed {
         fundamentalDataListenersOfSymbols = new HashMap<>();
         summaryUpdateListenersOfSymbols = new HashMap<>();
         regionalQuoteListenersOfSymbols = new HashMap<>();
+
+        currentUpdateFieldNamesFuture = new SingleMessageFuture<>(); // For initial 'CURRENT_UPDATE_FIELDNAMES' message
     }
 
     @Override
@@ -407,121 +411,204 @@ public class Level1Feed extends AbstractServerConnectionFeed {
             return;
         }
 
-        if (valueEquals(csv, 0, FeedMessageType.SYSTEM.value())) {
-            if (!valuePresent(csv, 1)) {
-                LOGGER.error("Received unknown System message: {}", (Object) csv);
-                return;
-            }
+        synchronized (messageReceivedLock) {
+            if (valueEquals(csv, 0, FeedMessageType.SYSTEM.value())) {
+                if (!valuePresent(csv, 1)) {
+                    LOGGER.error("Received unknown System message: {}", (Object) csv);
+                    return;
+                }
 
-            String systemMessageTypeString = csv[1];
+                String systemMessageTypeString = csv[1];
 
-            if (checkServerConnectionStatusMessage(systemMessageTypeString)) {
-                return;
-            }
+                if (checkServerConnectionStatusMessage(systemMessageTypeString)) {
+                    return;
+                }
 
-            try {
-                Level1SystemMessageType systemMessageType = Level1SystemMessageType.fromValue(systemMessageTypeString);
+                try {
+                    Level1SystemMessageType systemMessageType = Level1SystemMessageType.fromValue(
+                            systemMessageTypeString);
 
-                switch (systemMessageType) {
-                    case KEY:
-                    case KEYOK:
-                        LOGGER.debug("Received unused {} message: {}", systemMessageType, csv);
-                        break;
-                    case SERVER_RECONNECT_FAILED:
-                        break;
-                    case SYMBOL_LIMIT_REACHED:
-                        break;
-                    case IP:
-                        LOGGER.debug("Received unused {} message: {}", systemMessageType, csv);
-                        break;
-                    case CUST:
-                        break;
-                    case STATS:
-
-                        break;
-                    case FUNDAMENTAL_FIELDNAMES:
-                        if (handleListCSVSystemMessageFuture(systemMessageType, fundamentalFieldNamesFuture,
-                                STRING_LIST_CSV_MAPPER, csv, 2)) {
+                    switch (systemMessageType) {
+                        case KEY:
+                        case KEYOK:
+                        case IP:
+                            LOGGER.debug("Received unused {} message: {}", systemMessageType, csv);
+                            break;
+                        case SERVER_RECONNECT_FAILED:
+                            handleServerReconnectFailed();
+                            break;
+                        case SYMBOL_LIMIT_REACHED:
+                            handleSymbolLimitReachedMessage(csv);
+                            break;
+                        case CUST:
+                            handleCustomerInformationMessage(csv);
+                            break;
+                        case STATS:
+                            handleFeedStatisticsMessage(csv);
+                            break;
+                        case FUNDAMENTAL_FIELDNAMES:
+                            handleListCSVSystemMessageFuture(systemMessageType, fundamentalFieldNamesFuture,
+                                    STRING_LIST_CSV_MAPPER, csv);
                             fundamentalFieldNamesFuture = null;
-                        }
-                        break;
-                    case UPDATE_FIELDNAMES:
-                        if (handleListCSVSystemMessageFuture(systemMessageType, allUpdateFieldNamesFuture,
-                                SUMMARY_UPDATE_FIELDS_CSV_MAPPER, csv, 2)) {
+                            break;
+                        case UPDATE_FIELDNAMES:
+                            handleListCSVSystemMessageFuture(systemMessageType, allUpdateFieldNamesFuture,
+                                    SUMMARY_UPDATE_FIELDS_CSV_MAPPER, csv);
                             allUpdateFieldNamesFuture = null;
-                        }
-                        break;
-                    case CURRENT_UPDATE_FIELDNAMES:
-                        break;
-                    case CURRENT_LOG_LEVELS:
-                        if (handleListCSVSystemMessageFuture(systemMessageType, logLevelsFuture,
-                                LOG_LEVELS_CSV_MAPPER, csv, 2)) {
-                            allUpdateFieldNamesFuture = null;
-                        }
-                        break;
-                    case WATCHES:
-                        break;
-                    default:
-                        LOGGER.error("Unhandled message type: {}", systemMessageType);
+                            break;
+                        case CURRENT_UPDATE_FIELDNAMES:
+                            handleListCSVSystemMessageFuture(systemMessageType, currentUpdateFieldNamesFuture,
+                                    SUMMARY_UPDATE_FIELDS_CSV_MAPPER, csv);
+                            if (currentUpdateFieldNamesFuture != null &&
+                                    !currentUpdateFieldNamesFuture.isCompletedExceptionally()) {
+                                setupSummaryUpdateCSVMapper();
+                            } else {
+                                LOGGER.error("Cannot setup mappings for summary/update messages!");
+                            }
+                            currentUpdateFieldNamesFuture = null;
+                            break;
+                        case CURRENT_LOG_LEVELS:
+                            handleListCSVSystemMessageFuture(systemMessageType, logLevelsFuture,
+                                    LOG_LEVELS_CSV_MAPPER, csv);
+                            logLevelsFuture = null;
+                            break;
+                        case WATCHES:
+                            handleListCSVSystemMessageFuture(systemMessageType, watchedSymbolsFuture,
+                                    STRING_LIST_CSV_MAPPER, csv);
+                            watchedSymbolsFuture = null;
+                            break;
+                        default:
+                            LOGGER.error("Unhandled message type: {}", systemMessageType);
+                    }
+                } catch (IllegalArgumentException illegalArgumentException) {
+                    LOGGER.error("Received unknown message type: {}", csv[1], illegalArgumentException);
                 }
-            } catch (Exception exception) {
-                LOGGER.error("Received unknown message type: {}", csv[1], exception);
-            }
-        } else {
-            try {
-                Level1MessageType messageType = Level1MessageType.fromValue(csv[0]);
+            } else {
+                try {
+                    Level1MessageType messageType = Level1MessageType.fromValue(csv[0]);
 
-                switch (messageType) {
-                    case FUNDAMENTAL_MESSAGE:
-                        break;
-                    case SUMMARY_MESSAGE:
-                        break;
-                    case UPDATE_MESSAGE:
-                        break;
-                    case REGIONAL_UPDATE:
-                        break;
-                    case NEWS_HEADLINE_MESSAGE:
-                        break;
-                    case TIMESTAMP_MESSAGE:
-                        break;
-                    case SYMBOL_NOT_WATCHED:
-                        break;
-                    default:
-                        LOGGER.error("Unhandled message type: {}", messageType);
+                    switch (messageType) {
+                        case FUNDAMENTAL_MESSAGE:
+                            break;
+                        case SUMMARY_MESSAGE:
+                            break;
+                        case UPDATE_MESSAGE:
+                            break;
+                        case REGIONAL_UPDATE:
+                            break;
+                        case NEWS_HEADLINE_MESSAGE:
+                            break;
+                        case TIMESTAMP_MESSAGE:
+                            break;
+                        case SYMBOL_NOT_WATCHED:
+                            break;
+                        default:
+                            LOGGER.error("Unhandled message type: {}", messageType);
+                    }
+                } catch (IllegalArgumentException illegalArgumentException) {
+                    LOGGER.error("Received unknown message type: {}", csv[1], illegalArgumentException);
                 }
-            } catch (Exception exception) {
-                LOGGER.error("Received unknown message type: {}", csv[1], exception);
             }
         }
     }
 
+    private void handleServerReconnectFailed() {
+        if (level1FeedEventListener != null) {
+            level1FeedEventListener.onServerReconnectFailed();
+        }
+    }
+
+    private void handleSymbolLimitReachedMessage(String[] csv) {
+        if (level1FeedEventListener != null) {
+            if (!valueExists(csv, 2)) {
+                LOGGER.error("System message needs more arguments!");
+            } else {
+                String symbol = csv[2];
+                level1FeedEventListener.onSymbolLimitReached(symbol);
+            }
+        }
+    }
+
+    private void handleCustomerInformationMessage(String[] csv) {
+        try {
+            customerInformation = CUSTOMER_INFORMATION_CSV_MAPPER.map(csv, 2);
+        } catch (Exception exception) {
+            LOGGER.error("Could not map CustomerInformation!", exception);
+        }
+    }
+
+    private void handleFeedStatisticsMessage(String[] csv) {
+        try {
+            FeedStatistics feedStatistics = StreamingCSVMappers.FEED_STATISTICS_CSV_MAPPER.map(csv, 2);
+            latestFeedStatistics = feedStatistics;
+
+            if (feedStatisticsFuture != null) {
+                feedStatisticsFuture.complete(feedStatistics);
+                feedStatisticsFuture = null;
+            } else {
+                LOGGER.error("Could not complete {} future!", Level1SystemMessageType.STATS);
+            }
+        } catch (Exception exception) {
+            if (feedStatisticsFuture != null) {
+                feedStatisticsFuture.completeExceptionally(exception);
+                feedStatisticsFuture = null;
+            } else {
+                LOGGER.error("Could not complete {} future!", Level1SystemMessageType.STATS);
+            }
+        }
+    }
+
+    private void setupSummaryUpdateCSVMapper() {
+        try {
+            List<SummaryUpdateField> currentSummaryUpdateFields = currentUpdateFieldNamesFuture.get();
+            summaryUpdateCSVMapper = new IndexCSVMapper<>(SummaryUpdate::new);
+
+            for (int index = 0; index < currentSummaryUpdateFields.size(); index++) {
+                SummaryUpdateField summaryUpdateField = currentSummaryUpdateFields.get(index);
+                if (summaryUpdateField == null) {
+                    continue;
+                }
+
+                CSVMapping<SummaryUpdate, ?> summaryUpdateFieldMapping =
+                        CSV_MAPPINGS_OF_SUMMARY_UPDATE_FIELDS.get(summaryUpdateField);
+                if (summaryUpdateFieldMapping == null) {
+                    LOGGER.error("No mapping found for {} SummaryUpdateField!", summaryUpdateField);
+                    continue;
+                }
+
+                summaryUpdateCSVMapper.setMapping(index, summaryUpdateFieldMapping);
+            }
+
+            LOGGER.debug("Successfully mapped summary/update CSV messages to: {}", currentSummaryUpdateFields);
+        } catch (Exception exception) {
+            LOGGER.error("Cannot setup mappings for summary/update messages!", exception);
+        }
+    }
+
     /**
-     * Handles a {@link SingleMessageFuture} for a CSV with a {@link ListCSVMapper} {@link AbstractCSVMapper}.
+     * Handles a {@link SingleMessageFuture} for a CSV with a {@link ListCSVMapper}.
      *
      * @param <T>               the type of {@link SingleMessageFuture}
      * @param systemMessageType the {@link Level1SystemMessageType}
      * @param future            the {@link SingleMessageFuture}
      * @param listCSVMapper     the {@link ListCSVMapper}
      * @param csv               the CSV
-     * @param mappingOffset     the mapping offset
-     *
-     * @return true if the {@link SingleMessageFuture} wasn't null, false otherwise
      */
-    private <T> boolean handleListCSVSystemMessageFuture(Level1SystemMessageType systemMessageType,
-            SingleMessageFuture<List<T>> future, AbstractListCSVMapper<T> listCSVMapper, String[] csv,
-            int mappingOffset) {
+    private <T> void handleListCSVSystemMessageFuture(Level1SystemMessageType systemMessageType,
+            SingleMessageFuture<List<T>> future, AbstractListCSVMapper<T> listCSVMapper, String[] csv) {
         if (future != null) {
             try {
-                future.complete(listCSVMapper.mapToList(csv, mappingOffset));
+                future.complete(listCSVMapper.mapToList(csv, 2));
             } catch (Exception exception) {
                 future.completeExceptionally(exception);
             }
-
-            return true;
         } else {
             LOGGER.error("Received {} System message, but with no Future to handle it!", systemMessageType);
-            return false;
         }
+    }
+
+    private <T> void handleFeedMessageListenerMessage() {
+
     }
 
     //
@@ -678,7 +765,7 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     /**
      * Sends a {@link FeedCommand#SYSTEM} {@link Level1SystemCommand}.
      *
-     * @param level1SystemCommand the {@link AdminSystemCommand}
+     * @param level1SystemCommand the {@link Level1SystemCommand}
      * @param arguments           the arguments. Null for no arguments.
      *
      * @throws IOException thrown for {@link IOException}s
@@ -959,21 +1046,23 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     //
 
     /**
-     * Gets {@link #latestTimestamp}.
+     * Gets {@link #level1FeedEventListener}.
      *
-     * @return the latest {@link LocalDateTime} timestamp
+     * @return the {@link Level1FeedEventListener}
      */
-    public LocalDateTime getLatestTimestamp() {
-        return latestTimestamp;
+    public Level1FeedEventListener getLevel1FeedEventListener() {
+        return level1FeedEventListener;
     }
 
     /**
-     * Gets {@link #latestFeedStatistics}.
+     * Sets {@link #level1FeedEventListener}.
      *
-     * @return the latest {@link FeedStatistics}
+     * @param level1FeedEventListener the {@link Level1FeedEventListener}
      */
-    public FeedStatistics getLatestFeedStatistics() {
-        return latestFeedStatistics;
+    public void setLevel1FeedEventListener(Level1FeedEventListener level1FeedEventListener) {
+        synchronized (messageReceivedLock) {
+            this.level1FeedEventListener = level1FeedEventListener;
+        }
     }
 
     /**
@@ -991,6 +1080,35 @@ public class Level1Feed extends AbstractServerConnectionFeed {
      * @param newsHeadlineListener the {@link FeedMessageListener} of {@link NewsHeadline}s
      */
     public void setNewsHeadlineListener(FeedMessageListener<NewsHeadline> newsHeadlineListener) {
-        this.newsHeadlineListener = newsHeadlineListener;
+        synchronized (messageReceivedLock) {
+            this.newsHeadlineListener = newsHeadlineListener;
+        }
+    }
+
+    /**
+     * Gets {@link #latestTimestamp}.
+     *
+     * @return the latest {@link LocalDateTime} timestamp
+     */
+    public LocalDateTime getLatestTimestamp() {
+        return latestTimestamp;
+    }
+
+    /**
+     * Gets {@link #customerInformation}.
+     *
+     * @return the {@link CustomerInformation}
+     */
+    public CustomerInformation getCustomerInformation() {
+        return customerInformation;
+    }
+
+    /**
+     * Gets {@link #latestFeedStatistics}.
+     *
+     * @return the latest {@link FeedStatistics}
+     */
+    public FeedStatistics getLatestFeedStatistics() {
+        return latestFeedStatistics;
     }
 }

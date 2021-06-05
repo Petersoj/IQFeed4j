@@ -61,7 +61,7 @@ public class AdminFeed extends AbstractFeed {
     protected final HashMap<AdminSystemMessageType, SingleMessageFuture<String>> stringFutureOfAdminSystemMessageTypes;
     protected SingleMessageFuture<FeedStatistics> feedStatisticsFuture;
     protected SingleMessageFuture<ClientStatistics> clientStatisticsFuture;
-    protected FeedStatistics lastFeedStatistics;
+    protected FeedStatistics latestFeedStatistics;
 
     /**
      * Instantiates a new {@link AdminFeed}.
@@ -120,8 +120,8 @@ public class AdminFeed extends AbstractFeed {
                     default:
                         LOGGER.error("Unhandled message type: {}", adminSystemMessageType);
                 }
-            } catch (Exception exception) {
-                LOGGER.error("Received unknown message type: {}", csv[1], exception);
+            } catch (IllegalArgumentException illegalArgumentException) {
+                LOGGER.error("Received unknown message type: {}", csv[1], illegalArgumentException);
             }
         }
     }
@@ -154,7 +154,7 @@ public class AdminFeed extends AbstractFeed {
     private void handleStatsMessage(String[] csv) {
         try {
             FeedStatistics feedStatistics = StreamingCSVMappers.FEED_STATISTICS_CSV_MAPPER.map(csv, 2);
-            lastFeedStatistics = feedStatistics;
+            latestFeedStatistics = feedStatistics;
 
             if (feedStatisticsFuture != null) {
                 feedStatisticsFuture.complete(feedStatistics);
@@ -387,7 +387,7 @@ public class AdminFeed extends AbstractFeed {
      * connected.
      * <br>
      * There is no set message associated with this command but you should notice the connection status in the {@link
-     * #getLastFeedStatistics()} message change from {@link Status#NOT_CONNECTED} to {@link Status#CONNECTED} if the
+     * #getLatestFeedStatistics()} message change from {@link Status#NOT_CONNECTED} to {@link Status#CONNECTED} if the
      * connection was successful.
      *
      * @throws Exception thrown for {@link Exception}s
@@ -402,7 +402,7 @@ public class AdminFeed extends AbstractFeed {
      * (after having incremented above zero). This message is ignored if the feed is already disconnected.
      * <br>
      * There is no set message associated with this command but you should notice the connection status in the {@link
-     * #getLastFeedStatistics()} message change from {@link Status#CONNECTED} to {@link Status#NOT_CONNECTED} if the
+     * #getLatestFeedStatistics()} message change from {@link Status#CONNECTED} to {@link Status#NOT_CONNECTED} if the
      * disconnection was successful.
      *
      * @throws Exception thrown for {@link Exception}s
@@ -491,13 +491,13 @@ public class AdminFeed extends AbstractFeed {
     }
 
     /**
-     * Gets {@link #lastFeedStatistics}. This method is synchronized with {@link #messageReceivedLock}.
+     * Gets {@link #latestFeedStatistics}. This method is synchronized with {@link #messageReceivedLock}.
      *
      * @return the last {@link FeedStatistics}
      */
-    public FeedStatistics getLastFeedStatistics() {
+    public FeedStatistics getLatestFeedStatistics() {
         synchronized (messageReceivedLock) {
-            return lastFeedStatistics;
+            return latestFeedStatistics;
         }
     }
 }

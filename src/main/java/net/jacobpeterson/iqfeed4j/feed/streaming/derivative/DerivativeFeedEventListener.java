@@ -1,7 +1,7 @@
 package net.jacobpeterson.iqfeed4j.feed.streaming.derivative;
 
 /**
- * {@link DerivativeFeedEventListener} is an event listener for {@link DerivativeFeed}.
+ * {@link DerivativeFeedEventListener} is an arbitrary event listener for {@link DerivativeFeed}.
  * <br>
  * NOTE: Calling methods in {@link DerivativeFeed} that send feed messages will result in dead-lock! Use a separate
  * thread as needed.
