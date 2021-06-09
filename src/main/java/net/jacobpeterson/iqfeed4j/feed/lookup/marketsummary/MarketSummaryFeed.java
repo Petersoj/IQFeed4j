@@ -254,7 +254,7 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
             listenersOfRequestIDs.remove(requestID);
             csvIndicesOfIndexNamesOfRequestIDs.remove(requestID);
             requestIDFeedHelper.removeRequestID(requestID);
-            listener.onEndOfMultiMessage();
+            listener.handleEndOfMultiMessage();
         } else {
             Map<String, Integer> csvIndicesOfIndexNames = csvIndicesOfIndexNamesOfRequestIDs.get(requestID);
 

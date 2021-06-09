@@ -80,7 +80,7 @@ public abstract class AbstractLookupFeed extends AbstractFeed {
         } else if (requestIDFeedHelper.isRequestEndOfMessage(csv, requestID)) {
             listenersOfRequestIDs.remove(requestID);
             requestIDFeedHelper.removeRequestID(requestID);
-            listener.onEndOfMultiMessage();
+            listener.handleEndOfMultiMessage();
         } else {
             try {
                 T message = indexCSVMapper.map(csv, 1);
