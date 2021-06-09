@@ -14,9 +14,9 @@ import net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.enums.OptionTyp
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.enums.PutsCallsOption;
 import net.jacobpeterson.iqfeed4j.util.chars.CharUtil;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.list.ListCSVMapper;
-import net.jacobpeterson.iqfeed4j.util.exception.IQFeedException;
-import net.jacobpeterson.iqfeed4j.util.exception.NoDataException;
-import net.jacobpeterson.iqfeed4j.util.exception.SyntaxException;
+import net.jacobpeterson.iqfeed4j.feed.exception.IQFeedException;
+import net.jacobpeterson.iqfeed4j.feed.exception.NoDataException;
+import net.jacobpeterson.iqfeed4j.feed.exception.SyntaxException;
 import net.jacobpeterson.iqfeed4j.util.string.LineEnding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

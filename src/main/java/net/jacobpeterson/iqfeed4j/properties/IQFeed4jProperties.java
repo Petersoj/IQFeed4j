@@ -69,15 +69,15 @@ public class IQFeed4jProperties {
     public static final String FEED_HOSTNAME = getProperty(PROPERTIES_FILE, DEFAULT_PROPERTIES_FILE,
             FEED_HOSTNAME_KEY);
 
-    private static final String LEVEL1_FEED_PORT_KEY = "level1_feed_port";
-    /** The value of {@link #LEVEL1_FEED_PORT_KEY} in {@link #PROPERTIES_FILE}. */
-    public static final String LEVEL1_FEED_PORT = getProperty(PROPERTIES_FILE, DEFAULT_PROPERTIES_FILE,
-            LEVEL1_FEED_PORT_KEY);
+    private static final String LEVEL_1_FEED_PORT_KEY = "level_1_feed_port";
+    /** The value of {@link #LEVEL_1_FEED_PORT_KEY} in {@link #PROPERTIES_FILE}. */
+    public static final String LEVEL_1_FEED_PORT = getProperty(PROPERTIES_FILE, DEFAULT_PROPERTIES_FILE,
+            LEVEL_1_FEED_PORT_KEY);
 
-    private static final String LEVEL2_FEED_PORT_KEY = "level2_feed_port";
-    /** The value of {@link #LEVEL2_FEED_PORT_KEY} in {@link #PROPERTIES_FILE}. */
-    public static final String LEVEL2_FEED_PORT = getProperty(PROPERTIES_FILE, DEFAULT_PROPERTIES_FILE,
-            LEVEL2_FEED_PORT_KEY);
+    private static final String MARKET_DEPTH_FEED_PORT_KEY = "market_depth_feed_port";
+    /** The value of {@link #MARKET_DEPTH_FEED_PORT_KEY} in {@link #PROPERTIES_FILE}. */
+    public static final String MARKET_DEPTH_FEED_PORT = getProperty(PROPERTIES_FILE, DEFAULT_PROPERTIES_FILE,
+            MARKET_DEPTH_FEED_PORT_KEY);
 
     private static final String DERIVATIVE_FEED_PORT_KEY = "derivative_feed_port";
     /** The value of {@link #DERIVATIVE_FEED_PORT_KEY} in {@link #PROPERTIES_FILE}. */

@@ -1,6 +1,5 @@
 package net.jacobpeterson.iqfeed4j.feed.streaming.level1;
 
-import com.google.common.base.Preconditions;
 import net.jacobpeterson.iqfeed4j.feed.message.FeedMessageListener;
 import net.jacobpeterson.iqfeed4j.feed.message.SingleMessageFuture;
 import net.jacobpeterson.iqfeed4j.feed.streaming.AbstractServerConnectionFeed;
@@ -8,13 +7,23 @@ import net.jacobpeterson.iqfeed4j.feed.streaming.StreamingCSVMappers;
 import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedCommand;
 import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedMessageType;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.common.FeedStatistics;
-import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.*;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.CustomerInformation;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.CustomerInformation.ServiceType;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.FundamentalData;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.FundamentalData.OptionsMultipleDeliverables;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.NewsHeadline;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.RegionalQuote;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.SummaryUpdate;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.SummaryUpdate.MarketOpen;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.SummaryUpdate.MostRecentTradeAggressor;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.SummaryUpdate.RestrictedCode;
-import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.*;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.Level1Command;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.Level1MessageType;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.Level1SystemCommand;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.Level1SystemMessageType;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.LogLevel;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateContent;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapping;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.index.DirectIndexCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.index.IndexCSVMapper;
@@ -29,7 +38,11 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.StringJoiner;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -717,7 +730,7 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     //
 
     /**
-     * Begins watching a symbol for Level 1 updates.
+     * Begins watching a symbol for Level 1 updates. This sends a 'w' request.
      *
      * @param symbol                  the symbol that you wish to receive updates on
      * @param fundamentalDataListener the {@link FeedMessageListener} of {@link FundamentalData} Note if a {@link
@@ -754,7 +767,7 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     }
 
     /**
-     * Begins a trades only watch on a symbol for Level 1 updates.
+     * Begins a trades only watch on a symbol for Level 1 updates. This sends a 't' request.
      *
      * @param symbol                  the symbol that you wish to receive updates on
      * @param fundamentalDataListener the {@link FeedMessageListener} of {@link FundamentalData} Note if a {@link
@@ -791,7 +804,7 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     }
 
     /**
-     * Terminates Level 1 updates for the symbol specified (including regionals).
+     * Terminates Level 1 updates for the symbol specified (including regionals). This sends a 'r' request.
      *
      * @param symbol the symbol that you wish to terminate updates on
      *
@@ -816,7 +829,7 @@ public class Level1Feed extends AbstractServerConnectionFeed {
 
     /**
      * Forces a refresh for {@link FundamentalData} and a summary {@link SummaryUpdate} message from the server for the
-     * symbol specified.
+     * symbol specified. This sends a 'f' request.
      * <br>
      * NOTE: This can not be used as a method to get a snapshot of data from the feed. You must already be watching the
      * symbol or the server ignores this request.
@@ -837,7 +850,7 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     }
 
     /**
-     * Requests a {@link LocalDateTime} timestamp to be sent.
+     * Requests a {@link LocalDateTime} timestamp to be sent. This sends a 'T' request.
      *
      * @return the {@link SingleMessageFuture} of the {@link LocalDateTime} timestamp
      *
@@ -886,7 +899,8 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     }
 
     /**
-     * Enables or disables the once-per-second {@link LocalDateTime} timestamp.
+     * Enables or disables the once-per-second {@link LocalDateTime} timestamp. This sends an 'S,TIMESTAMPSON' or
+     * 'S,TIMESTAMPSOFF' request.
      *
      * @param toggle true to enable, false to disable
      *
@@ -897,7 +911,7 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     }
 
     /**
-     * Begins watching a symbol for Level 1 {@link RegionalQuote} updates.
+     * Begins watching a symbol for Level 1 {@link RegionalQuote} updates. This sends an 'S,REGON' request.
      *
      * @param symbol                the symbol that you wish to receive updates on
      * @param regionalQuoteListener the {@link FeedMessageListener} of {@link RegionalQuote}s.Note if a {@link
@@ -908,8 +922,8 @@ public class Level1Feed extends AbstractServerConnectionFeed {
      */
     public void requestRegionalQuoteWatch(String symbol, FeedMessageListener<RegionalQuote> regionalQuoteListener)
             throws IOException {
-        Preconditions.checkNotNull(symbol);
-        Preconditions.checkNotNull(regionalQuoteListener);
+        checkNotNull(symbol);
+        checkNotNull(regionalQuoteListener);
 
         synchronized (messageReceivedLock) {
             regionalQuoteListenersOfSymbols.put(symbol, regionalQuoteListener);
@@ -919,14 +933,14 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     }
 
     /**
-     * Stops watching a symbol for Level 1 {@link RegionalQuote} updates.
+     * Stops watching a symbol for Level 1 {@link RegionalQuote} updates. This sends an 'S,REGOFF' request.
      *
      * @param symbol the symbol that you wish to stop receiving updates on
      *
      * @throws IOException thrown for {@link IOException}s
      */
     public void requestRegionalQuoteUnwatch(String symbol) throws IOException {
-        Preconditions.checkNotNull(symbol);
+        checkNotNull(symbol);
 
         synchronized (messageReceivedLock) {
             regionalQuoteListenersOfSymbols.remove(symbol);
@@ -936,7 +950,7 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     }
 
     /**
-     * Enables or disables streaming {@link NewsHeadline}s.
+     * Enables or disables streaming {@link NewsHeadline}s. This sends an 'S,NEWSON' or 'S,NEWOFF' request.
      *
      * @param toggle true to enable, false to disable
      *
@@ -947,7 +961,7 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     }
 
     /**
-     * Requests {@link FeedStatistics} be sent.
+     * Requests {@link FeedStatistics} be sent. This sends an 'S,REQUEST STATS' request.
      *
      * @return the {@link SingleMessageFuture} of the {@link FeedStatistics}
      *
@@ -968,7 +982,8 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     }
 
     /**
-     * Request a list of all available {@link SummaryUpdateField}s for fundamental messages.
+     * Request a list of all available {@link SummaryUpdateField}s for fundamental messages. This sends an 'S,REQUEST
+     * FUNDAMENTAL FIELDNAMES' request.
      *
      * @return the {@link SingleMessageFuture} of the {@link String} field names
      *
@@ -990,7 +1005,7 @@ public class Level1Feed extends AbstractServerConnectionFeed {
 
     /**
      * Request a list of all available {@link SummaryUpdateField}s for summary/update messages for the currently set
-     * IQFeed protocol.
+     * IQFeed protocol. This sends an 'S,REQUEST ALL UPDATE FIELDNAMES' request.
      *
      * @return the {@link SingleMessageFuture} of the {@link SummaryUpdateField}s
      *
@@ -1011,7 +1026,8 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     }
 
     /**
-     * Request a list of all available {@link SummaryUpdateField}s for summary/update messages for this connection.
+     * Request a list of all available {@link SummaryUpdateField}s for summary/update messages for this connection. This
+     * sends an 'S,REQUEST CURRENT UPDATE FIELDNAMES' request.
      *
      * @return the {@link SingleMessageFuture} of the {@link SummaryUpdateField}s
      *
@@ -1033,7 +1049,7 @@ public class Level1Feed extends AbstractServerConnectionFeed {
 
     /**
      * Change your fieldset for this connection. This fieldset applies to all {@link SummaryUpdate} messages you receive
-     * on this connection.
+     * on this connection. This sends an 'S,SELECT UPDATE FIELDS' request.
      * <br>
      * NOTE: The {@link SummaryUpdateField#SYMBOL} is not selectable and will always be the first field of a {@link
      * SummaryUpdate}.
@@ -1060,7 +1076,7 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     }
 
     /**
-     * Change the logging levels for IQFeed.
+     * Change the logging levels for IQFeed. This sends an 'S,SET LOG LEVELS' request.
      *
      * @param logLevels the {@link LogLevel}s or <code>null</code> for no logging
      *
@@ -1082,7 +1098,7 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     }
 
     /**
-     * Request a list of all symbols currently watched on this connection.
+     * Request a list of all symbols currently watched on this connection. This sends an 'S,REQUEST WATCHES' request.
      *
      * @return the {@link SingleMessageFuture} of the {@link String} symbols
      *
@@ -1103,7 +1119,7 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     }
 
     /**
-     * Unwatch all currently watched symbols.
+     * Unwatch all currently watched symbols. This sends an 'S,UNWATCH ALL' request.
      *
      * @throws IOException thrown for {@link IOException}s
      */
@@ -1120,7 +1136,7 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     /**
      * Tells IQFeed to initiate a connection to the Level 1 server. This happens automatically upon launching the feed
      * unless the ProductID and/or Product version have not been set. This message is ignored if the feed is already
-     * connected.
+     * connected. This sends an 'S,CONNECT' request.
      *
      * @throws IOException thrown for {@link IOException}s
      */
@@ -1131,7 +1147,8 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     /**
      * Tells IQFeed to disconnect from the Level 1 server. This happens automatically as soon as the last client
      * connection to IQConnect is terminated and the ClientsConnected value in the S,STATS message returns to zero
-     * (after having incremented above zero). This message is ignored if the feed is already disconnected.
+     * (after having incremented above zero). This message is ignored if the feed is already disconnected. This sends an
+     * 'S,DISCONNECT' request.
      * <br>
      * NOTE: This will terminate all Level 1 updates for ALL apps connected to IQConnect on this Computer and should
      * only be used if you are certain no other applications are receiving data.

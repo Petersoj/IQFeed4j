@@ -1,4 +1,4 @@
-package net.jacobpeterson.iqfeed4j.util.exception;
+package net.jacobpeterson.iqfeed4j.feed.exception;
 
 /**
  * {@link IQFeedException} represents IQFeed {@link RuntimeException}s.

@@ -1,4 +1,4 @@
-package net.jacobpeterson.iqfeed4j.util.exception;
+package net.jacobpeterson.iqfeed4j.feed.exception;
 
 /**
  * {@link NoDataException} is an {@link IQFeedException} for when no data is present.

@@ -7,9 +7,9 @@ import net.jacobpeterson.iqfeed4j.feed.message.MultiMessageListener;
 import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedMessageType;
 import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedSpecialMessage;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.index.AbstractIndexCSVMapper;
-import net.jacobpeterson.iqfeed4j.util.exception.IQFeedException;
-import net.jacobpeterson.iqfeed4j.util.exception.NoDataException;
-import net.jacobpeterson.iqfeed4j.util.exception.SyntaxException;
+import net.jacobpeterson.iqfeed4j.feed.exception.IQFeedException;
+import net.jacobpeterson.iqfeed4j.feed.exception.NoDataException;
+import net.jacobpeterson.iqfeed4j.feed.exception.SyntaxException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

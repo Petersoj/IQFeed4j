@@ -1,6 +1,7 @@
 package net.jacobpeterson.iqfeed4j.feed.streaming.derivative;
 
 import net.jacobpeterson.iqfeed4j.feed.RequestIDFeedHelper;
+import net.jacobpeterson.iqfeed4j.feed.message.FeedMessageListener;
 import net.jacobpeterson.iqfeed4j.feed.message.SingleMessageFuture;
 import net.jacobpeterson.iqfeed4j.feed.streaming.AbstractServerConnectionFeed;
 import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedMessageType;
@@ -68,8 +69,8 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
 
     protected final Object messageReceivedLock;
     protected final RequestIDFeedHelper requestIDFeedHelper;
-    protected final HashMap<String, IntervalListener> intervalListenersOfRequestIDs;
-    protected final HashMap<String, List<IntervalListener>> intervalListenersOfWatchedSymbols;
+    protected final HashMap<String, FeedMessageListener<Interval>> intervalListenersOfRequestIDs;
+    protected final HashMap<String, List<FeedMessageListener<Interval>>> intervalListenersOfWatchedSymbols;
     protected DerivativeFeedEventListener derivativeFeedEventListener;
     protected SingleMessageFuture<List<WatchedInterval>> watchedIntervalsFuture;
 
@@ -208,7 +209,7 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
     private void handleIntervalMessage(String[] csv) {
         String requestID = csv[0]; // All interval messages on this feed should start with a Request ID
 
-        IntervalListener intervalListener = intervalListenersOfRequestIDs.get(requestID);
+        FeedMessageListener<Interval> intervalListener = intervalListenersOfRequestIDs.get(requestID);
         if (intervalListener == null) {
             LOGGER.warn("Received Interval message, but no listener could be found for Request ID: {}", requestID);
             return;
@@ -249,13 +250,13 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
      *                            (optional)
      * @param intervalType        the {@link IntervalType}
      * @param updateIntervalDelay the number of seconds before sending out an updated bar (defaults to 0) (optional)
-     * @param intervalListener    the {@link IntervalListener} for this request
+     * @param intervalListener    the {@link FeedMessageListener} of {@link Interval}s for this request
      *
      * @throws IOException thrown for {@link IOException}s
      */
     public void requestIntervalWatch(String symbol, int intervalLength, LocalDateTime beginDateTime,
             Integer maxDaysOfDataPoints, Integer maxDataPoints, LocalTime beginFilterTime, LocalTime endFilterTime,
-            IntervalType intervalType, Integer updateIntervalDelay, IntervalListener intervalListener)
+            IntervalType intervalType, Integer updateIntervalDelay, FeedMessageListener<Interval> intervalListener)
             throws IOException {
         checkNotNull(symbol);
         checkNotNull(intervalType);
@@ -305,7 +306,7 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
         synchronized (messageReceivedLock) {
             intervalListenersOfRequestIDs.put(requestID, intervalListener);
 
-            List<IntervalListener> intervalListeners =
+            List<FeedMessageListener<Interval>> intervalListeners =
                     intervalListenersOfWatchedSymbols.computeIfAbsent(symbol, k -> new ArrayList<>());
             intervalListeners.add(intervalListener);
         }
@@ -314,13 +315,14 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
     }
 
     /**
-     * Remove a watch request given a {@link IntervalListener}. This sends an BR request. This method is thread-safe.
+     * Remove a watch request given a {@link FeedMessageListener} of {@link Interval}s. This sends an BR request. This
+     * method is thread-safe.
      *
-     * @param intervalListener the {@link IntervalListener} to remove
+     * @param intervalListener the {@link FeedMessageListener} to remove
      *
      * @throws Exception thrown for {@link Exception}s
      */
-    public void requestIntervalWatchRemoval(IntervalListener intervalListener) throws Exception {
+    public void requestIntervalWatchRemoval(FeedMessageListener<Interval> intervalListener) throws Exception {
         checkNotNull(intervalListener);
 
         String symbol = getWatchedSymbol(intervalListener);
@@ -337,7 +339,7 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
         synchronized (messageReceivedLock) {
             intervalListenersOfRequestIDs.remove(requestID);
 
-            List<IntervalListener> intervalListeners = intervalListenersOfWatchedSymbols.get(symbol);
+            List<FeedMessageListener<Interval>> intervalListeners = intervalListenersOfWatchedSymbols.get(symbol);
             if (intervalListeners != null) {
                 intervalListeners.remove(intervalListener);
             }
@@ -400,39 +402,39 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
     //
 
     /**
-     * Gets an {@link IntervalListener} for the given 'requestID' if one exists.
+     * Gets an {@link FeedMessageListener} of {@link Interval}s for the given 'requestID' if one exists.
      *
      * @param requestID the Request ID
      *
-     * @return the {@link IntervalListener} or null
+     * @return the {@link FeedMessageListener} of {@link Interval}s or null
      */
-    public IntervalListener getIntervalListener(String requestID) {
+    public FeedMessageListener<Interval> getIntervalListener(String requestID) {
         synchronized (messageReceivedLock) {
             return intervalListenersOfRequestIDs.get(requestID);
         }
     }
 
     /**
-     * Gets a Request ID for the given {@link IntervalListener} if one exists.
+     * Gets a Request ID for the given {@link FeedMessageListener} of {@link Interval}s if one exists.
      *
-     * @param intervalListener the {@link IntervalListener}
+     * @param intervalListener the {@link FeedMessageListener} of {@link Interval}s
      *
      * @return the Request ID or null
      */
-    public String getRequestID(IntervalListener intervalListener) {
+    public String getRequestID(FeedMessageListener<Interval> intervalListener) {
         synchronized (messageReceivedLock) {
             return MapUtil.getKeyByValue(intervalListenersOfRequestIDs, intervalListener);
         }
     }
 
     /**
-     * Gets the watched symbol for the given {@link IntervalListener}.
+     * Gets the watched symbol for the given {@link FeedMessageListener} of {@link Interval}s.
      *
-     * @param intervalListener the {@link IntervalListener}
+     * @param intervalListener the {@link FeedMessageListener} of {@link Interval}s
      *
      * @return the watched symbol
      */
-    public String getWatchedSymbol(IntervalListener intervalListener) {
+    public String getWatchedSymbol(FeedMessageListener<Interval> intervalListener) {
         synchronized (messageReceivedLock) {
             return intervalListenersOfWatchedSymbols.entrySet().stream()
                     .filter(entry -> entry.getValue().contains(intervalListener))

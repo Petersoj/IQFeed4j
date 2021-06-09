@@ -1,4 +1,4 @@
-package net.jacobpeterson.iqfeed4j.util.exception;
+package net.jacobpeterson.iqfeed4j.feed.exception;
 
 /**
  * {@link SyntaxException} is an {@link IQFeedException} for when a syntax error in a request occurs.
