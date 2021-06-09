@@ -225,8 +225,8 @@ public class AdminFeed extends AbstractFeed {
      *
      * @param <T>                             the {@link SingleMessageFuture} type
      * @param futureOfAdminSystemMessageTypes the {@link SingleMessageFuture}s of {@link AdminSystemMessageType}s
-     * @param AdminSystemMessageType          the {@link AdminSystemMessageType}
-     * @param AdminSystemCommand              the {@link AdminSystemCommand} for the {@link AdminSystemMessageType}
+     * @param adminSystemMessageType          the {@link AdminSystemMessageType}
+     * @param adminSystemCommand              the {@link AdminSystemCommand} for the {@link AdminSystemMessageType}
      * @param arguments                       the arguments
      *
      * @return a {@link SingleMessageFuture}
@@ -235,24 +235,24 @@ public class AdminFeed extends AbstractFeed {
      */
     private <T> SingleMessageFuture<T> getOrSendAdminSystemCommandFuture(
             Map<AdminSystemMessageType, SingleMessageFuture<T>> futureOfAdminSystemMessageTypes,
-            AdminSystemMessageType AdminSystemMessageType,
-            AdminSystemCommand AdminSystemCommand, String... arguments) throws IOException {
+            AdminSystemMessageType adminSystemMessageType,
+            AdminSystemCommand adminSystemCommand, String... arguments) throws IOException {
         synchronized (messageReceivedLock) {
-            SingleMessageFuture<T> messageFuture = futureOfAdminSystemMessageTypes.get(AdminSystemMessageType);
+            SingleMessageFuture<T> messageFuture = futureOfAdminSystemMessageTypes.get(adminSystemMessageType);
             if (messageFuture != null) {
                 return messageFuture;
             }
 
-            sendAdminSystemCommand(AdminSystemCommand, arguments);
+            sendAdminSystemCommand(adminSystemCommand, arguments);
             messageFuture = new SingleMessageFuture<>();
-            futureOfAdminSystemMessageTypes.put(AdminSystemMessageType, messageFuture);
+            futureOfAdminSystemMessageTypes.put(adminSystemMessageType, messageFuture);
             return messageFuture;
         }
     }
 
     /**
      * Registers your application with the feed. Users will not be able to login to the feed until an application is
-     * registered.
+     * registered. This sends a {@link AdminSystemCommand#REGISTER_CLIENT_APP} request.
      *
      * @param productID      the Registered Product ID that you were assigned when you created your developer API
      *                       account.
@@ -260,9 +260,9 @@ public class AdminFeed extends AbstractFeed {
      *
      * @return a {@link SingleMessageFuture} completed upon command response
      *
-     * @throws Exception thrown for {@link Exception}s
+     * @throws IOException thrown for {@link IOException}s
      */
-    public SingleMessageFuture<Void> registerClientApp(String productID, String productVersion) throws Exception {
+    public SingleMessageFuture<Void> registerClientApp(String productID, String productVersion) throws IOException {
         checkNotNull(productID);
         checkNotNull(productVersion);
 
@@ -272,7 +272,8 @@ public class AdminFeed extends AbstractFeed {
     }
 
     /**
-     * Removes the registration of your application with the feed.
+     * Removes the registration of your application with the feed. This sends a {@link
+     * AdminSystemCommand#REMOVE_CLIENT_APP} request.
      *
      * @param productID      the Registered Product ID that you were assigned when you created your developer API
      *                       account.
@@ -280,9 +281,9 @@ public class AdminFeed extends AbstractFeed {
      *
      * @return a {@link SingleMessageFuture} completed upon command response
      *
-     * @throws Exception thrown for {@link Exception}s
+     * @throws IOException thrown for {@link IOException}s
      */
-    public SingleMessageFuture<Void> removeClientApp(String productID, String productVersion) throws Exception {
+    public SingleMessageFuture<Void> removeClientApp(String productID, String productVersion) throws IOException {
         checkNotNull(productID);
         checkNotNull(productVersion);
 
@@ -292,15 +293,15 @@ public class AdminFeed extends AbstractFeed {
     }
 
     /**
-     * Sets the user loginID for IQFeed.
+     * Sets the user loginID for IQFeed. This sends a {@link AdminSystemCommand#SET_LOGINID} request.
      *
      * @param loginID the loginID that was assigned to the user when they created their datafeed account.
      *
      * @return a {@link SingleMessageFuture} completed upon command response
      *
-     * @throws Exception thrown for {@link Exception}s
+     * @throws IOException thrown for {@link IOException}s
      */
-    public SingleMessageFuture<String> setLoginID(String loginID) throws Exception {
+    public SingleMessageFuture<String> setLoginID(String loginID) throws IOException {
         checkNotNull(loginID);
 
         return getOrSendAdminSystemCommandFuture(stringFutureOfAdminSystemMessageTypes,
@@ -309,15 +310,15 @@ public class AdminFeed extends AbstractFeed {
     }
 
     /**
-     * Sets the user password for IQFeed.
+     * Sets the user password for IQFeed. This sends a {@link AdminSystemCommand#SET_PASSWORD} request.
      *
      * @param password the password that was assigned to the user when they created their datafeed account.
      *
      * @return a {@link SingleMessageFuture} completed upon command response
      *
-     * @throws Exception thrown for {@link Exception}s
+     * @throws IOException thrown for {@link IOException}s
      */
-    public SingleMessageFuture<String> setPassword(String password) throws Exception {
+    public SingleMessageFuture<String> setPassword(String password) throws IOException {
         checkNotNull(password);
 
         return getOrSendAdminSystemCommandFuture(stringFutureOfAdminSystemMessageTypes,
@@ -327,16 +328,16 @@ public class AdminFeed extends AbstractFeed {
 
     /**
      * Sets the save login info (loginID/password) flag for IQFeed. This will be ignored at the time of connection if
-     * either the loginID, password are not set.
+     * either the loginID, password are not set. This sends a {@link AdminSystemCommand#SET_SAVE_LOGIN_INFO} request.
      *
      * @param onOffOption {@link OnOffOption#ON} if you want IQConnect to save the user's loginID and password or {@link
      *                    OnOffOption#OFF} if you do not want IQConnect to save the user's loginID and password.
      *
      * @return a {@link SingleMessageFuture} completed upon command response
      *
-     * @throws Exception thrown for {@link Exception}s
+     * @throws IOException thrown for {@link IOException}s
      */
-    public SingleMessageFuture<Void> setSaveLoginInfo(OnOffOption onOffOption) throws Exception {
+    public SingleMessageFuture<Void> setSaveLoginInfo(OnOffOption onOffOption) throws IOException {
         checkNotNull(onOffOption);
 
         switch (onOffOption) {
@@ -355,16 +356,16 @@ public class AdminFeed extends AbstractFeed {
 
     /**
      * Sets the auto connect flag for IQFeed. This will be ignored at the time of connection if either the loginID,
-     * password are not set.
+     * password are not set. This sends a {@link AdminSystemCommand#SET_AUTOCONNECT} request.
      *
      * @param onOffOption {@link OnOffOption#ON} if you want IQConnect to automatically connect to the servers or {@link
      *                    OnOffOption#OFF} if you do not want IQConnect to automatically connect.
      *
      * @return a {@link SingleMessageFuture} completed upon command response
      *
-     * @throws Exception thrown for {@link Exception}s
+     * @throws IOException thrown for {@link IOException}s
      */
-    public SingleMessageFuture<Void> setAutoconnect(OnOffOption onOffOption) throws Exception {
+    public SingleMessageFuture<Void> setAutoconnect(OnOffOption onOffOption) throws IOException {
         checkNotNull(onOffOption);
 
         switch (onOffOption) {
@@ -384,57 +385,60 @@ public class AdminFeed extends AbstractFeed {
     /**
      * Tells IQConnect.exe to initiate a connection to the servers. This happens automatically upon launching the feed
      * unless the ProductID and/or Product version have not been set. This message is ignored if the feed is already
-     * connected.
+     * connected. This sends a {@link AdminSystemCommand#CONNECT} request.
      * <br>
      * There is no set message associated with this command but you should notice the connection status in the {@link
      * #getLatestFeedStatistics()} message change from {@link Status#NOT_CONNECTED} to {@link Status#CONNECTED} if the
      * connection was successful.
      *
-     * @throws Exception thrown for {@link Exception}s
+     * @throws IOException thrown for {@link IOException}s
      */
-    public void connect() throws Exception {
+    public void connect() throws IOException {
         sendAdminSystemCommand(AdminSystemCommand.CONNECT);
     }
 
     /**
      * Tells IQConnect.exe to disconnect from the IQFeed servers. This happens automatically as soon as the last client
-     * connection to IQConnect is terminated and the ClientsConnected value in the S,STATS message returns to zero
-     * (after having incremented above zero). This message is ignored if the feed is already disconnected.
+     * connection to IQConnect is terminated and the ClientsConnected value in the {@link ClientStatistics} message
+     * returns to zero (after having incremented above zero). This message is ignored if the feed is already
+     * disconnected. This sends a {@link AdminSystemCommand#DISCONNECT} request.
      * <br>
      * There is no set message associated with this command but you should notice the connection status in the {@link
      * #getLatestFeedStatistics()} message change from {@link Status#CONNECTED} to {@link Status#NOT_CONNECTED} if the
      * disconnection was successful.
      *
-     * @throws Exception thrown for {@link Exception}s
+     * @throws IOException thrown for {@link IOException}s
      */
-    public void disconnect() throws Exception {
+    public void disconnect() throws IOException {
         sendAdminSystemCommand(AdminSystemCommand.DISCONNECT);
     }
 
     /**
-     * Tells IQConnect.exe to start streaming client stats to your connection.
+     * Tells IQConnect.exe to start streaming client stats to your connection. This sends a {@link
+     * AdminSystemCommand#CLIENTSTATS_ON} request.
      * <br>
      * There is no set message associated with this command but you should start receiving {@link ClientStatistics}
      * messages (detailed on the Admin System Messages page). You will receive 1 stats message per second per client
      * currently connected to IQFeed.
      *
-     * @throws Exception thrown for {@link Exception}s
+     * @throws IOException thrown for {@link IOException}s
      * @see #getClientStatisticsOfClientIDs()
      */
-    public void setClientStatsOn() throws Exception {
+    public void setClientStatsOn() throws IOException {
         sendAdminSystemCommand(AdminSystemCommand.CLIENTSTATS_ON);
     }
 
     /**
-     * Tells IQConnect.exe to stop streaming client stats to your connection.
+     * Tells IQConnect.exe to stop streaming client stats to your connection. This sends a {@link
+     * AdminSystemCommand#CLIENTSTATS_OFF} request.
      * <br>
      * There is no set message associated with this command but you should stop receiving {@link ClientStatistics}
      * messages.
      *
-     * @throws Exception thrown for {@link Exception}s
+     * @throws IOException thrown for {@link IOException}s
      * @see #getClientStatisticsOfClientIDs()
      */
-    public void setClientStatsOff() throws Exception {
+    public void setClientStatsOff() throws IOException {
         sendAdminSystemCommand(AdminSystemCommand.CLIENTSTATS_OFF);
         synchronized (messageReceivedLock) {
             clientStatisticsOfClientIDs.clear();

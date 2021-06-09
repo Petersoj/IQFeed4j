@@ -3,6 +3,7 @@ package net.jacobpeterson.iqfeed4j.feed.lookup.news;
 import net.jacobpeterson.iqfeed4j.feed.lookup.AbstractLookupFeed;
 import net.jacobpeterson.iqfeed4j.feed.message.MultiMessageListener;
 import net.jacobpeterson.iqfeed4j.model.feed.common.message.MessageLine;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.news.enums.NewsCommand;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.news.enums.XMLTextEmailOption;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.news.enums.XMLTextOption;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.index.TrailingIndexCSVMapper;
@@ -72,7 +73,7 @@ public class NewsFeed extends AbstractLookupFeed {
     //
 
     /**
-     * This requests the current News configuration. This sends an NCG request. This method is thread-safe.
+     * This requests the current News configuration. This sends a {@link NewsCommand#NEWS_CONFIGURATION} request.
      *
      * @param xmlTextOption       the {@link XMLTextOption}. See
      *                            <a href="https://www.iqfeed.net/dev/api/docs//NewsLookupviaTCPIP.cfm">News
@@ -89,7 +90,7 @@ public class NewsFeed extends AbstractLookupFeed {
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
-        requestBuilder.append("NCG").append(",");
+        requestBuilder.append(NewsCommand.NEWS_CONFIGURATION.value()).append(",");
         requestBuilder.append(xmlTextOption.value()).append(",");
         requestBuilder.append(requestID);
         requestBuilder.append(LineEnding.CR_LF.getASCIIString());
@@ -102,7 +103,7 @@ public class NewsFeed extends AbstractLookupFeed {
     }
 
     /**
-     * This requests News headlines. This sends an NHL request. This method is thread-safe.
+     * This requests News headlines. This sends a {@link NewsCommand#NEWS_HEADLINE} request.
      *
      * @param sources             a {@link List} of news sources which can be retrieved via {@link
      *                            #requestNewsConfiguration(XMLTextOption, MultiMessageListener)}. (optional)
@@ -128,7 +129,7 @@ public class NewsFeed extends AbstractLookupFeed {
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
-        requestBuilder.append("NHL").append(",");
+        requestBuilder.append(NewsCommand.NEWS_HEADLINE.value()).append(",");
 
         if (sources != null) {
             requestBuilder.append(String.join(":", sources));
@@ -170,7 +171,7 @@ public class NewsFeed extends AbstractLookupFeed {
     }
 
     /**
-     * This requests News stories. This sends an NSY request. This method is thread-safe.
+     * This requests News stories. This sends a {@link NewsCommand#NEWS_STORY} request.
      *
      * @param id                  the headline/story identifier which can be retrieved via {@link
      *                            #requestNewsHeadlines(List, List, XMLTextOption, Integer, List, Map,
@@ -195,7 +196,7 @@ public class NewsFeed extends AbstractLookupFeed {
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
-        requestBuilder.append("NSY").append(",");
+        requestBuilder.append(NewsCommand.NEWS_STORY.value()).append(",");
         requestBuilder.append(id).append(",");
         requestBuilder.append(xmlTextEmailOption.value()).append(",");
 
@@ -215,7 +216,7 @@ public class NewsFeed extends AbstractLookupFeed {
     }
 
     /**
-     * This requests the count of News stories. This sends an NSC request. This method is thread-safe.
+     * This requests the count of News stories. This sends a {@link NewsCommand#NEWS_STORY_COUNT} request.
      *
      * @param symbols             a {@link List} of symbols
      * @param xmlTextOption       the {@link XMLTextOption}. See
@@ -242,7 +243,7 @@ public class NewsFeed extends AbstractLookupFeed {
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
-        requestBuilder.append("NSC").append(",");
+        requestBuilder.append(NewsCommand.NEWS_STORY_COUNT.value()).append(",");
         requestBuilder.append(String.join(":", symbols)).append(",");
         requestBuilder.append(xmlTextOption.value()).append(",");
 

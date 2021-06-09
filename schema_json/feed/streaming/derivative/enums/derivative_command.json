@@ -1,0 +1,16 @@
+{
+  "type": "string",
+  "title": "Enums for Derivative feed commands. See <a href=\"https://www.iqfeed.net/dev/api/docs/Derivatives_StreamingIntervalBars_TCPIP.cfm\">Streaming interval bars via TCP/IP</a>",
+  "enum": [
+    "BW",
+    "BR"
+  ],
+  "javaEnums": [
+    {
+      "name": "BAR_WATCH"
+    },
+    {
+      "name": "BAR_REMOVE"
+    }
+  ]
+}

@@ -14,43 +14,5 @@
     "CURRENT UPDATE FIELDNAMES",
     "CURRENT LOG LEVELS",
     "WATCHES"
-  ],
-  "javaEnums": [
-    {
-      "title": "IQFeed authentication key."
-    },
-    {
-      "title": "Result of sending the S,KEY,##### message back to IQFeed."
-    },
-    {
-      "title": "The attempt to reconnect failed."
-    },
-    {
-      "title": "A notification that the symbol limit has been reached including the symbol which was not not serviced."
-    },
-    {
-      "title": "This message is received after your program connects to IQConnect. It indicates the IP addresses that IQFeed is to use to connect to the data sources."
-    },
-    {
-      "title": "This message is received after your program connects to IQConnect. It contains customer information."
-    },
-    {
-      "title": "This message is sent in response to a S,REQUEST STATS<LF> message."
-    },
-    {
-      "title": "This message is sent in response to a S,REQUEST FUNDAMENTAL FIELDNAMES<LF> message. The message is a comma delimited list of all Level1 field names for Fundamental messages."
-    },
-    {
-      "title": "This message is sent in response to a S,REQUEST ALL UPDATE FIELDNAMES<LF> message. The message is a comma delimited list of all available Level1 field names for Update and Summary messages."
-    },
-    {
-      "title": "This message is sent in response to a S,REQUEST CURRENT UPDATE FIELDNAMES<LF> message. The message is a comma delimited list of the Level1 field names currently selected for Update and Summary messages."
-    },
-    {
-      "title": "This message is sent in response to a S,SET LOG LEVELS<LF> message. The message is a comma delimited list of the logging levels currently selected for IQConnect."
-    },
-    {
-      "title": "This message is sent in reponse to a S,REQUEST WATCHES<LF> message. The message is a comma delimited list of all Level1 symbols that are currently being watched."
-    }
   ]
 }

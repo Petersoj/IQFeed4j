@@ -2,6 +2,7 @@ package net.jacobpeterson.iqfeed4j.util.csv.mapper.map;
 
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapping;
+import net.jacobpeterson.iqfeed4j.util.csv.mapper.exception.CSVMappingException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -64,10 +65,15 @@ public class NamedCSVMapper<T> extends AbstractCSVMapper<T> {
      *
      * @return a new POJO
      *
-     * @throws Exception thrown for a variety of {@link Exception}s
+     * @throws CSVMappingException thrown for {@link CSVMappingException}s
      */
-    public T map(String[] csv, int offset, Map<String, Integer> csvIndicesOfIndexNames) throws Exception {
-        T instance = pojoInstantiator.call();
+    public T map(String[] csv, int offset, Map<String, Integer> csvIndicesOfIndexNames) {
+        T instance;
+        try {
+            instance = pojoInstantiator.call();
+        } catch (Exception exception) {
+            throw new CSVMappingException("Could not instantiate POJO!", exception);
+        }
 
         // Loop through all added 'CSVMapping's and apply them with the given 'csvIndicesOfIndexNames' map
         for (Map.Entry<String, Integer> csvIndexOfIndexName : csvIndicesOfIndexNames.entrySet()) {
@@ -82,11 +88,13 @@ public class NamedCSVMapper<T> extends AbstractCSVMapper<T> {
             if (!valueNotWhitespace(csv, csvNamedIndex + offset)) { // Don't map empty CSV values
                 continue;
             }
+
             try {
                 csvMapping.apply(instance, csv[csvNamedIndex + offset]);
             } catch (Exception exception) {
-                throw new Exception("Error mapping at index " + csvNamedIndex + " with offset " + offset +
-                        " with index name " + csvIndexOfIndexName.getKey(), exception);
+                throw new CSVMappingException(
+                        String.format("Error mapping at index %d with offset %d with index name %s",
+                                csvNamedIndex, offset, csvIndexOfIndexName.getKey()), exception);
             }
         }
 

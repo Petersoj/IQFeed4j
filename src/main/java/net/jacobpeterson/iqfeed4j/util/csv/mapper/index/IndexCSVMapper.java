@@ -1,6 +1,7 @@
 package net.jacobpeterson.iqfeed4j.util.csv.mapper.index;
 
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapping;
+import net.jacobpeterson.iqfeed4j.util.csv.mapper.exception.CSVMappingException;
 
 import java.util.HashMap;
 import java.util.concurrent.Callable;
@@ -113,8 +114,13 @@ public class IndexCSVMapper<T> extends AbstractIndexCSVMapper<T> {
      * Note this will map with the mappings added via {@link #setMapping(int, BiConsumer, Function)}.
      */
     @Override
-    public T map(String[] csv, int offset) throws Exception {
-        T instance = pojoInstantiator.call();
+    public T map(String[] csv, int offset) {
+        T instance;
+        try {
+            instance = pojoInstantiator.call();
+        } catch (Exception exception) {
+            throw new CSVMappingException("Could not instantiate POJO!", exception);
+        }
 
         // Loop through all added 'CSVMappings' and apply them
         for (int csvIndex : csvMappingsOfCSVIndices.keySet()) {
@@ -126,7 +132,7 @@ public class IndexCSVMapper<T> extends AbstractIndexCSVMapper<T> {
             try {
                 csvMappingsOfCSVIndices.get(csvIndex).apply(instance, csv[csvIndex + offset]);
             } catch (Exception exception) {
-                throw new Exception("Error mapping at index " + csvIndex + " with offset " + offset, exception);
+                throw new CSVMappingException(csvIndex, offset, exception);
             }
         }
 

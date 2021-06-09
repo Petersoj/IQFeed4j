@@ -1,4 +1,4 @@
-package net.jacobpeterson.iqfeed4j;
+package net.jacobpeterson.iqfeed4j.api;
 
 import net.jacobpeterson.iqfeed4j.feed.lookup.AbstractLookupFeed;
 import net.jacobpeterson.iqfeed4j.feed.lookup.historical.HistoricalFeed;

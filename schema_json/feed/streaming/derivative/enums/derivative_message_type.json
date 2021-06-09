@@ -6,8 +6,7 @@
   ],
   "javaEnums": [
     {
-      "name": "SYMBOL_NOT_WATCHED",
-      "title": "Symbol was not found or the user not authorized."
+      "name": "SYMBOL_NOT_WATCHED"
     }
   ]
 }

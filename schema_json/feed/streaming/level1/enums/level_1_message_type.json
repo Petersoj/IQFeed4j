@@ -12,32 +12,25 @@
   ],
   "javaEnums": [
     {
-      "name": "FUNDAMENTAL_MESSAGE",
-      "title": "A fundamental message."
+      "name": "FUNDAMENTAL_MESSAGE"
     },
     {
-      "name": "SUMMARY_MESSAGE",
-      "title": "A summary message."
+      "name": "SUMMARY_MESSAGE"
     },
     {
-      "name": "UPDATE_MESSAGE",
-      "title": "An update message."
+      "name": "UPDATE_MESSAGE"
     },
     {
-      "name": "REGIONAL_UPDATE",
-      "title": "A regional update."
+      "name": "REGIONAL_UPDATE"
     },
     {
-      "name": "NEWS_HEADLINE_MESSAGE",
-      "title": "A news headline message."
+      "name": "NEWS_HEADLINE_MESSAGE"
     },
     {
-      "name": "TIMESTAMP_MESSAGE",
-      "title": "A timestamp message."
+      "name": "TIMESTAMP_MESSAGE"
     },
     {
-      "name": "SYMBOL_NOT_WATCHED",
-      "title": "Symbol was not found or the user not authorized."
+      "name": "SYMBOL_NOT_WATCHED"
     }
   ]
 }

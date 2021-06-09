@@ -2,6 +2,7 @@ package net.jacobpeterson.iqfeed4j.util.csv.mapper.list;
 
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapping;
+import net.jacobpeterson.iqfeed4j.util.csv.mapper.exception.CSVMappingException;
 
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -30,7 +31,7 @@ public abstract class AbstractListCSVMapper<T> extends AbstractCSVMapper<T> {
      *
      * @return a new {@link List} of mapped POJOs
      *
-     * @throws Exception thrown for a variety of {@link Exception}s
+     * @throws CSVMappingException thrown for {@link CSVMappingException}s
      */
-    public abstract List<T> mapToList(String[] csv, int offset) throws Exception;
+    public abstract List<T> mapToList(String[] csv, int offset);
 }

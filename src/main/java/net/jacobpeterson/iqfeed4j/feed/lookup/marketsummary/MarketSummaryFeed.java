@@ -1,16 +1,17 @@
 package net.jacobpeterson.iqfeed4j.feed.lookup.marketsummary;
 
+import net.jacobpeterson.iqfeed4j.feed.exception.IQFeedRuntimeException;
+import net.jacobpeterson.iqfeed4j.feed.exception.NoDataException;
+import net.jacobpeterson.iqfeed4j.feed.exception.SyntaxException;
 import net.jacobpeterson.iqfeed4j.feed.lookup.AbstractLookupFeed;
 import net.jacobpeterson.iqfeed4j.feed.lookup.symbolmarketinfo.SymbolMarketInfoFeed;
 import net.jacobpeterson.iqfeed4j.feed.message.MultiMessageListener;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.marketsummary.EndOfDaySnapshot;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.marketsummary.FiveMinuteSnapshot;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.marketsummary.FundamentalSnapshot;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.marketsummary.enums.MarketSummaryCommand;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.DateTimeFormatters;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.map.NamedCSVMapper;
-import net.jacobpeterson.iqfeed4j.feed.exception.IQFeedException;
-import net.jacobpeterson.iqfeed4j.feed.exception.NoDataException;
-import net.jacobpeterson.iqfeed4j.feed.exception.SyntaxException;
 import net.jacobpeterson.iqfeed4j.util.string.LineEnding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -245,7 +246,7 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
             } else if (requestIDFeedHelper.isRequestSyntaxError(csv)) {
                 listener.onMessageException(new SyntaxException());
             } else {
-                listener.onMessageException(new IQFeedException(
+                listener.onMessageException(new IQFeedRuntimeException(
                         valuePresent(csv, 2) ?
                                 String.join(",", Arrays.copyOfRange(csv, 2, csv.length)) :
                                 "Error message not present."));
@@ -292,8 +293,8 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
     //
 
     /**
-     * Retrieves {@link EndOfDaySnapshot}s for all symbols in a Security Type and Exchange Group. This sends an EDS
-     * request. This method is thread-safe.
+     * Retrieves {@link EndOfDaySnapshot}s for all symbols in a Security Type and Exchange Group. This sends a {@link
+     * MarketSummaryCommand#END_OF_DAY_SUMMARY} request.
      *
      * @param securityType             a number representing the desired security type. (Futures, equities, spots,
      *                                 etc... Values can be found using
@@ -314,7 +315,7 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
-        requestBuilder.append("EDS").append(",");
+        requestBuilder.append(MarketSummaryCommand.END_OF_DAY_SUMMARY.value()).append(",");
         requestBuilder.append(securityType).append(",");
         requestBuilder.append(groupID).append(",");
         requestBuilder.append(date.format(DateTimeFormatters.DATE)).append(",");
@@ -329,8 +330,8 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Retrieves {@link FundamentalSnapshot}s for all symbols in a Security Type and Exchange Group. This sends an FDS
-     * request. This method is thread-safe.
+     * Retrieves {@link FundamentalSnapshot}s for all symbols in a Security Type and Exchange Group. This sends a {@link
+     * MarketSummaryCommand#FUNDAMENTAL_SUMMARY} request.
      *
      * @param securityType                a number representing the desired security type. (Futures, equities, spots,
      *                                    etc... Values can be found using
@@ -352,7 +353,7 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
-        requestBuilder.append("FDS").append(",");
+        requestBuilder.append(MarketSummaryCommand.FUNDAMENTAL_SUMMARY.value()).append(",");
         requestBuilder.append(securityType).append(",");
         requestBuilder.append(groupID).append(",");
         requestBuilder.append(date.format(DateTimeFormatters.DATE)).append(",");
@@ -368,8 +369,8 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
 
     /**
      * Retrieves a snapshot of the current market data for all symbols in a Security Type and Exchange Group. NOTE: The
-     * timing of the snapshot is not guaranteed, but data will be gathered every 5 minutes. This sends an 5MS request.
-     * This method is thread-safe.
+     * timing of the snapshot is not guaranteed, but data will be gathered every 5 minutes. This sends a {@link
+     * MarketSummaryCommand#FIVE_MINUTE_SNAPSHOT} request.
      *
      * @param securityType               a number representing the desired security type. (Futures, equities, spots,
      *                                   etc... Values can be found using
@@ -388,7 +389,7 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
-        requestBuilder.append("5MS").append(",");
+        requestBuilder.append(MarketSummaryCommand.FIVE_MINUTE_SNAPSHOT.value()).append(",");
         requestBuilder.append(securityType).append(",");
         requestBuilder.append(groupID).append(",");
         requestBuilder.append(requestID);

@@ -1,22 +1,17 @@
 package net.jacobpeterson.iqfeed4j.feed.lookup.optionschains;
 
 import com.google.common.base.Splitter;
+import net.jacobpeterson.iqfeed4j.feed.exception.IQFeedRuntimeException;
+import net.jacobpeterson.iqfeed4j.feed.exception.NoDataException;
+import net.jacobpeterson.iqfeed4j.feed.exception.SyntaxException;
 import net.jacobpeterson.iqfeed4j.feed.lookup.AbstractLookupFeed;
 import net.jacobpeterson.iqfeed4j.feed.message.SingleMessageFuture;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.FutureContract;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.FutureSpread;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.OptionContract;
-import net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.enums.EquityOptionMonth;
-import net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.enums.FutureMonth;
-import net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.enums.NonStandardOptionTypes;
-import net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.enums.OptionFilterType;
-import net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.enums.OptionType;
-import net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.enums.PutsCallsOption;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.optionchains.enums.*;
 import net.jacobpeterson.iqfeed4j.util.chars.CharUtil;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.list.ListCSVMapper;
-import net.jacobpeterson.iqfeed4j.feed.exception.IQFeedException;
-import net.jacobpeterson.iqfeed4j.feed.exception.NoDataException;
-import net.jacobpeterson.iqfeed4j.feed.exception.SyntaxException;
 import net.jacobpeterson.iqfeed4j.util.string.LineEnding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,11 +19,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.Month;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -410,7 +401,7 @@ public class OptionChainsFeed extends AbstractLookupFeed {
             } else if (requestIDFeedHelper.isRequestSyntaxError(csv)) {
                 future.completeExceptionally(new SyntaxException());
             } else {
-                future.completeExceptionally(new IQFeedException(
+                future.completeExceptionally(new IQFeedRuntimeException(
                         valuePresent(csv, 2) ?
                                 String.join(",", Arrays.copyOfRange(csv, 2, csv.length)) :
                                 "Error message not present."));
@@ -435,7 +426,7 @@ public class OptionChainsFeed extends AbstractLookupFeed {
     //
 
     /**
-     * Gets a {@link FutureContract} chain. This sends an CFU request. This method is thread-safe.
+     * Gets a {@link FutureContract} chain. This sends a {@link OptionChainsCommand#FUTURE_CHAIN} request.
      *
      * @param symbol     the symbol. Max Length 30 characters.
      * @param months     the {@link FutureMonth}s of the chain
@@ -456,7 +447,7 @@ public class OptionChainsFeed extends AbstractLookupFeed {
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
-        requestBuilder.append("CFU").append(",");
+        requestBuilder.append(OptionChainsCommand.FUTURE_CHAIN.value()).append(",");
         requestBuilder.append(symbol).append(",");
 
         if (months != null) {
@@ -492,7 +483,7 @@ public class OptionChainsFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Gets a {@link FutureSpread} chain. This sends an CFS request. This method is thread-safe.
+     * Gets a {@link FutureSpread} chain. This sends a {@link OptionChainsCommand#FUTURE_SPREAD_CHAIN} request.
      *
      * @param symbol     the symbol. Max Length 30 characters.
      * @param months     the {@link FutureMonth}s of the chain
@@ -513,7 +504,7 @@ public class OptionChainsFeed extends AbstractLookupFeed {
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
-        requestBuilder.append("CFS").append(",");
+        requestBuilder.append(OptionChainsCommand.FUTURE_SPREAD_CHAIN.value()).append(",");
         requestBuilder.append(symbol).append(",");
 
         if (months != null) {
@@ -549,7 +540,8 @@ public class OptionChainsFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Gets a Future {@link OptionContract} chain. This sends an CFO request. This method is thread-safe.
+     * Gets a Future {@link OptionContract} chain. This sends a {@link OptionChainsCommand#FUTURE_OPTION_CHAIN}
+     * request.
      *
      * @param symbol          the symbol. Max Length 30 characters.
      * @param putsCallsOption the {@link PutsCallsOption}
@@ -573,7 +565,7 @@ public class OptionChainsFeed extends AbstractLookupFeed {
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
-        requestBuilder.append("CFO").append(",");
+        requestBuilder.append(OptionChainsCommand.FUTURE_OPTION_CHAIN.value()).append(",");
         requestBuilder.append(symbol).append(",");
         requestBuilder.append(putsCallsOption.value()).append(",");
 
@@ -610,7 +602,8 @@ public class OptionChainsFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Gets an Equity {@link OptionContract} chain. This sends an CEO request. This method is thread-safe.
+     * Gets an Equity {@link OptionContract} chain. This sends a {@link OptionChainsCommand#EQUITY_OPTION_CHAIN}
+     * request.
      *
      * @param symbol                 the symbol. Max Length 30 characters.
      * @param putsCallsOption        the {@link PutsCallsOption}
@@ -630,8 +623,8 @@ public class OptionChainsFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Gets an Equity {@link OptionContract} chain using a Strike price filter. This sends an CEO request. This method
-     * is thread-safe.
+     * Gets an Equity {@link OptionContract} chain using a Strike price filter. This sends a {@link
+     * OptionChainsCommand#EQUITY_OPTION_CHAIN} request.
      *
      * @param symbol                 the symbol. Max Length 30 characters.
      * @param putsCallsOption        the {@link PutsCallsOption}
@@ -656,7 +649,7 @@ public class OptionChainsFeed extends AbstractLookupFeed {
 
     /**
      * Gets an Equity {@link OptionContract} chain using the number of contracts In-The-Money or Out-Of-The-Money as a
-     * filter. This sends an CEO request. This method is thread-safe.
+     * filter. This sends a {@link OptionChainsCommand#EQUITY_OPTION_CHAIN} request.
      *
      * @param symbol                 the symbol. Max Length 30 characters.
      * @param putsCallsOption        the {@link PutsCallsOption}
@@ -679,7 +672,8 @@ public class OptionChainsFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Gets an Equity {@link OptionContract} chain. This sends an CEO request. This method is thread-safe.
+     * Gets an Equity {@link OptionContract} chain. This sends a {@link OptionChainsCommand#EQUITY_OPTION_CHAIN}
+     * request.
      *
      * @param symbol                 the symbol. Max Length 30 characters.
      * @param putsCallsOption        the {@link PutsCallsOption}
@@ -710,7 +704,7 @@ public class OptionChainsFeed extends AbstractLookupFeed {
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
-        requestBuilder.append("CEO").append(",");
+        requestBuilder.append(OptionChainsCommand.EQUITY_OPTION_CHAIN.value()).append(",");
         requestBuilder.append(symbol).append(",");
         requestBuilder.append(putsCallsOption.value()).append(",");
 

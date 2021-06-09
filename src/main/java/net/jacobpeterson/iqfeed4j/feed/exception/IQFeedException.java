@@ -1,9 +1,10 @@
 package net.jacobpeterson.iqfeed4j.feed.exception;
 
 /**
- * {@link IQFeedException} represents IQFeed {@link RuntimeException}s.
+ * {@link IQFeedException} represents IQFeed {@link Exception}s resembling a recoverable error due to an issue outside
+ * the control of this program.
  */
-public class IQFeedException extends RuntimeException {
+public class IQFeedException extends Exception {
 
     /**
      * Instantiates a new {@link IQFeedException}.
@@ -27,5 +28,14 @@ public class IQFeedException extends RuntimeException {
      */
     public IQFeedException(String message, Throwable cause) {
         super(message, cause);
+    }
+
+    /**
+     * Instantiates a new {@link IQFeedException}
+     *
+     * @param cause the cause
+     */
+    public IQFeedException(Throwable cause) {
+        super(cause);
     }
 }

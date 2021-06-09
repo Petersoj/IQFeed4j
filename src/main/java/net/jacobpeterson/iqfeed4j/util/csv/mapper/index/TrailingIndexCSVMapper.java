@@ -1,6 +1,7 @@
 package net.jacobpeterson.iqfeed4j.util.csv.mapper.index;
 
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapping;
+import net.jacobpeterson.iqfeed4j.util.csv.mapper.exception.CSVMappingException;
 
 import java.util.HashMap;
 import java.util.concurrent.Callable;
@@ -13,8 +14,8 @@ import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueNotWhitespace;
 /**
  * {@inheritDoc}
  * <br>
- * {@link TrailingIndexCSVMapper} mappings are based off of predefined CSV indices, but with the ability to add a CSV mapping
- * that accumulates all CSV values after a certain index into one mapping.
+ * {@link TrailingIndexCSVMapper} mappings are based off of predefined CSV indices, but with the ability to add a CSV
+ * mapping that accumulates all CSV values after a certain index into one mapping.
  */
 public class TrailingIndexCSVMapper<T> extends AbstractIndexCSVMapper<T> {
 
@@ -88,8 +89,13 @@ public class TrailingIndexCSVMapper<T> extends AbstractIndexCSVMapper<T> {
      * #setTrailingMapping(BiConsumer, Function)}.
      */
     @Override
-    public T map(String[] csv, int offset) throws Exception {
-        T instance = pojoInstantiator.call();
+    public T map(String[] csv, int offset) {
+        T instance;
+        try {
+            instance = pojoInstantiator.call();
+        } catch (Exception exception) {
+            throw new CSVMappingException("Could not instantiate POJO!", exception);
+        }
 
         // Loop through all added 'CSVMapping's and apply them
         for (int csvIndex : csvMappingsOfCSVIndices.keySet()) {
@@ -101,7 +107,7 @@ public class TrailingIndexCSVMapper<T> extends AbstractIndexCSVMapper<T> {
             try {
                 csvMappingsOfCSVIndices.get(csvIndex).apply(instance, csv[csvIndex + offset]);
             } catch (Exception exception) {
-                throw new Exception("Error mapping at index " + csvIndex + " with offset " + offset, exception);
+                throw new CSVMappingException(csvIndex, offset, exception);
             }
         }
 
@@ -122,8 +128,7 @@ public class TrailingIndexCSVMapper<T> extends AbstractIndexCSVMapper<T> {
                 try {
                     trailingCSVMapping.apply(instance, trailingCSVString);
                 } catch (Exception exception) {
-                    throw new Exception("Error mapping trailing CSV values at index " +
-                            trailingCSVIndex + " with offset " + offset, exception);
+                    throw new CSVMappingException(trailingCSVIndex, offset, exception);
                 }
             }
         }

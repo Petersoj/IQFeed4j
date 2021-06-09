@@ -1,0 +1,24 @@
+{
+  "type": "string",
+  "title": "Enums for News feed commands. See <a href=\"https://www.iqfeed.net/dev/api/docs//NewsLookupviaTCPIP.cfm\">News Lookup via TCP/IP</a>",
+  "enum": [
+    "NCG",
+    "NHL",
+    "NSY",
+    "NSC"
+  ],
+  "javaEnums": [
+    {
+      "name": "NEWS_CONFIGURATION"
+    },
+    {
+      "name": "NEWS_HEADLINE"
+    },
+    {
+      "name": "NEWS_STORY"
+    },
+    {
+      "name": "NEWS_STORY_COUNT"
+    }
+  ]
+}

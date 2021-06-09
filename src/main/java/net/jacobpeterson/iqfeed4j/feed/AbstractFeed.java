@@ -8,7 +8,11 @@ import net.jacobpeterson.iqfeed4j.util.string.LineEnding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
@@ -84,9 +88,10 @@ public abstract class AbstractFeed implements Runnable {
      * Starts this feed connection (starts a new socket, new thread, and send protocol message). This method is
      * synchronized with {@link #stop()}.
      *
-     * @throws Exception thrown for {@link Exception}s
+     * @throws InterruptedException thrown for {@link InterruptedException}s
+     * @throws IOException          thrown for {@link IOException}s
      */
-    public void start() throws Exception {
+    public void start() throws InterruptedException, IOException {
         synchronized (startStopLock) {
             if (socketThread != null && socketThread.isAlive()) {
                 if (isFeedSocketOpen()) {
@@ -135,9 +140,10 @@ public abstract class AbstractFeed implements Runnable {
      * Stop this feed connection (close socket and interrupt thread). This method is synchronized with {@link
      * #start()}.
      *
-     * @throws Exception thrown for {@link Exception}s
+     * @throws InterruptedException thrown for {@link InterruptedException}s
+     * @throws IOException          thrown for {@link IOException}s
      */
-    public void stop() throws Exception {
+    public void stop() throws InterruptedException, IOException {
         synchronized (startStopLock) {
             closeSocket();
             interruptAndJoinThread();

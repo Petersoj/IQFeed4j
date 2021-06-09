@@ -7,6 +7,7 @@ import net.jacobpeterson.iqfeed4j.model.feed.lookup.historical.DatedInterval;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.historical.Interval;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.historical.Tick;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.historical.enums.DataDirection;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.historical.enums.HistoricalCommand;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.historical.enums.PartialDatapoint;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.historical.enums.TimeLabelPlacement;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.DateTimeFormatters;
@@ -143,8 +144,8 @@ public class HistoricalFeed extends AbstractLookupFeed {
     //
 
     /**
-     * Retrieves up to 'maxDataPoints' number of {@link Tick}s for the specified 'symbol'. This sends an HTX request.
-     * This method is thread-safe.
+     * Retrieves up to 'maxDataPoints' number of {@link Tick}s for the specified 'symbol'. This sends a {@link
+     * HistoricalCommand#HISTORICAL_TICKS_DATAPOINTS} request.
      *
      * @param symbol        the symbol. Max length of 30 characters.
      * @param maxDataPoints the maximum number of datapoints to be retrieved
@@ -161,7 +162,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
-        requestBuilder.append("HTX").append(",");
+        requestBuilder.append(HistoricalCommand.HISTORICAL_TICKS_DATAPOINTS.value()).append(",");
         requestBuilder.append(symbol).append(",");
         requestBuilder.append(maxDataPoints).append(",");
 
@@ -182,8 +183,8 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Retrieves {@link Tick}s for the previous 'maxDays' days for the specified 'symbol'. This sends an HTD request.
-     * This method is thread-safe.
+     * Retrieves {@link Tick}s for the previous 'maxDays' days for the specified 'symbol'. This sends a {@link
+     * HistoricalCommand#HISTORICAL_TICKS_DAYS} request.
      *
      * @param symbol          the symbol. Max length of 30 characters.
      * @param maxDays         the max days
@@ -206,7 +207,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
-        requestBuilder.append("HTD").append(",");
+        requestBuilder.append(HistoricalCommand.HISTORICAL_TICKS_DAYS.value()).append(",");
         requestBuilder.append(symbol).append(",");
         requestBuilder.append(maxDays).append(",");
 
@@ -242,8 +243,8 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Retrieves {@link Tick} data between 'beginDateTime' and 'endDateTime' for the specified 'symbol. This sends an
-     * HTT request. This method is thread-safe.
+     * Retrieves {@link Tick} data between 'beginDateTime' and 'endDateTime' for the specified 'symbol. This sends a
+     * {@link HistoricalCommand#HISTORICAL_TICKS_DATETIMES} request.
      *
      * @param symbol          the symbol. Max length of 30 characters.
      * @param beginDateTime   earliest date/time (Eastern) to receive data for.
@@ -268,7 +269,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
-        requestBuilder.append("HTT").append(",");
+        requestBuilder.append(HistoricalCommand.HISTORICAL_TICKS_DATETIMES.value()).append(",");
         requestBuilder.append(symbol).append(",");
 
         if (beginDateTime != null) {
@@ -313,8 +314,8 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Retrieves up to 'maxDataPoints' number of {@link Interval}s for the specified 'symbol'. This sends an HIX
-     * request. This method is thread-safe.
+     * Retrieves up to 'maxDataPoints' number of {@link Interval}s for the specified 'symbol'. This sends a {@link
+     * HistoricalCommand#HISTORICAL_INTERVAL_DATAPOINTS} request.
      *
      * @param symbol            the symbol. Max length of 30 characters.
      * @param intervalLength    the interval length
@@ -334,7 +335,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
-        requestBuilder.append("HIX").append(",");
+        requestBuilder.append(HistoricalCommand.HISTORICAL_INTERVAL_DATAPOINTS.value()).append(",");
         requestBuilder.append(symbol).append(",");
         requestBuilder.append(intervalLength).append(",");
         requestBuilder.append(maxDataPoints).append(",");
@@ -363,8 +364,8 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Retrieves {@link Interval}s for 'maxDays' days for the specified 'symbol'. This sends an HID request. This method
-     * is thread-safe.
+     * Retrieves {@link Interval}s for 'maxDays' days for the specified 'symbol'. This sends a {@link
+     * HistoricalCommand#HISTORICAL_INTERVAL_DAYS} request.
      *
      * @param symbol            the symbol. Max length of 30 characters.
      * @param intervalLength    the interval length
@@ -389,7 +390,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
-        requestBuilder.append("HID").append(",");
+        requestBuilder.append(HistoricalCommand.HISTORICAL_INTERVAL_DAYS.value()).append(",");
         requestBuilder.append(symbol).append(",");
         requestBuilder.append(intervalLength).append(",");
         requestBuilder.append(maxDays).append(",");
@@ -433,8 +434,8 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Retrieves {@link Interval} data between 'beginDateTime' and 'endDateTime' for the specified 'symbol. This sends
-     * an HIT request. This method is thread-safe.
+     * Retrieves {@link Interval} data between 'beginDateTime' and 'endDateTime' for the specified 'symbol. This sends a
+     * {@link HistoricalCommand#HISTORICAL_INTERVAL_DATETIMES} request.
      *
      * @param symbol            the symbol. Max length of 30 characters.
      * @param intervalLength    the interval length
@@ -462,7 +463,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
-        requestBuilder.append("HIT").append(",");
+        requestBuilder.append(HistoricalCommand.HISTORICAL_INTERVAL_DATETIMES.value()).append(",");
         requestBuilder.append(symbol).append(",");
         requestBuilder.append(intervalLength).append(",");
 
@@ -515,8 +516,8 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Retrieves up to 'maxDays' days of End-Of-Day {@link DatedInterval} for the specified 'symbol'. This sends an HDX
-     * request. This method is thread-safe.
+     * Retrieves up to 'maxDays' days of End-Of-Day {@link DatedInterval} for the specified 'symbol'. This sends a
+     * {@link HistoricalCommand#HISTORICAL_DAILY_DATAPOINTS} request.
      *
      * @param symbol                 the symbol. Max length of 30 characters.
      * @param maxDays                the max days
@@ -537,7 +538,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
-        requestBuilder.append("HDX").append(",");
+        requestBuilder.append(HistoricalCommand.HISTORICAL_DAILY_DATAPOINTS.value()).append(",");
         requestBuilder.append(symbol).append(",");
         requestBuilder.append(maxDays).append(",");
 
@@ -563,8 +564,8 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Retrieves Daily {@link DatedInterval}s between 'beginDate' and 'endDate' for the specified 'symbol'. This sends
-     * an HDT request. This method is thread-safe.
+     * Retrieves Daily {@link DatedInterval}s between 'beginDate' and 'endDate' for the specified 'symbol'. This sends a
+     * {@link HistoricalCommand#HISTORICAL_DAILY_DATES} request.
      *
      * @param symbol                 the symbol. Max length of 30 characters.
      * @param beginDate              earliest date (Eastern) to receive data for.
@@ -588,7 +589,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
-        requestBuilder.append("HDT").append(",");
+        requestBuilder.append(HistoricalCommand.HISTORICAL_DAILY_DATES.value()).append(",");
         requestBuilder.append(symbol).append(",");
 
         if (beginDate != null) {
@@ -628,8 +629,8 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Retrieves up to 'maxWeeks' if composite weekly {@link DatedInterval} for the specified 'symbol'. This sends an
-     * HWX request. This method is thread-safe.
+     * Retrieves up to 'maxWeeks' if composite weekly {@link DatedInterval} for the specified 'symbol'. This sends a
+     * {@link HistoricalCommand#HISTORICAL_WEEKLY_DATAPOINTS} request.
      *
      * @param symbol                 the symbol. Max length of 30 characters.
      * @param maxWeeks               the max weeks
@@ -650,7 +651,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
-        requestBuilder.append("HWX").append(",");
+        requestBuilder.append(HistoricalCommand.HISTORICAL_WEEKLY_DATAPOINTS.value()).append(",");
         requestBuilder.append(symbol).append(",");
         requestBuilder.append(maxWeeks).append(",");
 
@@ -676,8 +677,8 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Retrieves up to 'maxMonths' if composite monthly {@link DatedInterval} for the specified 'symbol'. This sends an
-     * HMX request. This method is thread-safe.
+     * Retrieves up to 'maxMonths' if composite monthly {@link DatedInterval} for the specified 'symbol'. This sends a
+     * {@link HistoricalCommand#HISTORICAL_MONTHLY_DATAPOINTS} request.
      *
      * @param symbol                 the symbol. Max length of 30 characters.
      * @param maxMonths              the max months
@@ -698,7 +699,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
-        requestBuilder.append("HMX").append(",");
+        requestBuilder.append(HistoricalCommand.HISTORICAL_MONTHLY_DATAPOINTS.value()).append(",");
         requestBuilder.append(symbol).append(",");
         requestBuilder.append(maxMonths).append(",");
 

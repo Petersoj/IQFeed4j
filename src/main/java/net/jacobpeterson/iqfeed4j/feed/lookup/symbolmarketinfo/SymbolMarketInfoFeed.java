@@ -2,15 +2,11 @@ package net.jacobpeterson.iqfeed4j.feed.lookup.symbolmarketinfo;
 
 import net.jacobpeterson.iqfeed4j.feed.lookup.AbstractLookupFeed;
 import net.jacobpeterson.iqfeed4j.feed.message.MultiMessageListener;
-import net.jacobpeterson.iqfeed4j.model.feed.lookup.symbolmarketinfo.ListedMarket;
-import net.jacobpeterson.iqfeed4j.model.feed.lookup.symbolmarketinfo.NIACCode;
-import net.jacobpeterson.iqfeed4j.model.feed.lookup.symbolmarketinfo.SICCode;
-import net.jacobpeterson.iqfeed4j.model.feed.lookup.symbolmarketinfo.SecurityType;
-import net.jacobpeterson.iqfeed4j.model.feed.lookup.symbolmarketinfo.SymbolSearchResult;
-import net.jacobpeterson.iqfeed4j.model.feed.lookup.symbolmarketinfo.TradeCondition;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.symbolmarketinfo.*;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.symbolmarketinfo.enums.SearchCodeType;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.symbolmarketinfo.enums.SearchField;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.symbolmarketinfo.enums.SymbolFilterType;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.symbolmarketinfo.enums.SymbolMarketInfoCommand;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.index.IndexCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.index.TrailingIndexCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.string.LineEnding;
@@ -175,7 +171,7 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
 
     /**
      * A symbol search by symbol or description. Can be filtered by providing a list of Listed Markets or Security
-     * Types. This sends an SBF request. This method is thread-safe.
+     * Types. This sends a {@link SymbolMarketInfoCommand#SYMBOLS_BY_FILTER} request.
      *
      * @param searchField                the {@link SearchField}
      * @param searchString               the string to search for
@@ -197,7 +193,7 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
-        requestBuilder.append("SBF").append(",");
+        requestBuilder.append(SymbolMarketInfoCommand.SYMBOLS_BY_FILTER.value()).append(",");
         requestBuilder.append(searchField.value()).append(",");
         requestBuilder.append(searchString).append(",");
         requestBuilder.append(symbolFilterType.value()).append(",");
@@ -215,7 +211,8 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
 
     /**
      * Searches for a list of symbols existing within a specific {@link SearchCodeType} or group of {@link
-     * SearchCodeType} codes. This sends an SBS or SBN request. This method is thread-safe.
+     * SearchCodeType} codes. This sends a {@link SymbolMarketInfoCommand#SYMBOLS_BY_SIC_CODE} or {@link
+     * SymbolMarketInfoCommand#SYMBOLS_BY_NIAC_CODE} request.
      *
      * @param searchCodeType             the {@link SearchCodeType}
      * @param searchString               at least the first 2 digits of an existing {@link SearchCodeType}.
@@ -277,58 +274,70 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Request a list of {@link ListedMarket}s from the feed. This sends an SLM request. This method is thread-safe.
+     * Request a list of {@link ListedMarket}s from the feed. This sends a
+     * {@link SymbolMarketInfoCommand#LISTED_MARKETS}
+     * request.
      *
      * @param listedMarketListener the {@link MultiMessageListener} for the requested {@link ListedMarket}s
      *
      * @throws IOException thrown for {@link IOException}s
      */
     public void requestListedMarkets(MultiMessageListener<ListedMarket> listedMarketListener) throws IOException {
-        requestGenericMultiMessage("SLM", listedMarketListenersOfRequestIDs, listedMarketListener);
+        requestGenericMultiMessage(SymbolMarketInfoCommand.LISTED_MARKETS.value(), listedMarketListenersOfRequestIDs,
+                listedMarketListener);
     }
 
     /**
-     * Request a list of {@link SecurityType}s from the feed. This sends an SST request. This method is thread-safe.
+     * Request a list of {@link SecurityType}s from the feed. This sends a
+     * {@link SymbolMarketInfoCommand#SECURITY_TYPES}
+     * request.
      *
      * @param securityTypeListener the {@link MultiMessageListener} for the requested {@link SecurityType}s
      *
      * @throws IOException thrown for {@link IOException}s
      */
     public void requestSecurityTypes(MultiMessageListener<SecurityType> securityTypeListener) throws IOException {
-        requestGenericMultiMessage("SST", securityTypeListenersOfRequestIDs, securityTypeListener);
+        requestGenericMultiMessage(SymbolMarketInfoCommand.SECURITY_TYPES.value(), securityTypeListenersOfRequestIDs,
+                securityTypeListener);
     }
 
     /**
-     * Request a list of {@link TradeCondition}s from the feed. This sends an STC request. This method is thread-safe.
+     * Request a list of {@link TradeCondition}s from the feed. This sends a {@link
+     * SymbolMarketInfoCommand#TRADE_CONDITIONS} request.
      *
      * @param tradeConditionListener the {@link MultiMessageListener} for the requested {@link TradeCondition}s
      *
      * @throws IOException thrown for {@link IOException}s
      */
     public void requestTradeConditions(MultiMessageListener<TradeCondition> tradeConditionListener) throws IOException {
-        requestGenericMultiMessage("STC", tradeConditionListenersOfRequestIDs, tradeConditionListener);
+        requestGenericMultiMessage(SymbolMarketInfoCommand.TRADE_CONDITIONS.value(),
+                tradeConditionListenersOfRequestIDs, tradeConditionListener);
     }
 
     /**
-     * Request a list of {@link SICCode}s from the feed. This sends an SSC request. This method is thread-safe.
+     * Request a list of {@link SICCode}s from the feed. This sends a {@link SymbolMarketInfoCommand#SIC_CODES}
+     * request.
      *
      * @param sicCodeListener the {@link MultiMessageListener} for the requested {@link SICCode}s
      *
      * @throws IOException thrown for {@link IOException}s
      */
     public void requestSICCodes(MultiMessageListener<SICCode> sicCodeListener) throws IOException {
-        requestGenericMultiMessage("SSC", sicCodeListenersOfRequestIDs, sicCodeListener);
+        requestGenericMultiMessage(SymbolMarketInfoCommand.SIC_CODES.value(), sicCodeListenersOfRequestIDs,
+                sicCodeListener);
     }
 
     /**
-     * Request a list of {@link NIACCode}s from the feed. This sends an SNC request. This method is thread-safe.
+     * Request a list of {@link NIACCode}s from the feed. This sends a {@link SymbolMarketInfoCommand#NIAC_CODES}
+     * request.
      *
      * @param niacCodeListener the {@link MultiMessageListener} for the requested {@link NIACCode}s
      *
      * @throws IOException thrown for {@link IOException}s
      */
     public void requestNIACCodeCodes(MultiMessageListener<NIACCode> niacCodeListener) throws IOException {
-        requestGenericMultiMessage("SNC", niacCodeListenersOfRequestIDs, niacCodeListener);
+        requestGenericMultiMessage(SymbolMarketInfoCommand.NIAC_CODES.value(), niacCodeListenersOfRequestIDs,
+                niacCodeListener);
     }
 
     //

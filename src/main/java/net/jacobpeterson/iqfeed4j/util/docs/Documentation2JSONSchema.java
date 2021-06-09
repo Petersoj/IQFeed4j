@@ -2,13 +2,17 @@ package net.jacobpeterson.iqfeed4j.util.docs;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 /**
  * {@link Documentation2JSONSchema} is not meant for regular runtime use. It's used to generate jsonschema2POJO schema
@@ -48,10 +52,13 @@ public final class Documentation2JSONSchema {
      *
      * @return the schema from the doc
      *
-     * @throws Exception thrown for various {@link Exception}s
+     * @throws ParserConfigurationException thrown for {@link ParserConfigurationException}s
+     * @throws XPathExpressionException     thrown for {@link XPathExpressionException}s
+     * @throws IOException                  thrown for {@link IOException}s
+     * @throws SAXException                 thrown for {@link SAXException}s
      */
     private static String getSchemaFromDoc(String docHTML, String nameXPath, String typeXPath, String descriptionXPath)
-            throws Exception {
+            throws ParserConfigurationException, XPathExpressionException, IOException, SAXException {
         StringBuilder schemaJSON = new StringBuilder();
         DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         Document document = builder.parse(new ByteArrayInputStream(docHTML.getBytes()));

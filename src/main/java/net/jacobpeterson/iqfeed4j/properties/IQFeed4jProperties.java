@@ -1,5 +1,6 @@
 package net.jacobpeterson.iqfeed4j.properties;
 
+import net.jacobpeterson.iqfeed4j.api.IQFeed4j;
 import net.jacobpeterson.iqfeed4j.util.reflection.ReflectionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,7 +10,7 @@ import java.util.stream.Collectors;
 import static net.jacobpeterson.iqfeed4j.util.properties.PropertyUtil.getProperty;
 
 /**
- * {@link IQFeed4jProperties} defines properties for {@link net.jacobpeterson.iqfeed4j.IQFeed4j}.
+ * {@link IQFeed4jProperties} defines properties for {@link IQFeed4j}.
  */
 public class IQFeed4jProperties {
 

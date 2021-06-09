@@ -1,5 +1,7 @@
 package net.jacobpeterson.iqfeed4j.util.csv.mapper.list;
 
+import net.jacobpeterson.iqfeed4j.util.csv.mapper.exception.CSVMappingException;
+
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.function.BiConsumer;
@@ -44,8 +46,13 @@ public class ListCSVMapper<T> extends AbstractListCSVMapper<T> {
      * Note: this will map to a list of POJOs with the {@link #csvValueConsumer} applied.
      */
     @Override
-    public List<T> mapToList(String[] csv, int offset) throws Exception {
-        List<T> mappedList = listInstantiator.call();
+    public List<T> mapToList(String[] csv, int offset) {
+        List<T> mappedList;
+        try {
+            mappedList = listInstantiator.call();
+        } catch (Exception exception) {
+            throw new CSVMappingException("Could not instantiate List!", exception);
+        }
 
         for (int csvIndex = offset; csvIndex < csv.length; csvIndex++) {
             if (!valueNotWhitespace(csv, csvIndex)) { // Add null for empty CSV values
@@ -58,14 +65,19 @@ public class ListCSVMapper<T> extends AbstractListCSVMapper<T> {
                 continue;
             }
 
-            T instance = pojoInstantiator.call();
+            T instance;
+            try {
+                instance = pojoInstantiator.call();
+            } catch (Exception exception) {
+                throw new CSVMappingException("Could not instantiate POJO!", exception);
+            }
+
             // accept() could throw a variety of exceptions
             try {
                 csvValueConsumer.accept(instance, csv[csvIndex]);
                 mappedList.add(instance);
             } catch (Exception exception) {
-                throw new Exception("Error mapping at index " + (csvIndex - offset) + " with offset " + offset,
-                        exception);
+                throw new CSVMappingException(csvIndex - offset, offset, exception);
             }
         }
 

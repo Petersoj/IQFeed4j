@@ -1,0 +1,20 @@
+{
+  "type": "string",
+  "title": "Enums for Market Summary feed commands. See <a href=\"https://www.iqfeed.net/dev/api/docs//MarketSummaryviaTCPIP.cfm\">Market Summary via TCP/IP</a>",
+  "enum": [
+    "EDS",
+    "FDS",
+    "5MS"
+  ],
+  "javaEnums": [
+    {
+      "name": "END_OF_DAY_SUMMARY"
+    },
+    {
+      "name": "FUNDAMENTAL_SUMMARY"
+    },
+    {
+      "name": "FIVE_MINUTE_SNAPSHOT"
+    }
+  ]
+}

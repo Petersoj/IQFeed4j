@@ -1,0 +1,24 @@
+{
+  "type": "string",
+  "title": "Enums for Option Chains feed commands. See <a href=\"https://www.iqfeed.net/dev/api/docs//OptionChainsviaTCPIP.cfm\">Option Chains via TCP/IP</a>",
+  "enum": [
+    "CFU",
+    "CFS",
+    "CFO",
+    "CEO"
+  ],
+  "javaEnums": [
+    {
+      "name": "FUTURE_CHAIN"
+    },
+    {
+      "name": "FUTURE_SPREAD_CHAIN"
+    },
+    {
+      "name": "FUTURE_OPTION_CHAIN"
+    },
+    {
+      "name": "EQUITY_OPTION_CHAIN"
+    }
+  ]
+}

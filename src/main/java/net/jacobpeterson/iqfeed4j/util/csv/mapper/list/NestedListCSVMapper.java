@@ -1,6 +1,7 @@
 package net.jacobpeterson.iqfeed4j.util.csv.mapper.list;
 
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapping;
+import net.jacobpeterson.iqfeed4j.util.csv.mapper.exception.CSVMappingException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -80,11 +81,21 @@ public class NestedListCSVMapper<T> extends AbstractListCSVMapper<T> {
      * Function)}. This will iterate through the list at {@link #nestedListLength} length.
      */
     @Override
-    public List<T> mapToList(String[] csv, int offset) throws Exception {
-        List<T> mappedList = listInstantiator.call();
+    public List<T> mapToList(String[] csv, int offset) {
+        List<T> mappedList;
+        try {
+            mappedList = listInstantiator.call();
+        } catch (Exception exception) {
+            throw new CSVMappingException("Could not instantiate List!", exception);
+        }
 
         for (int csvIndex = offset; csvIndex < csv.length; csvIndex += nestedListLength) {
-            T instance = pojoInstantiator.call();
+            T instance;
+            try {
+                instance = pojoInstantiator.call();
+            } catch (Exception exception) {
+                throw new CSVMappingException("Could not instantiate POJO!", exception);
+            }
 
             // Loop through all added 'CSVMapping's and apply them
             boolean valueWasMapped = false;
@@ -98,8 +109,9 @@ public class NestedListCSVMapper<T> extends AbstractListCSVMapper<T> {
                     csvMappingsOfCSVIndices.get(mappedCSVIndex).apply(instance, csv[csvIndex + mappedCSVIndex]);
                     valueWasMapped = true;
                 } catch (Exception exception) {
-                    throw new Exception("Error mapping at index " + (csvIndex - offset) + " with offset " + offset +
-                            " at mapped CSV index " + mappedCSVIndex, exception);
+                    throw new CSVMappingException(
+                            String.format("Error mapping at index %d with offset %d at mapped CSV index %d",
+                                    csvIndex - offset, offset, mappedCSVIndex), exception);
                 }
             }
 

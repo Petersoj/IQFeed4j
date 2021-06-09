@@ -8,16 +8,13 @@
   ],
   "javaEnums": [
     {
-      "name": "SYMBOL_LIMIT_REACHED",
-      "title": "The attempt to watch a symbol has failed, due to the symbol limit being reached."
+      "name": "SYMBOL_LIMIT_REACHED"
     },
     {
-      "name": "REPLACED_PREVIOUSLY_WATCHED_INTERVAL",
-      "title": "The new interval bar watch has replaced the previous watched streaming interval bar watch."
+      "name": "REPLACED_PREVIOUSLY_WATCHED_INTERVAL"
     },
     {
-      "name": "WATCHED_INTERVALS",
-      "title": "The message is a response for the <code>S,REQUEST WATCHES</code> request."
+      "name": "WATCHED_INTERVALS"
     }
   ]
 }

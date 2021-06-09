@@ -3,13 +3,13 @@ package net.jacobpeterson.iqfeed4j.feed.lookup;
 import com.google.common.base.Splitter;
 import net.jacobpeterson.iqfeed4j.feed.AbstractFeed;
 import net.jacobpeterson.iqfeed4j.feed.RequestIDFeedHelper;
+import net.jacobpeterson.iqfeed4j.feed.exception.IQFeedRuntimeException;
+import net.jacobpeterson.iqfeed4j.feed.exception.NoDataException;
+import net.jacobpeterson.iqfeed4j.feed.exception.SyntaxException;
 import net.jacobpeterson.iqfeed4j.feed.message.MultiMessageListener;
 import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedMessageType;
 import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedSpecialMessage;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.index.AbstractIndexCSVMapper;
-import net.jacobpeterson.iqfeed4j.feed.exception.IQFeedException;
-import net.jacobpeterson.iqfeed4j.feed.exception.NoDataException;
-import net.jacobpeterson.iqfeed4j.feed.exception.SyntaxException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,7 +72,7 @@ public abstract class AbstractLookupFeed extends AbstractFeed {
             } else if (requestIDFeedHelper.isRequestSyntaxError(csv)) {
                 listener.onMessageException(new SyntaxException());
             } else {
-                listener.onMessageException(new IQFeedException(
+                listener.onMessageException(new IQFeedRuntimeException(
                         valuePresent(csv, 2) ?
                                 String.join(",", Arrays.copyOfRange(csv, 2, csv.length)) :
                                 "Error message not present."));

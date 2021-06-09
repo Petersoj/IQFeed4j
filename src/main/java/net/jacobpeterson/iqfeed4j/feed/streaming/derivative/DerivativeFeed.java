@@ -4,11 +4,14 @@ import net.jacobpeterson.iqfeed4j.feed.RequestIDFeedHelper;
 import net.jacobpeterson.iqfeed4j.feed.message.FeedMessageListener;
 import net.jacobpeterson.iqfeed4j.feed.message.SingleMessageFuture;
 import net.jacobpeterson.iqfeed4j.feed.streaming.AbstractServerConnectionFeed;
+import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedCommand;
 import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedMessageType;
 import net.jacobpeterson.iqfeed4j.model.feed.common.interval.IntervalType;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.derivative.Interval;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.derivative.WatchedInterval;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.derivative.enums.DerivativeCommand;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.derivative.enums.DerivativeMessageType;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.derivative.enums.DerivativeSystemCommand;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.derivative.enums.DerivativeSystemMessageType;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.index.IndexCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.list.NestedListCSVMapper;
@@ -149,7 +152,9 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
                         default:
                             LOGGER.error("Unhandled message type: {}", derivativeSystemMessage);
                     }
-                } catch (IllegalArgumentException ignored) {} // Only handle 'DerivativeSystemMessage's here
+                } catch (IllegalArgumentException illegalArgumentException) {
+                    LOGGER.error("Received unknown system message type: {}", csv[1], illegalArgumentException);
+                }
 
                 return;
             }
@@ -229,7 +234,7 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
 
     /**
      * Request a new interval bar watch based on parameters retrieving history based on the same set of parameters. This
-     * sends an BW request. This method is thread-safe.
+     * sends a {@link DerivativeCommand#BAR_WATCH} request.
      *
      * @param symbol              the symbol to watch
      * @param intervalLength      the interval in seconds/volume/trades (depending on {@link IntervalType}).
@@ -264,7 +269,7 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
         String requestID = requestIDFeedHelper.getNewRequestID();
         StringBuilder requestBuilder = new StringBuilder();
 
-        requestBuilder.append("BW").append(",");
+        requestBuilder.append(DerivativeCommand.BAR_WATCH.value()).append(",");
         requestBuilder.append(symbol).append(",");
         requestBuilder.append(intervalLength).append(",");
 
@@ -315,14 +320,14 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
     }
 
     /**
-     * Remove a watch request given a {@link FeedMessageListener} of {@link Interval}s. This sends an BR request. This
-     * method is thread-safe.
+     * Remove a watch request given a {@link FeedMessageListener} of {@link Interval}s. This sends a {@link
+     * DerivativeCommand#BAR_REMOVE} request.
      *
      * @param intervalListener the {@link FeedMessageListener} to remove
      *
-     * @throws Exception thrown for {@link Exception}s
+     * @throws IOException thrown for {@link IOException}s
      */
-    public void requestIntervalWatchRemoval(FeedMessageListener<Interval> intervalListener) throws Exception {
+    public void requestIntervalWatchRemoval(FeedMessageListener<Interval> intervalListener) throws IOException {
         checkNotNull(intervalListener);
 
         String symbol = getWatchedSymbol(intervalListener);
@@ -331,7 +336,7 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
         checkNotNull(requestID);
 
         StringBuilder requestBuilder = new StringBuilder();
-        requestBuilder.append("BR").append(",");
+        requestBuilder.append(DerivativeCommand.BAR_REMOVE.value()).append(",");
         requestBuilder.append(symbol).append(",");
         requestBuilder.append(requestID);
         requestBuilder.append(LineEnding.CR_LF.getASCIIString());
@@ -349,8 +354,8 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
     }
 
     /**
-     * Request a list of all the current watch requests. This sends an 'S,REQUEST WATCHES' request. This method is
-     * thread-safe.
+     * Request a list of all the current watch requests. This sends a {@link DerivativeSystemCommand#REQUEST_WATCHES}
+     * request.
      *
      * @return a {@link SingleMessageFuture} of {@link WatchedInterval}s
      *
@@ -364,8 +369,8 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
         }
 
         StringBuilder requestBuilder = new StringBuilder();
-        requestBuilder.append(FeedMessageType.SYSTEM.value()).append(",");
-        requestBuilder.append("REQUEST WATCHES");
+        requestBuilder.append(FeedCommand.SYSTEM.value()).append(",");
+        requestBuilder.append(DerivativeSystemCommand.REQUEST_WATCHES.value());
         requestBuilder.append(LineEnding.CR_LF.getASCIIString());
 
         synchronized (messageReceivedLock) {
@@ -378,15 +383,15 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
     }
 
     /**
-     * Requests removal of all currently watched intervals. This sends an 'S,UNWATCH ALL' request. This method is
-     * thread-safe.
+     * Requests removal of all currently watched intervals. This sends a {@link DerivativeSystemCommand#UNWATCH_ALL}
+     * request.
      *
      * @throws IOException thrown for {@link IOException}s
      */
     public void requestUnwatchAll() throws IOException {
         StringBuilder requestBuilder = new StringBuilder();
-        requestBuilder.append(FeedMessageType.SYSTEM.value()).append(",");
-        requestBuilder.append("UNWATCH ALL");
+        requestBuilder.append(FeedCommand.SYSTEM.value()).append(",");
+        requestBuilder.append(DerivativeSystemCommand.UNWATCH_ALL.value());
         requestBuilder.append(LineEnding.CR_LF.getASCIIString());
 
         synchronized (messageReceivedLock) {

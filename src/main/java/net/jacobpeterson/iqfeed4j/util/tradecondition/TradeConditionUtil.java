@@ -1,6 +1,6 @@
 package net.jacobpeterson.iqfeed4j.util.tradecondition;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,7 +21,7 @@ public class TradeConditionUtil {
             return null;
         }
 
-        LinkedList<Integer> tradeConditions = new LinkedList<>();
+        ArrayList<Integer> tradeConditions = new ArrayList<>(4); // Max of 4 trade conditions usually
 
         for (int index = 0; index < tradeConditionString.length(); index++) {
             if (index + 1 < tradeConditionString.length()) { // Check if there is another hex digit after current

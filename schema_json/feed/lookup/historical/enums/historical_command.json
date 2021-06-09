@@ -1,0 +1,48 @@
+{
+  "type": "string",
+  "title": "Enums for Historical feed commands. See <a href=\"https://www.iqfeed.net/dev/api/docs//HistoricalviaTCPIP.cfm\">Historical via TCP/IP</a>",
+  "enum": [
+    "HTX",
+    "HTD",
+    "HTT",
+    "HIX",
+    "HID",
+    "HIT",
+    "HDX",
+    "HDT",
+    "HWX",
+    "HMX"
+  ],
+  "javaEnums": [
+    {
+      "name": "HISTORICAL_TICKS_DATAPOINTS"
+    },
+    {
+      "name": "HISTORICAL_TICKS_DAYS"
+    },
+    {
+      "name": "HISTORICAL_TICKS_DATETIMES"
+    },
+    {
+      "name": "HISTORICAL_INTERVAL_DATAPOINTS"
+    },
+    {
+      "name": "HISTORICAL_INTERVAL_DAYS"
+    },
+    {
+      "name": "HISTORICAL_INTERVAL_DATETIMES"
+    },
+    {
+      "name": "HISTORICAL_DAILY_DATAPOINTS"
+    },
+    {
+      "name": "HISTORICAL_DAILY_DATES"
+    },
+    {
+      "name": "HISTORICAL_WEEKLY_DATAPOINTS"
+    },
+    {
+      "name": "HISTORICAL_MONTHLY_DATAPOINTS"
+    }
+  ]
+}

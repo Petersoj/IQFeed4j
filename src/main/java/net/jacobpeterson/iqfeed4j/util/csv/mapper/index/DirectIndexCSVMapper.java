@@ -1,5 +1,7 @@
 package net.jacobpeterson.iqfeed4j.util.csv.mapper.index;
 
+import net.jacobpeterson.iqfeed4j.util.csv.mapper.exception.CSVMappingException;
+
 import java.util.function.Function;
 
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueNotWhitespace;
@@ -35,7 +37,7 @@ public class DirectIndexCSVMapper<T> extends AbstractIndexCSVMapper<T> {
      * Note: this will map to a type using the {@link #stringToTypeConverter}.
      */
     @Override
-    public T map(String[] csv, int offset) throws Exception {
+    public T map(String[] csv, int offset) {
         if (!valueNotWhitespace(csv, csvIndex + offset)) { // Don't map empty CSV values
             return null;
         }
@@ -44,7 +46,7 @@ public class DirectIndexCSVMapper<T> extends AbstractIndexCSVMapper<T> {
         try {
             return stringToTypeConverter.apply(csv[csvIndex + offset]);
         } catch (Exception exception) {
-            throw new Exception("Error mapping at index " + csvIndex + " with offset " + offset, exception);
+            throw new CSVMappingException(csvIndex, offset, exception);
         }
     }
 }

@@ -1,0 +1,40 @@
+{
+  "type": "string",
+  "title": "Enums for Symbol Market Info feed commands. See <a href=\"https://www.iqfeed.net/dev/api/docs/SymbolLookupviaTCPIP.cfm\">Symbol Lookup via TCP/IP</a>",
+  "enum": [
+    "SBF",
+    "SBS",
+    "SBN",
+    "SLM",
+    "SST",
+    "STC",
+    "SSC",
+    "SNC"
+  ],
+  "javaEnums": [
+    {
+      "name": "SYMBOLS_BY_FILTER"
+    },
+    {
+      "name": "SYMBOLS_BY_SIC_CODE"
+    },
+    {
+      "name": "SYMBOLS_BY_NIAC_CODE"
+    },
+    {
+      "name": "LISTED_MARKETS"
+    },
+    {
+      "name": "SECURITY_TYPES"
+    },
+    {
+      "name": "TRADE_CONDITIONS"
+    },
+    {
+      "name": "SIC_CODES"
+    },
+    {
+      "name": "NIAC_CODES"
+    }
+  ]
+}
