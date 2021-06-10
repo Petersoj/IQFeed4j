@@ -1,6 +1,4 @@
-package net.jacobpeterson.iqfeed4j.api.message;
-
-import net.jacobpeterson.iqfeed4j.feed.message.MultiMessageListener;
+package net.jacobpeterson.iqfeed4j.feed.message;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -13,15 +11,15 @@ import java.util.concurrent.ExecutionException;
  * <br>
  * This will accumulate all data/messages in memory to be consumed later.
  */
-public class AsyncMultiMessageListener<T> extends MultiMessageListener<T> {
+public class MultiMessageIteratorListener<T> extends MultiMessageListener<T> {
 
     protected final CompletableFuture<Void> completionFuture;
     protected final List<T> messages;
 
     /**
-     * Instantiates a new {@link AsyncMultiMessageListener}.
+     * Instantiates a new {@link MultiMessageIteratorListener}.
      */
-    public AsyncMultiMessageListener() {
+    public MultiMessageIteratorListener() {
         completionFuture = new CompletableFuture<>();
         messages = new ArrayList<>(); // ArrayList provides best performance for Iterators
     }

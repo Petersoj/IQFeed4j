@@ -9,14 +9,25 @@ import net.jacobpeterson.iqfeed4j.feed.lookup.news.NewsFeed;
 import net.jacobpeterson.iqfeed4j.feed.lookup.optionschains.OptionChainsFeed;
 import net.jacobpeterson.iqfeed4j.feed.lookup.symbolmarketinfo.SymbolMarketInfoFeed;
 import net.jacobpeterson.iqfeed4j.feed.message.FeedMessageListener;
+import net.jacobpeterson.iqfeed4j.feed.message.MultiMessageIteratorListener;
+import net.jacobpeterson.iqfeed4j.feed.message.MultiMessageListener;
 import net.jacobpeterson.iqfeed4j.feed.streaming.admin.AdminFeed;
 import net.jacobpeterson.iqfeed4j.feed.streaming.derivative.DerivativeFeed;
 import net.jacobpeterson.iqfeed4j.feed.streaming.level1.Level1Feed;
 import net.jacobpeterson.iqfeed4j.feed.streaming.marketdepth.MarketDepthFeed;
+import net.jacobpeterson.iqfeed4j.model.feed.common.interval.IntervalType;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.historical.DatedInterval;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.historical.Interval;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.historical.Tick;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.historical.enums.DataDirection;
+import net.jacobpeterson.iqfeed4j.model.feed.lookup.historical.enums.PartialDatapoint;
 import net.jacobpeterson.iqfeed4j.properties.IQFeed4jProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Iterator;
 import java.util.function.Supplier;
 
@@ -24,18 +35,22 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * {@link IQFeed4j} contains all methods to interface with IQFeed. You will generally only need one instance of it in
- * your application. Interact with the various feeds that IQFeed provides via: <code>getFeedName();</code> or
- * <code>startFeedName();</code> and <code>stopFeedName();</code>.
+ * your application. The methods in this class provide conveniences such as: automatically start feeds upon data/command
+ * requests, aggregating lookup data in an {@link Iterator}, higher-level data mapping for easier processing, wrapping
+ * {@link Exception}s in {@link IQFeed4jException}. Directly interact with the various feeds that IQFeed provides via:
+ * <code>getFeedName();</code> or <code>startFeedName();</code> and <code>stopFeedName();</code>.
  * <br>
- * Note that many methods allow <code>null<code/> to be passed in as a parameter if it is optional.
+ * Methods allow <code>null<code/> to be passed in as a parameter if it is optional. See the Javadoc of the method for
+ * more details.
  * <br>
- * Methods that interact with a Lookup Feed (e.g. feeds that extend {@link AbstractLookupFeed} and return an {@link
- * Iterator} in this class will accumulate all requested messages/data into memory which can be consumed later. If this
- * behavior is undesired and you want to consume data synchronously with the underlying feed, use the
- * <code>getFeedName();</code> getters to request data with a supplied {@link FeedMessageListener} instead.
- * Note this can block the underlying feed if data is not consumed fast enough, but prevents large amounts of messages
- * from accumulating in memory without being processed and garbage-collected, which is useful for large multi-message
- * requests.
+ * Methods that interact with a Lookup Feed (e.g. feeds that extend {@link AbstractLookupFeed}) and return an {@link
+ * Iterator} and do not have a method name that ends in <code>Sync</code> in this class, will accumulate all requested
+ * messages/data into memory which can be consumed later. If this behavior is undesired and you want to consume data
+ * synchronously with the underlying feed, either use the <code>getFeedName();</code> getters to request data with a
+ * supplied {@link FeedMessageListener} instead or use the methods that have a name that ends in <code>Sync</code>. Note
+ * that synchronously consuming data will block the underlying feed if data is not consumed fast enough, but prevents
+ * large amounts of messages from accumulating in memory without being processed and garbage-collected, which is useful
+ * for large multi-message requests.
  */
 public class IQFeed4j {
 
@@ -99,8 +114,233 @@ public class IQFeed4j {
     }
 
     //
+    // START Level1Feed
+    //
+
+    //
+    // END Level1Feed
+    //
+
+    // TODO MarketDepthFeed
+
+    //
+    // START DerivativeFeed
+    //
+
+    //
+    // END DerivativeFeed
+    //
+
+    //
+    // START AdminFeed
+    //
+
+    //
+    // END AdminFeed
+    //
+
+    //
     // START HistoricalFeed
     //
+
+    /**
+     * See {@link HistoricalFeed#requestTicks(String, int, DataDirection, MultiMessageListener)} for details.
+     *
+     * @throws IQFeed4jException thrown for {@link IQFeed4jException}s
+     */
+    public Iterator<Tick> requestTicks(String symbol, int maxDataPoints, DataDirection dataDirection)
+            throws IQFeed4jException {
+        try {
+            startHistoricalFeed();
+
+            MultiMessageIteratorListener<Tick> asyncListener = new MultiMessageIteratorListener<>();
+            historicalFeed.requestTicks(symbol, maxDataPoints, dataDirection, asyncListener);
+            return asyncListener.getIterator();
+        } catch (Exception exception) {
+            throw new IQFeed4jException(exception);
+        }
+    }
+
+    /**
+     * See {@link HistoricalFeed#requestTicks(String, int, Integer, LocalTime, LocalTime, DataDirection,
+     * MultiMessageListener)} for details.
+     *
+     * @throws IQFeed4jException thrown for {@link IQFeed4jException}s
+     */
+    public Iterator<Tick> requestTicks(String symbol, int maxDays, Integer maxDataPoints, LocalTime beginFilterTime,
+            LocalTime endFilterTime, DataDirection dataDirection) throws IQFeed4jException {
+        try {
+            startHistoricalFeed();
+
+            MultiMessageIteratorListener<Tick> asyncListener = new MultiMessageIteratorListener<>();
+            historicalFeed.requestTicks(symbol, maxDays, maxDataPoints, beginFilterTime, endFilterTime, dataDirection,
+                    asyncListener);
+            return asyncListener.getIterator();
+        } catch (Exception exception) {
+            throw new IQFeed4jException(exception);
+        }
+    }
+
+    /**
+     * See {@link HistoricalFeed#requestTicks(String, LocalDateTime, LocalDateTime, Integer, LocalTime, LocalTime,
+     * DataDirection, MultiMessageListener)} for details.
+     *
+     * @throws IQFeed4jException thrown for {@link IQFeed4jException}s
+     */
+    public Iterator<Tick> requestTicks(String symbol, LocalDateTime beginDateTime, LocalDateTime endDateTime,
+            Integer maxDataPoints, LocalTime beginFilterTime, LocalTime endFilterTime, DataDirection dataDirection)
+            throws IQFeed4jException {
+        try {
+            startHistoricalFeed();
+
+            MultiMessageIteratorListener<Tick> asyncListener = new MultiMessageIteratorListener<>();
+            historicalFeed.requestTicks(symbol, beginDateTime, endDateTime, maxDataPoints, beginFilterTime,
+                    endFilterTime, dataDirection, asyncListener);
+            return asyncListener.getIterator();
+        } catch (Exception exception) {
+            throw new IQFeed4jException(exception);
+        }
+    }
+
+    /**
+     * See {@link HistoricalFeed#requestIntervals(String, int, Integer, DataDirection, IntervalType,
+     * MultiMessageListener)} for details.
+     *
+     * @throws IQFeed4jException thrown for {@link IQFeed4jException}s
+     */
+    public Iterator<Interval> requestIntervals(String symbol, int intervalLength, Integer maxDataPoints,
+            DataDirection dataDirection, IntervalType intervalType) throws IQFeed4jException {
+        try {
+            startHistoricalFeed();
+
+            MultiMessageIteratorListener<Interval> asyncListener = new MultiMessageIteratorListener<>();
+            historicalFeed.requestIntervals(symbol, intervalLength, maxDataPoints, dataDirection, intervalType,
+                    asyncListener);
+            return asyncListener.getIterator();
+        } catch (Exception exception) {
+            throw new IQFeed4jException(exception);
+        }
+    }
+
+    /**
+     * See {@link HistoricalFeed#requestIntervals(String, int, int, Integer, LocalTime, LocalTime, DataDirection,
+     * IntervalType, MultiMessageListener)} for details.
+     *
+     * @throws IQFeed4jException thrown for {@link IQFeed4jException}s
+     */
+    public Iterator<Interval> requestIntervals(String symbol, int intervalLength, int maxDays, Integer maxDataPoints,
+            LocalTime beginFilterTime, LocalTime endFilterTime, DataDirection dataDirection, IntervalType intervalType)
+            throws IQFeed4jException {
+        try {
+            startHistoricalFeed();
+
+            MultiMessageIteratorListener<Interval> asyncListener = new MultiMessageIteratorListener<>();
+            historicalFeed.requestIntervals(symbol, intervalLength, maxDays, maxDataPoints, beginFilterTime,
+                    endFilterTime, dataDirection, intervalType, asyncListener);
+            return asyncListener.getIterator();
+        } catch (Exception exception) {
+            throw new IQFeed4jException(exception);
+        }
+    }
+
+    /**
+     * See {@link HistoricalFeed#requestIntervals(String, int, LocalDateTime, LocalDateTime, Integer, LocalTime,
+     * LocalTime, DataDirection, IntervalType, MultiMessageListener)} for details.
+     *
+     * @throws IQFeed4jException thrown for {@link IQFeed4jException}s
+     */
+    public Iterator<Interval> requestIntervals(String symbol, int intervalLength, LocalDateTime beginDateTime,
+            LocalDateTime endDateTime, Integer maxDataPoints, LocalTime beginFilterTime, LocalTime endFilterTime,
+            DataDirection dataDirection, IntervalType intervalType) throws IQFeed4jException {
+        try {
+            startHistoricalFeed();
+
+            MultiMessageIteratorListener<Interval> asyncListener = new MultiMessageIteratorListener<>();
+            historicalFeed.requestIntervals(symbol, intervalLength, beginDateTime, endDateTime, maxDataPoints,
+                    beginFilterTime, endFilterTime, dataDirection, intervalType, asyncListener);
+            return asyncListener.getIterator();
+        } catch (Exception exception) {
+            throw new IQFeed4jException(exception);
+        }
+    }
+
+    /**
+     * See {@link HistoricalFeed#requestDayIntervals(String, int, DataDirection, PartialDatapoint,
+     * MultiMessageListener)} for details.
+     *
+     * @throws IQFeed4jException thrown for {@link IQFeed4jException}s
+     */
+    public Iterator<DatedInterval> requestDayIntervals(String symbol, int maxDays, DataDirection dataDirection,
+            PartialDatapoint partialDatapoint) throws IQFeed4jException {
+        try {
+            startHistoricalFeed();
+
+            MultiMessageIteratorListener<DatedInterval> asyncListener = new MultiMessageIteratorListener<>();
+            historicalFeed.requestDayIntervals(symbol, maxDays, dataDirection, partialDatapoint, asyncListener);
+            return asyncListener.getIterator();
+        } catch (Exception exception) {
+            throw new IQFeed4jException(exception);
+        }
+    }
+
+    /**
+     * See {@link HistoricalFeed#requestDayIntervals(String, LocalDate, LocalDate, Integer, DataDirection,
+     * PartialDatapoint, MultiMessageListener)} for details.
+     *
+     * @throws IQFeed4jException thrown for {@link IQFeed4jException}s
+     */
+    public Iterator<DatedInterval> requestDayIntervals(String symbol, LocalDate beginDate, LocalDate endDate,
+            Integer maxDataPoints, DataDirection dataDirection, PartialDatapoint partialDatapoint)
+            throws IQFeed4jException {
+        try {
+            startHistoricalFeed();
+
+            MultiMessageIteratorListener<DatedInterval> asyncListener = new MultiMessageIteratorListener<>();
+            historicalFeed.requestDayIntervals(symbol, beginDate, endDate, maxDataPoints, dataDirection,
+                    partialDatapoint, asyncListener);
+            return asyncListener.getIterator();
+        } catch (Exception exception) {
+            throw new IQFeed4jException(exception);
+        }
+    }
+
+    /**
+     * See {@link HistoricalFeed#requestWeekIntervals(String, int, DataDirection, PartialDatapoint,
+     * MultiMessageListener)} for details.
+     *
+     * @throws IQFeed4jException thrown for {@link IQFeed4jException}s
+     */
+    public Iterator<DatedInterval> requestWeekIntervals(String symbol, int maxWeeks, DataDirection dataDirection,
+            PartialDatapoint partialDatapoint) throws IQFeed4jException {
+        try {
+            startHistoricalFeed();
+
+            MultiMessageIteratorListener<DatedInterval> asyncListener = new MultiMessageIteratorListener<>();
+            historicalFeed.requestWeekIntervals(symbol, maxWeeks, dataDirection, partialDatapoint, asyncListener);
+            return asyncListener.getIterator();
+        } catch (Exception exception) {
+            throw new IQFeed4jException(exception);
+        }
+    }
+
+    /**
+     * See {@link HistoricalFeed#requestMonthIntervals(String, int, DataDirection, PartialDatapoint,
+     * MultiMessageListener)} for details.
+     *
+     * @throws IQFeed4jException thrown for {@link IQFeed4jException}s
+     */
+    public Iterator<DatedInterval> requestMonthIntervals(String symbol, int maxMonths, DataDirection dataDirection,
+            PartialDatapoint partialDatapoint) throws IQFeed4jException {
+        try {
+            startHistoricalFeed();
+
+            MultiMessageIteratorListener<DatedInterval> asyncListener = new MultiMessageIteratorListener<>();
+            historicalFeed.requestMonthIntervals(symbol, maxMonths, dataDirection, partialDatapoint, asyncListener);
+            return asyncListener.getIterator();
+        } catch (Exception exception) {
+            throw new IQFeed4jException(exception);
+        }
+    }
 
     //
     // END HistoricalFeed
