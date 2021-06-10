@@ -1,6 +1,7 @@
 package net.jacobpeterson.iqfeed4j.feed.lookup.symbolmarketinfo;
 
 import net.jacobpeterson.iqfeed4j.feed.lookup.AbstractLookupFeed;
+import net.jacobpeterson.iqfeed4j.feed.message.MultiMessageIteratorListener;
 import net.jacobpeterson.iqfeed4j.feed.message.MultiMessageListener;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.symbolmarketinfo.*;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.symbolmarketinfo.enums.SearchCodeType;
@@ -15,8 +16,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -210,6 +213,24 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
     }
 
     /**
+     * Calls {@link #searchSymbols(SearchField, String, SymbolFilterType, List, MultiMessageListener)} and will
+     * accumulate all requested data into an {@link Iterator} which can be consumed later.
+     *
+     * @return an {@link Iterator} of {@link SymbolSearchResult}s
+     *
+     * @throws IOException          thrown for {@link IOException}s
+     * @throws ExecutionException   thrown for {@link ExecutionException}s
+     * @throws InterruptedException thrown for {@link InterruptedException}s
+     */
+    public Iterator<SymbolSearchResult> searchSymbols(SearchField searchField, String searchString,
+            SymbolFilterType symbolFilterType, List<Integer> filterValues)
+            throws IOException, ExecutionException, InterruptedException {
+        MultiMessageIteratorListener<SymbolSearchResult> asyncListener = new MultiMessageIteratorListener<>();
+        searchSymbols(searchField, searchString, symbolFilterType, filterValues, asyncListener);
+        return asyncListener.getIterator();
+    }
+
+    /**
      * Searches for a list of symbols existing within a specific {@link SearchCodeType} or group of {@link
      * SearchCodeType} codes. This sends a {@link SymbolMarketInfoCommand#SYMBOLS_BY_SIC_CODE} or {@link
      * SymbolMarketInfoCommand#SYMBOLS_BY_NIAC_CODE} request.
@@ -241,6 +262,23 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
         }
 
         sendAndLogMessage(requestBuilder.toString());
+    }
+
+    /**
+     * Calls {@link #searchSymbols(SearchCodeType, String, MultiMessageListener)} and will accumulate all requested data
+     * into an {@link Iterator} which can be consumed later.
+     *
+     * @return an {@link Iterator} of {@link SymbolSearchResult}s
+     *
+     * @throws IOException          thrown for {@link IOException}s
+     * @throws ExecutionException   thrown for {@link ExecutionException}s
+     * @throws InterruptedException thrown for {@link InterruptedException}s
+     */
+    public Iterator<SymbolSearchResult> searchSymbols(SearchCodeType searchCodeType, String searchString)
+            throws IOException, ExecutionException, InterruptedException {
+        MultiMessageIteratorListener<SymbolSearchResult> asyncListener = new MultiMessageIteratorListener<>();
+        searchSymbols(searchCodeType, searchString, asyncListener);
+        return asyncListener.getIterator();
     }
 
     /**
@@ -288,6 +326,22 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
     }
 
     /**
+     * Calls {@link #requestListedMarkets(MultiMessageListener)} and will accumulate all requested data into an {@link
+     * Iterator} which can be consumed later.
+     *
+     * @return an {@link Iterator} of {@link ListedMarket}s
+     *
+     * @throws IOException          thrown for {@link IOException}s
+     * @throws ExecutionException   thrown for {@link ExecutionException}s
+     * @throws InterruptedException thrown for {@link InterruptedException}s
+     */
+    public Iterator<ListedMarket> requestListedMarkets() throws IOException, ExecutionException, InterruptedException {
+        MultiMessageIteratorListener<ListedMarket> asyncListener = new MultiMessageIteratorListener<>();
+        requestListedMarkets(asyncListener);
+        return asyncListener.getIterator();
+    }
+
+    /**
      * Request a list of {@link SecurityType}s from the feed. This sends a
      * {@link SymbolMarketInfoCommand#SECURITY_TYPES}
      * request.
@@ -299,6 +353,22 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
     public void requestSecurityTypes(MultiMessageListener<SecurityType> securityTypeListener) throws IOException {
         requestGenericMultiMessage(SymbolMarketInfoCommand.SECURITY_TYPES.value(), securityTypeListenersOfRequestIDs,
                 securityTypeListener);
+    }
+
+    /**
+     * Calls {@link #requestSecurityTypes(MultiMessageListener)} and will accumulate all requested data into an {@link
+     * Iterator} which can be consumed later.
+     *
+     * @return an {@link Iterator} of {@link SecurityType}s
+     *
+     * @throws IOException          thrown for {@link IOException}s
+     * @throws ExecutionException   thrown for {@link ExecutionException}s
+     * @throws InterruptedException thrown for {@link InterruptedException}s
+     */
+    public Iterator<SecurityType> requestSecurityTypes() throws IOException, ExecutionException, InterruptedException {
+        MultiMessageIteratorListener<SecurityType> asyncListener = new MultiMessageIteratorListener<>();
+        requestSecurityTypes(asyncListener);
+        return asyncListener.getIterator();
     }
 
     /**
@@ -315,6 +385,23 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
     }
 
     /**
+     * Calls {@link #requestTradeConditions(MultiMessageListener)} and will accumulate all requested data into an {@link
+     * Iterator} which can be consumed later.
+     *
+     * @return an {@link Iterator} of {@link TradeCondition}s
+     *
+     * @throws IOException          thrown for {@link IOException}s
+     * @throws ExecutionException   thrown for {@link ExecutionException}s
+     * @throws InterruptedException thrown for {@link InterruptedException}s
+     */
+    public Iterator<TradeCondition> requestTradeConditions()
+            throws IOException, ExecutionException, InterruptedException {
+        MultiMessageIteratorListener<TradeCondition> asyncListener = new MultiMessageIteratorListener<>();
+        requestTradeConditions(asyncListener);
+        return asyncListener.getIterator();
+    }
+
+    /**
      * Request a list of {@link SICCode}s from the feed. This sends a {@link SymbolMarketInfoCommand#SIC_CODES}
      * request.
      *
@@ -328,6 +415,22 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
     }
 
     /**
+     * Calls {@link #requestSICCodes(MultiMessageListener)} and will accumulate all requested data into an {@link
+     * Iterator} which can be consumed later.
+     *
+     * @return an {@link Iterator} of {@link SICCode}s
+     *
+     * @throws IOException          thrown for {@link IOException}s
+     * @throws ExecutionException   thrown for {@link ExecutionException}s
+     * @throws InterruptedException thrown for {@link InterruptedException}s
+     */
+    public Iterator<SICCode> requestSICCodes() throws IOException, ExecutionException, InterruptedException {
+        MultiMessageIteratorListener<SICCode> asyncListener = new MultiMessageIteratorListener<>();
+        requestSICCodes(asyncListener);
+        return asyncListener.getIterator();
+    }
+
+    /**
      * Request a list of {@link NIACCode}s from the feed. This sends a {@link SymbolMarketInfoCommand#NIAC_CODES}
      * request.
      *
@@ -338,6 +441,22 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
     public void requestNIACCodeCodes(MultiMessageListener<NIACCode> niacCodeListener) throws IOException {
         requestGenericMultiMessage(SymbolMarketInfoCommand.NIAC_CODES.value(), niacCodeListenersOfRequestIDs,
                 niacCodeListener);
+    }
+
+    /**
+     * Calls {@link #requestNIACCodeCodes(MultiMessageListener)} and will accumulate all requested data into an {@link
+     * Iterator} which can be consumed later.
+     *
+     * @return an {@link Iterator} of {@link NIACCode}s
+     *
+     * @throws IOException          thrown for {@link IOException}s
+     * @throws ExecutionException   thrown for {@link ExecutionException}s
+     * @throws InterruptedException thrown for {@link InterruptedException}s
+     */
+    public Iterator<NIACCode> requestNIACCodeCodes() throws IOException, ExecutionException, InterruptedException {
+        MultiMessageIteratorListener<NIACCode> asyncListener = new MultiMessageIteratorListener<>();
+        requestNIACCodeCodes(asyncListener);
+        return asyncListener.getIterator();
     }
 
     //

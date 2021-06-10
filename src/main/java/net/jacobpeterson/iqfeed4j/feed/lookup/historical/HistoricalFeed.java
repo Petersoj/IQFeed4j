@@ -186,9 +186,10 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     /**
-     * See {@link HistoricalFeed#requestTicks(String, int, DataDirection, MultiMessageListener)} for parameter details.
-     * <br>
-     * This will accumulate all requested data into memory which can be consumed later.
+     * Calls {@link #requestTicks(String, int, DataDirection, MultiMessageListener)} and will accumulate all requested
+     * data into an {@link Iterator} which can be consumed later.
+     *
+     * @return an {@link Iterator} of {@link Tick}s
      *
      * @throws IOException          thrown for {@link IOException}s
      * @throws ExecutionException   thrown for {@link ExecutionException}s
@@ -262,10 +263,10 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     /**
-     * See {@link HistoricalFeed#requestTicks(String, int, Integer, LocalTime, LocalTime, DataDirection,
-     * MultiMessageListener)} for parameter details.
-     * <br>
-     * This will accumulate all requested data into memory which can be consumed later.
+     * Calls {@link #requestTicks(String, int, Integer, LocalTime, LocalTime, DataDirection, MultiMessageListener)} and
+     * will accumulate all requested data into an {@link Iterator} which can be consumed later.
+     *
+     * @return an {@link Iterator} of {@link Tick}s
      *
      * @throws IOException          thrown for {@link IOException}s
      * @throws ExecutionException   thrown for {@link ExecutionException}s
@@ -351,10 +352,11 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     /**
-     * See {@link HistoricalFeed#requestTicks(String, LocalDateTime, LocalDateTime, Integer, LocalTime, LocalTime,
-     * DataDirection, MultiMessageListener)} for parameter details.
-     * <br>
-     * This will accumulate all requested data into memory which can be consumed later.
+     * Calls {@link #requestTicks(String, LocalDateTime, LocalDateTime, Integer, LocalTime, LocalTime, DataDirection,
+     * MultiMessageListener)} and will accumulate all requested data into an {@link Iterator} which can be consumed
+     * later.
+     *
+     * @return an {@link Iterator} of {@link Tick}s
      *
      * @throws IOException          thrown for {@link IOException}s
      * @throws ExecutionException   thrown for {@link ExecutionException}s
@@ -420,10 +422,10 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     /**
-     * See {@link HistoricalFeed#requestIntervals(String, int, Integer, DataDirection, IntervalType,
-     * MultiMessageListener)} for parameter details.
-     * <br>
-     * This will accumulate all requested data into memory which can be consumed later.
+     * Calls {@link #requestIntervals(String, int, Integer, DataDirection, IntervalType, MultiMessageListener)} and will
+     * accumulate all requested data into an {@link Iterator} which can be consumed later.
+     *
+     * @return an {@link Iterator} of {@link Interval}s
      *
      * @throws IOException          thrown for {@link IOException}s
      * @throws ExecutionException   thrown for {@link ExecutionException}s
@@ -508,10 +510,11 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     /**
-     * See {@link HistoricalFeed#requestIntervals(String, int, int, Integer, LocalTime, LocalTime, DataDirection,
-     * IntervalType, MultiMessageListener)} for parameter details.
-     * <br>
-     * This will accumulate all requested data into memory which can be consumed later.
+     * Calls {@link #requestIntervals(String, int, int, Integer, LocalTime, LocalTime, DataDirection, IntervalType,
+     * MultiMessageListener)} and will accumulate all requested data into an {@link Iterator} which can be consumed
+     * later.
+     *
+     * @return an {@link Iterator} of {@link Interval}s
      *
      * @throws IOException          thrown for {@link IOException}s
      * @throws ExecutionException   thrown for {@link ExecutionException}s
@@ -609,10 +612,11 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     /**
-     * See {@link HistoricalFeed#requestIntervals(String, int, LocalDateTime, LocalDateTime, Integer, LocalTime,
-     * LocalTime, DataDirection, IntervalType, MultiMessageListener)} for parameter details.
-     * <br>
-     * This will accumulate all requested data into memory which can be consumed later.
+     * Calls {@link #requestIntervals(String, int, LocalDateTime, LocalDateTime, Integer, LocalTime, LocalTime,
+     * DataDirection, IntervalType, MultiMessageListener)} and will accumulate all requested data into an {@link
+     * Iterator} which can be consumed later.
+     *
+     * @return an {@link Iterator} of {@link Interval}s
      *
      * @throws IOException          thrown for {@link IOException}s
      * @throws ExecutionException   thrown for {@link ExecutionException}s
@@ -677,10 +681,10 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     /**
-     * See {@link HistoricalFeed#requestDayIntervals(String, int, DataDirection, PartialDatapoint,
-     * MultiMessageListener)} for parameter details.
-     * <br>
-     * This will accumulate all requested data into memory which can be consumed later.
+     * Calls {@link #requestDayIntervals(String, int, DataDirection, PartialDatapoint, MultiMessageListener)} and will
+     * accumulate all requested data into an {@link Iterator} which can be consumed later.
+     *
+     * @return an {@link Iterator} of {@link DatedInterval}s
      *
      * @throws IOException          thrown for {@link IOException}s
      * @throws ExecutionException   thrown for {@link ExecutionException}s
@@ -759,10 +763,11 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     /**
-     * See {@link HistoricalFeed#requestDayIntervals(String, LocalDate, LocalDate, Integer, DataDirection,
-     * PartialDatapoint, MultiMessageListener)} for parameter details.
-     * <br>
-     * This will accumulate all requested data into memory which can be consumed later.
+     * Calls {@link #requestDayIntervals(String, LocalDate, LocalDate, Integer, DataDirection, PartialDatapoint,
+     * MultiMessageListener)} and will accumulate all requested data into an {@link Iterator} which can be consumed
+     * later.
+     *
+     * @return an {@link Iterator} of {@link DatedInterval}s
      *
      * @throws IOException          thrown for {@link IOException}s
      * @throws ExecutionException   thrown for {@link ExecutionException}s
@@ -825,10 +830,10 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     /**
-     * See {@link HistoricalFeed#requestWeekIntervals(String, int, DataDirection, PartialDatapoint,
-     * MultiMessageListener)} for parameter details.
-     * <br>
-     * This will accumulate all requested data into memory which can be consumed later.
+     * Calls {@link #requestWeekIntervals(String, int, DataDirection, PartialDatapoint, MultiMessageListener)} and will
+     * accumulate all requested data into an {@link Iterator} which can be consumed later.
+     *
+     * @return an {@link Iterator} of {@link DatedInterval}s
      *
      * @throws IOException          thrown for {@link IOException}s
      * @throws ExecutionException   thrown for {@link ExecutionException}s
@@ -890,10 +895,10 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     /**
-     * See {@link HistoricalFeed#requestMonthIntervals(String, int, DataDirection, PartialDatapoint,
-     * MultiMessageListener)} for parameter details.
-     * <br>
-     * This will accumulate all requested data into memory which can be consumed later.
+     * Calls {@link #requestMonthIntervals(String, int, DataDirection, PartialDatapoint, MultiMessageListener)} and will
+     * accumulate all requested data into an {@link Iterator} which can be consumed later.
+     *
+     * @return an {@link Iterator} of {@link DatedInterval}s
      *
      * @throws IOException          thrown for {@link IOException}s
      * @throws ExecutionException   thrown for {@link ExecutionException}s

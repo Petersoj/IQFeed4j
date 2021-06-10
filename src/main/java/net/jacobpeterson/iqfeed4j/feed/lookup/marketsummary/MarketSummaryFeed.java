@@ -5,6 +5,7 @@ import net.jacobpeterson.iqfeed4j.feed.exception.NoDataException;
 import net.jacobpeterson.iqfeed4j.feed.exception.SyntaxException;
 import net.jacobpeterson.iqfeed4j.feed.lookup.AbstractLookupFeed;
 import net.jacobpeterson.iqfeed4j.feed.lookup.symbolmarketinfo.SymbolMarketInfoFeed;
+import net.jacobpeterson.iqfeed4j.feed.message.MultiMessageIteratorListener;
 import net.jacobpeterson.iqfeed4j.feed.message.MultiMessageListener;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.marketsummary.EndOfDaySnapshot;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.marketsummary.FiveMinuteSnapshot;
@@ -20,7 +21,9 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
@@ -330,6 +333,23 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
     }
 
     /**
+     * Calls {@link #requestEndOfDaySummary(String, String, LocalDate, MultiMessageListener)} and will accumulate all
+     * requested data into an {@link Iterator} which can be consumed later.
+     *
+     * @return an {@link Iterator} of {@link EndOfDaySnapshot}s
+     *
+     * @throws IOException          thrown for {@link IOException}s
+     * @throws ExecutionException   thrown for {@link ExecutionException}s
+     * @throws InterruptedException thrown for {@link InterruptedException}s
+     */
+    public Iterator<EndOfDaySnapshot> requestEndOfDaySummary(String securityType, String groupID, LocalDate date)
+            throws IOException, ExecutionException, InterruptedException {
+        MultiMessageIteratorListener<EndOfDaySnapshot> asyncListener = new MultiMessageIteratorListener<>();
+        requestEndOfDaySummary(securityType, groupID, date, asyncListener);
+        return asyncListener.getIterator();
+    }
+
+    /**
      * Retrieves {@link FundamentalSnapshot}s for all symbols in a Security Type and Exchange Group. This sends a {@link
      * MarketSummaryCommand#FUNDAMENTAL_SUMMARY} request.
      *
@@ -368,6 +388,23 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
     }
 
     /**
+     * Calls {@link #requestFundamentalSummary(String, String, LocalDate, MultiMessageListener)} and will accumulate all
+     * requested data into an {@link Iterator} which can be consumed later.
+     *
+     * @return an {@link Iterator} of {@link FundamentalSnapshot}s
+     *
+     * @throws IOException          thrown for {@link IOException}s
+     * @throws ExecutionException   thrown for {@link ExecutionException}s
+     * @throws InterruptedException thrown for {@link InterruptedException}s
+     */
+    public Iterator<FundamentalSnapshot> requestFundamentalSummary(String securityType, String groupID, LocalDate date)
+            throws IOException, ExecutionException, InterruptedException {
+        MultiMessageIteratorListener<FundamentalSnapshot> asyncListener = new MultiMessageIteratorListener<>();
+        requestFundamentalSummary(securityType, groupID, date, asyncListener);
+        return asyncListener.getIterator();
+    }
+
+    /**
      * Retrieves a snapshot of the current market data for all symbols in a Security Type and Exchange Group. NOTE: The
      * timing of the snapshot is not guaranteed, but data will be gathered every 5 minutes. This sends a {@link
      * MarketSummaryCommand#FIVE_MINUTE_SNAPSHOT} request.
@@ -400,6 +437,23 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
         }
 
         sendAndLogMessage(requestBuilder.toString());
+    }
+
+    /**
+     * Calls {@link #request5MinuteSummary(String, String, MultiMessageListener)} and will accumulate all requested data
+     * into an {@link Iterator} which can be consumed later.
+     *
+     * @return an {@link Iterator} of {@link FiveMinuteSnapshot}s
+     *
+     * @throws IOException          thrown for {@link IOException}s
+     * @throws ExecutionException   thrown for {@link ExecutionException}s
+     * @throws InterruptedException thrown for {@link InterruptedException}s
+     */
+    public Iterator<FiveMinuteSnapshot> request5MinuteSummary(String securityType, String groupID)
+            throws IOException, ExecutionException, InterruptedException {
+        MultiMessageIteratorListener<FiveMinuteSnapshot> asyncListener = new MultiMessageIteratorListener<>();
+        request5MinuteSummary(securityType, groupID, asyncListener);
+        return asyncListener.getIterator();
     }
 
     //
