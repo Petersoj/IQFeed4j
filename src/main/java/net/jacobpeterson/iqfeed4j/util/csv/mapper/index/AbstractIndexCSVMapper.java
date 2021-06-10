@@ -4,7 +4,7 @@ import net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapping;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.exception.CSVMappingException;
 
-import java.util.concurrent.Callable;
+import java.util.function.Supplier;
 
 /**
  * {@inheritDoc}
@@ -16,9 +16,9 @@ public abstract class AbstractIndexCSVMapper<T> extends AbstractCSVMapper<T> {
     /**
      * Instantiates a new {@link AbstractIndexCSVMapper}.
      *
-     * @param pojoInstantiator a {@link Callable} to instantiate a new POJO
+     * @param pojoInstantiator a {@link Supplier} to instantiate a new POJO
      */
-    public AbstractIndexCSVMapper(Callable<T> pojoInstantiator) {
+    public AbstractIndexCSVMapper(Supplier<T> pojoInstantiator) {
         super(pojoInstantiator);
     }
 

@@ -5,9 +5,9 @@ import net.jacobpeterson.iqfeed4j.util.csv.mapper.exception.CSVMappingException;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueNotWhitespace;
 
@@ -19,18 +19,18 @@ import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueNotWhitespace;
  */
 public class NestedListCSVMapper<T> extends AbstractListCSVMapper<T> {
 
-    protected final Callable<? extends List<T>> listInstantiator;
+    protected final Supplier<? extends List<T>> listInstantiator;
     protected final HashMap<Integer, CSVMapping<T, ?>> csvMappingsOfCSVIndices;
     protected final int nestedListLength;
 
     /**
      * Instantiates a new {@link NestedListCSVMapper}.
      *
-     * @param listInstantiator a {@link Callable} to instantiate a new {@link List}
-     * @param pojoInstantiator a {@link Callable} to instantiate a new POJO
+     * @param listInstantiator a {@link Supplier} to instantiate a new {@link List}
+     * @param pojoInstantiator a {@link Supplier} to instantiate a new POJO
      * @param nestedListLength the nested list length
      */
-    public NestedListCSVMapper(Callable<? extends List<T>> listInstantiator, Callable<T> pojoInstantiator,
+    public NestedListCSVMapper(Supplier<? extends List<T>> listInstantiator, Supplier<T> pojoInstantiator,
             int nestedListLength) {
         super(pojoInstantiator);
 
@@ -82,20 +82,10 @@ public class NestedListCSVMapper<T> extends AbstractListCSVMapper<T> {
      */
     @Override
     public List<T> mapToList(String[] csv, int offset) {
-        List<T> mappedList;
-        try {
-            mappedList = listInstantiator.call();
-        } catch (Exception exception) {
-            throw new CSVMappingException("Could not instantiate List!", exception);
-        }
+        List<T> mappedList = listInstantiator.get();
 
         for (int csvIndex = offset; csvIndex < csv.length; csvIndex += nestedListLength) {
-            T instance;
-            try {
-                instance = pojoInstantiator.call();
-            } catch (Exception exception) {
-                throw new CSVMappingException("Could not instantiate POJO!", exception);
-            }
+            T instance = pojoInstantiator.get();
 
             // Loop through all added 'CSVMapping's and apply them
             boolean valueWasMapped = false;

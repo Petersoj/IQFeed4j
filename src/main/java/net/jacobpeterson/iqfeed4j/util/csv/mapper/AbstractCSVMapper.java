@@ -7,8 +7,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
 import java.util.Locale;
-import java.util.concurrent.Callable;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * {@link AbstractCSVMapper} maps CSV {@link String} values to various types/objects.
@@ -124,14 +124,14 @@ public abstract class AbstractCSVMapper<T> {
                 (value) -> LocalDateTime.parse(value, DateTimeFormatters.DATE_SPACE_COLON_TIME);
     }
 
-    protected final Callable<T> pojoInstantiator;
+    protected final Supplier<T> pojoInstantiator;
 
     /**
      * Instantiates a new {@link AbstractCSVMapper}.
      *
-     * @param pojoInstantiator a {@link Callable} to instantiate a new POJO
+     * @param pojoInstantiator a {@link Supplier} to instantiate a new POJO
      */
-    public AbstractCSVMapper(Callable<T> pojoInstantiator) {
+    public AbstractCSVMapper(Supplier<T> pojoInstantiator) {
         this.pojoInstantiator = pojoInstantiator;
     }
 }

@@ -3,8 +3,8 @@ package net.jacobpeterson.iqfeed4j.util.csv.mapper.list;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.exception.CSVMappingException;
 
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueNotWhitespace;
@@ -16,22 +16,22 @@ import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueNotWhitespace;
  */
 public class ListCSVMapper<T> extends AbstractListCSVMapper<T> {
 
-    protected final Callable<? extends List<T>> listInstantiator;
+    protected final Supplier<? extends List<T>> listInstantiator;
     protected final BiConsumer<T, String> csvValueConsumer;
     protected final Pattern skipPattern;
 
     /**
      * Instantiates a new {@link ListCSVMapper}.
      *
-     * @param listInstantiator a {@link Callable} to instantiate a new {@link List}
-     * @param pojoInstantiator a {@link Callable} to instantiate a new POJO
+     * @param listInstantiator a {@link Supplier} to instantiate a new {@link List}
+     * @param pojoInstantiator a {@link Supplier} to instantiate a new POJO
      * @param csvValueConsumer a {@link BiConsumer} that takes a new POJO instance as the first argument, and the CSV
      *                         list {@link String} value as the second argument. This is so that fields inside the POJO
      *                         can be set according to the passed in CSV list {@link String} value.
      * @param skipPattern      when a CSV value matches this given {@link Pattern} in {@link #mapToList(String[], int)},
      *                         then it is skipped (<code>null</code> to not check)
      */
-    public ListCSVMapper(Callable<? extends List<T>> listInstantiator, Callable<T> pojoInstantiator,
+    public ListCSVMapper(Supplier<? extends List<T>> listInstantiator, Supplier<T> pojoInstantiator,
             BiConsumer<T, String> csvValueConsumer, Pattern skipPattern) {
         super(pojoInstantiator);
 
@@ -47,12 +47,7 @@ public class ListCSVMapper<T> extends AbstractListCSVMapper<T> {
      */
     @Override
     public List<T> mapToList(String[] csv, int offset) {
-        List<T> mappedList;
-        try {
-            mappedList = listInstantiator.call();
-        } catch (Exception exception) {
-            throw new CSVMappingException("Could not instantiate List!", exception);
-        }
+        List<T> mappedList = listInstantiator.get();
 
         for (int csvIndex = offset; csvIndex < csv.length; csvIndex++) {
             if (!valueNotWhitespace(csv, csvIndex)) { // Add null for empty CSV values
@@ -65,12 +60,7 @@ public class ListCSVMapper<T> extends AbstractListCSVMapper<T> {
                 continue;
             }
 
-            T instance;
-            try {
-                instance = pojoInstantiator.call();
-            } catch (Exception exception) {
-                throw new CSVMappingException("Could not instantiate POJO!", exception);
-            }
+            T instance = pojoInstantiator.get();
 
             // accept() could throw a variety of exceptions
             try {

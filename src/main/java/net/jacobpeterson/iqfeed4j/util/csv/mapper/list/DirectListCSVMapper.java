@@ -3,8 +3,8 @@ package net.jacobpeterson.iqfeed4j.util.csv.mapper.list;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.exception.CSVMappingException;
 
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueNotWhitespace;
 
@@ -15,17 +15,17 @@ import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueNotWhitespace;
  */
 public class DirectListCSVMapper<T> extends AbstractListCSVMapper<T> {
 
-    protected final Callable<? extends List<T>> listInstantiator;
+    protected final Supplier<? extends List<T>> listInstantiator;
     protected final Function<String, T> stringToTypeConverter;
 
     /**
      * Instantiates a new {@link DirectListCSVMapper}.
      *
-     * @param listInstantiator      a {@link Callable} to instantiate a new {@link List}
+     * @param listInstantiator      a {@link Supplier} to instantiate a new {@link List}
      * @param stringToTypeConverter a {@link Function} that will takes a CSV value {@link String} as the argument, and
      *                              returns the converted CSV value type.
      */
-    public DirectListCSVMapper(Callable<? extends List<T>> listInstantiator,
+    public DirectListCSVMapper(Supplier<? extends List<T>> listInstantiator,
             Function<String, T> stringToTypeConverter) {
         super(null);
 
@@ -40,12 +40,7 @@ public class DirectListCSVMapper<T> extends AbstractListCSVMapper<T> {
      */
     @Override
     public List<T> mapToList(String[] csv, int offset) {
-        List<T> mappedList;
-        try {
-            mappedList = listInstantiator.call();
-        } catch (Exception exception) {
-            throw new CSVMappingException("Could not instantiate List!", exception);
-        }
+        List<T> mappedList = listInstantiator.get();
 
         for (int csvIndex = offset; csvIndex < csv.length; csvIndex++) {
             if (!valueNotWhitespace(csv, csvIndex)) { // Add null for empty CSV values

@@ -4,9 +4,9 @@ import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapping;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.exception.CSVMappingException;
 
 import java.util.HashMap;
-import java.util.concurrent.Callable;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueNotWhitespace;
 
@@ -20,9 +20,9 @@ public class IndexCSVMapper<T> extends AbstractIndexCSVMapper<T> {
     /**
      * Instantiates a new {@link IndexCSVMapper}.
      *
-     * @param pojoInstantiator a {@link Callable} to instantiate a new POJO
+     * @param pojoInstantiator a {@link Supplier} to instantiate a new POJO
      */
-    public IndexCSVMapper(Callable<T> pojoInstantiator) {
+    public IndexCSVMapper(Supplier<T> pojoInstantiator) {
         super(pojoInstantiator);
 
         csvMappingsOfCSVIndices = new HashMap<>();
@@ -115,12 +115,7 @@ public class IndexCSVMapper<T> extends AbstractIndexCSVMapper<T> {
      */
     @Override
     public T map(String[] csv, int offset) {
-        T instance;
-        try {
-            instance = pojoInstantiator.call();
-        } catch (Exception exception) {
-            throw new CSVMappingException("Could not instantiate POJO!", exception);
-        }
+        T instance = pojoInstantiator.get();
 
         // Loop through all added 'CSVMappings' and apply them
         for (int csvIndex : csvMappingsOfCSVIndices.keySet()) {

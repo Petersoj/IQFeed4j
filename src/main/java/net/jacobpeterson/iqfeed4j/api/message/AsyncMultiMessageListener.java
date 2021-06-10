@@ -43,7 +43,7 @@ public class AsyncMultiMessageListener<T> extends MultiMessageListener<T> {
 
     /**
      * Gets an {@link Iterator} for all the messages in {@link #messages}. Note this will block until {@link
-     * #onEndOfMultiMessage()}* has been called by the underlying feed.
+     * #onEndOfMultiMessage()} has been called by the underlying feed.
      *
      * @return an {@link Iterator}
      *
