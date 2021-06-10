@@ -1,6 +1,7 @@
 package net.jacobpeterson.iqfeed4j.feed.lookup.historical;
 
 import net.jacobpeterson.iqfeed4j.feed.lookup.AbstractLookupFeed;
+import net.jacobpeterson.iqfeed4j.feed.message.MultiMessageIteratorListener;
 import net.jacobpeterson.iqfeed4j.feed.message.MultiMessageListener;
 import net.jacobpeterson.iqfeed4j.model.feed.common.interval.IntervalType;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.historical.DatedInterval;
@@ -22,6 +23,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.concurrent.ExecutionException;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -183,6 +186,22 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     /**
+     * See {@link HistoricalFeed#requestTicks(String, int, DataDirection, MultiMessageListener)} for parameter details.
+     * <br>
+     * This will accumulate all requested data into memory which can be consumed later.
+     *
+     * @throws IOException          thrown for {@link IOException}s
+     * @throws ExecutionException   thrown for {@link ExecutionException}s
+     * @throws InterruptedException thrown for {@link InterruptedException}s
+     */
+    public Iterator<Tick> requestTicks(String symbol, int maxDataPoints, DataDirection dataDirection)
+            throws IOException, ExecutionException, InterruptedException {
+        MultiMessageIteratorListener<Tick> asyncListener = new MultiMessageIteratorListener<>();
+        requestTicks(symbol, maxDataPoints, dataDirection, asyncListener);
+        return asyncListener.getIterator();
+    }
+
+    /**
      * Retrieves {@link Tick}s for the previous 'maxDays' days for the specified 'symbol'. This sends a {@link
      * HistoricalCommand#HISTORICAL_TICKS_DAYS} request.
      *
@@ -240,6 +259,24 @@ public class HistoricalFeed extends AbstractLookupFeed {
         }
 
         sendAndLogMessage(requestBuilder.toString());
+    }
+
+    /**
+     * See {@link HistoricalFeed#requestTicks(String, int, Integer, LocalTime, LocalTime, DataDirection,
+     * MultiMessageListener)} for parameter details.
+     * <br>
+     * This will accumulate all requested data into memory which can be consumed later.
+     *
+     * @throws IOException          thrown for {@link IOException}s
+     * @throws ExecutionException   thrown for {@link ExecutionException}s
+     * @throws InterruptedException thrown for {@link InterruptedException}s
+     */
+    public Iterator<Tick> requestTicks(String symbol, int maxDays, Integer maxDataPoints, LocalTime beginFilterTime,
+            LocalTime endFilterTime, DataDirection dataDirection)
+            throws IOException, ExecutionException, InterruptedException {
+        MultiMessageIteratorListener<Tick> asyncListener = new MultiMessageIteratorListener<>();
+        requestTicks(symbol, maxDays, maxDataPoints, beginFilterTime, endFilterTime, dataDirection, asyncListener);
+        return asyncListener.getIterator();
     }
 
     /**
@@ -314,6 +351,25 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     /**
+     * See {@link HistoricalFeed#requestTicks(String, LocalDateTime, LocalDateTime, Integer, LocalTime, LocalTime,
+     * DataDirection, MultiMessageListener)} for parameter details.
+     * <br>
+     * This will accumulate all requested data into memory which can be consumed later.
+     *
+     * @throws IOException          thrown for {@link IOException}s
+     * @throws ExecutionException   thrown for {@link ExecutionException}s
+     * @throws InterruptedException thrown for {@link InterruptedException}s
+     */
+    public Iterator<Tick> requestTicks(String symbol, LocalDateTime beginDateTime, LocalDateTime endDateTime,
+            Integer maxDataPoints, LocalTime beginFilterTime, LocalTime endFilterTime, DataDirection dataDirection)
+            throws IOException, ExecutionException, InterruptedException {
+        MultiMessageIteratorListener<Tick> asyncListener = new MultiMessageIteratorListener<>();
+        requestTicks(symbol, beginDateTime, endDateTime, maxDataPoints, beginFilterTime, endFilterTime, dataDirection,
+                asyncListener);
+        return asyncListener.getIterator();
+    }
+
+    /**
      * Retrieves up to 'maxDataPoints' number of {@link Interval}s for the specified 'symbol'. This sends a {@link
      * HistoricalCommand#HISTORICAL_INTERVAL_DATAPOINTS} request.
      *
@@ -361,6 +417,24 @@ public class HistoricalFeed extends AbstractLookupFeed {
         }
 
         sendAndLogMessage(requestBuilder.toString());
+    }
+
+    /**
+     * See {@link HistoricalFeed#requestIntervals(String, int, Integer, DataDirection, IntervalType,
+     * MultiMessageListener)} for parameter details.
+     * <br>
+     * This will accumulate all requested data into memory which can be consumed later.
+     *
+     * @throws IOException          thrown for {@link IOException}s
+     * @throws ExecutionException   thrown for {@link ExecutionException}s
+     * @throws InterruptedException thrown for {@link InterruptedException}s
+     */
+    public Iterator<Interval> requestIntervals(String symbol, int intervalLength, Integer maxDataPoints,
+            DataDirection dataDirection, IntervalType intervalType)
+            throws IOException, ExecutionException, InterruptedException {
+        MultiMessageIteratorListener<Interval> asyncListener = new MultiMessageIteratorListener<>();
+        requestIntervals(symbol, intervalLength, maxDataPoints, dataDirection, intervalType, asyncListener);
+        return asyncListener.getIterator();
     }
 
     /**
@@ -431,6 +505,25 @@ public class HistoricalFeed extends AbstractLookupFeed {
         }
 
         sendAndLogMessage(requestBuilder.toString());
+    }
+
+    /**
+     * See {@link HistoricalFeed#requestIntervals(String, int, int, Integer, LocalTime, LocalTime, DataDirection,
+     * IntervalType, MultiMessageListener)} for parameter details.
+     * <br>
+     * This will accumulate all requested data into memory which can be consumed later.
+     *
+     * @throws IOException          thrown for {@link IOException}s
+     * @throws ExecutionException   thrown for {@link ExecutionException}s
+     * @throws InterruptedException thrown for {@link InterruptedException}s
+     */
+    public Iterator<Interval> requestIntervals(String symbol, int intervalLength, int maxDays, Integer maxDataPoints,
+            LocalTime beginFilterTime, LocalTime endFilterTime, DataDirection dataDirection, IntervalType intervalType)
+            throws IOException, ExecutionException, InterruptedException {
+        MultiMessageIteratorListener<Interval> asyncListener = new MultiMessageIteratorListener<>();
+        requestIntervals(symbol, intervalLength, maxDays, maxDataPoints, beginFilterTime, endFilterTime, dataDirection,
+                intervalType, asyncListener);
+        return asyncListener.getIterator();
     }
 
     /**
@@ -516,6 +609,26 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     /**
+     * See {@link HistoricalFeed#requestIntervals(String, int, LocalDateTime, LocalDateTime, Integer, LocalTime,
+     * LocalTime, DataDirection, IntervalType, MultiMessageListener)} for parameter details.
+     * <br>
+     * This will accumulate all requested data into memory which can be consumed later.
+     *
+     * @throws IOException          thrown for {@link IOException}s
+     * @throws ExecutionException   thrown for {@link ExecutionException}s
+     * @throws InterruptedException thrown for {@link InterruptedException}s
+     */
+    public Iterator<Interval> requestIntervals(String symbol, int intervalLength, LocalDateTime beginDateTime,
+            LocalDateTime endDateTime, Integer maxDataPoints, LocalTime beginFilterTime, LocalTime endFilterTime,
+            DataDirection dataDirection, IntervalType intervalType)
+            throws IOException, ExecutionException, InterruptedException {
+        MultiMessageIteratorListener<Interval> asyncListener = new MultiMessageIteratorListener<>();
+        requestIntervals(symbol, intervalLength, beginDateTime, endDateTime, maxDataPoints, beginFilterTime,
+                endFilterTime, dataDirection, intervalType, asyncListener);
+        return asyncListener.getIterator();
+    }
+
+    /**
      * Retrieves up to 'maxDays' days of End-Of-Day {@link DatedInterval} for the specified 'symbol'. This sends a
      * {@link HistoricalCommand#HISTORICAL_DAILY_DATAPOINTS} request.
      *
@@ -561,6 +674,23 @@ public class HistoricalFeed extends AbstractLookupFeed {
         }
 
         sendAndLogMessage(requestBuilder.toString());
+    }
+
+    /**
+     * See {@link HistoricalFeed#requestDayIntervals(String, int, DataDirection, PartialDatapoint,
+     * MultiMessageListener)} for parameter details.
+     * <br>
+     * This will accumulate all requested data into memory which can be consumed later.
+     *
+     * @throws IOException          thrown for {@link IOException}s
+     * @throws ExecutionException   thrown for {@link ExecutionException}s
+     * @throws InterruptedException thrown for {@link InterruptedException}s
+     */
+    public Iterator<DatedInterval> requestDayIntervals(String symbol, int maxDays, DataDirection dataDirection,
+            PartialDatapoint partialDatapoint) throws IOException, ExecutionException, InterruptedException {
+        MultiMessageIteratorListener<DatedInterval> asyncListener = new MultiMessageIteratorListener<>();
+        requestDayIntervals(symbol, maxDays, dataDirection, partialDatapoint, asyncListener);
+        return asyncListener.getIterator();
     }
 
     /**
@@ -629,6 +759,24 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     /**
+     * See {@link HistoricalFeed#requestDayIntervals(String, LocalDate, LocalDate, Integer, DataDirection,
+     * PartialDatapoint, MultiMessageListener)} for parameter details.
+     * <br>
+     * This will accumulate all requested data into memory which can be consumed later.
+     *
+     * @throws IOException          thrown for {@link IOException}s
+     * @throws ExecutionException   thrown for {@link ExecutionException}s
+     * @throws InterruptedException thrown for {@link InterruptedException}s
+     */
+    public Iterator<DatedInterval> requestDayIntervals(String symbol, LocalDate beginDate, LocalDate endDate,
+            Integer maxDataPoints, DataDirection dataDirection, PartialDatapoint partialDatapoint)
+            throws IOException, ExecutionException, InterruptedException {
+        MultiMessageIteratorListener<DatedInterval> asyncListener = new MultiMessageIteratorListener<>();
+        requestDayIntervals(symbol, beginDate, endDate, maxDataPoints, dataDirection, partialDatapoint, asyncListener);
+        return asyncListener.getIterator();
+    }
+
+    /**
      * Retrieves up to 'maxWeeks' if composite weekly {@link DatedInterval} for the specified 'symbol'. This sends a
      * {@link HistoricalCommand#HISTORICAL_WEEKLY_DATAPOINTS} request.
      *
@@ -677,6 +825,23 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     /**
+     * See {@link HistoricalFeed#requestWeekIntervals(String, int, DataDirection, PartialDatapoint,
+     * MultiMessageListener)} for parameter details.
+     * <br>
+     * This will accumulate all requested data into memory which can be consumed later.
+     *
+     * @throws IOException          thrown for {@link IOException}s
+     * @throws ExecutionException   thrown for {@link ExecutionException}s
+     * @throws InterruptedException thrown for {@link InterruptedException}s
+     */
+    public Iterator<DatedInterval> requestWeekIntervals(String symbol, int maxWeeks, DataDirection dataDirection,
+            PartialDatapoint partialDatapoint) throws IOException, ExecutionException, InterruptedException {
+        MultiMessageIteratorListener<DatedInterval> asyncListener = new MultiMessageIteratorListener<>();
+        requestWeekIntervals(symbol, maxWeeks, dataDirection, partialDatapoint, asyncListener);
+        return asyncListener.getIterator();
+    }
+
+    /**
      * Retrieves up to 'maxMonths' if composite monthly {@link DatedInterval} for the specified 'symbol'. This sends a
      * {@link HistoricalCommand#HISTORICAL_MONTHLY_DATAPOINTS} request.
      *
@@ -722,6 +887,23 @@ public class HistoricalFeed extends AbstractLookupFeed {
         }
 
         sendAndLogMessage(requestBuilder.toString());
+    }
+
+    /**
+     * See {@link HistoricalFeed#requestMonthIntervals(String, int, DataDirection, PartialDatapoint,
+     * MultiMessageListener)} for parameter details.
+     * <br>
+     * This will accumulate all requested data into memory which can be consumed later.
+     *
+     * @throws IOException          thrown for {@link IOException}s
+     * @throws ExecutionException   thrown for {@link ExecutionException}s
+     * @throws InterruptedException thrown for {@link InterruptedException}s
+     */
+    public Iterator<DatedInterval> requestMonthIntervals(String symbol, int maxMonths, DataDirection dataDirection,
+            PartialDatapoint partialDatapoint) throws IOException, ExecutionException, InterruptedException {
+        MultiMessageIteratorListener<DatedInterval> asyncListener = new MultiMessageIteratorListener<>();
+        requestMonthIntervals(symbol, maxMonths, dataDirection, partialDatapoint, asyncListener);
+        return asyncListener.getIterator();
     }
 
     //

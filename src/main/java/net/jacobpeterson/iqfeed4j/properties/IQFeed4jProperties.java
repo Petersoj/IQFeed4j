@@ -1,6 +1,6 @@
 package net.jacobpeterson.iqfeed4j.properties;
 
-import net.jacobpeterson.iqfeed4j.api.IQFeed4j;
+import net.jacobpeterson.iqfeed4j.IQFeed4j;
 import net.jacobpeterson.iqfeed4j.util.reflection.ReflectionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

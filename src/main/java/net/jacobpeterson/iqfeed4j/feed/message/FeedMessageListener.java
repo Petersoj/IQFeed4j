@@ -8,7 +8,10 @@ package net.jacobpeterson.iqfeed4j.feed.message;
 public interface FeedMessageListener<T> {
 
     /**
-     * Called when a message is received. Note: This method should NEVER block and should NEVER throw an exception!
+     * Called when a message is received. <strong>This method should NEVER throw an {@link Exception}!</strong>
+     * <br>
+     * Note that synchronously consuming data via this method will block the underlying feed if the data is not consumed
+     * fast enough.
      *
      * @param message the message
      */

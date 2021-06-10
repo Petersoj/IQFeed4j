@@ -3,7 +3,8 @@ package net.jacobpeterson.iqfeed4j.feed.message;
 import net.jacobpeterson.iqfeed4j.feed.AbstractFeed;
 
 /**
- * {@link MultiMessageListener} is an abstract class that represents a listener for multiple typed messages.
+ * {@link MultiMessageListener} is an abstract class that represents a {@link FeedMessageListener} for multiple typed
+ * messages.
  *
  * @param <T> the type of the message POJO
  */
