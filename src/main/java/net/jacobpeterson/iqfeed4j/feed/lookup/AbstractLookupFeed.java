@@ -52,13 +52,14 @@ public abstract class AbstractLookupFeed extends AbstractFeed {
      * @param <T>                   the type of {@link MultiMessageListener}
      * @param csv                   the CSV
      * @param requestID             the Request ID
+     * @param offset                the offset to add to CSV indices
      * @param listenersOfRequestIDs the {@link Map} with the keys being the Request IDs and the values being the
      *                              corresponding {@link MultiMessageListener}s
      * @param indexCSVMapper        the {@link AbstractIndexCSVMapper} for the message
      *
      * @return true if the 'requestID' was a key inside 'listenersOfRequestIDs', false otherwise
      */
-    protected <T> boolean handleStandardMultiMessage(String[] csv, String requestID,
+    protected <T> boolean handleStandardMultiMessage(String[] csv, String requestID, int offset,
             Map<String, MultiMessageListener<T>> listenersOfRequestIDs, AbstractIndexCSVMapper<T> indexCSVMapper) {
         MultiMessageListener<T> listener = listenersOfRequestIDs.get(requestID);
 
@@ -83,7 +84,7 @@ public abstract class AbstractLookupFeed extends AbstractFeed {
             listener.handleEndOfMultiMessage();
         } else {
             try {
-                T message = indexCSVMapper.map(csv, 1);
+                T message = indexCSVMapper.map(csv, offset);
                 listener.onMessageReceived(message);
             } catch (Exception exception) {
                 listener.onMessageException(exception);
@@ -107,7 +108,7 @@ public abstract class AbstractLookupFeed extends AbstractFeed {
             return true;
         }
 
-        // All messages sent on this feed must have a numeric Request ID first
+        // Messages sent on this feed have a numeric Request ID first
         if (!valueNotWhitespace(csv, 0)) {
             LOGGER.error("Received unknown message format: {}", (Object) csv);
             return true;

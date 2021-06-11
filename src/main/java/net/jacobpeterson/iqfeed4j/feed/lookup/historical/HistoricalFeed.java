@@ -127,15 +127,15 @@ public class HistoricalFeed extends AbstractLookupFeed {
         String requestID = csv[0];
 
         synchronized (messageReceivedLock) {
-            if (handleStandardMultiMessage(csv, requestID, tickListenersOfRequestIDs, TICK_CSV_MAPPER)) {
+            if (handleStandardMultiMessage(csv, requestID, 1, tickListenersOfRequestIDs, TICK_CSV_MAPPER)) {
                 return;
             }
 
-            if (handleStandardMultiMessage(csv, requestID, intervalListenersOfRequestIDs, INTERVAL_CSV_MAPPER)) {
+            if (handleStandardMultiMessage(csv, requestID, 1, intervalListenersOfRequestIDs, INTERVAL_CSV_MAPPER)) {
                 return;
             }
 
-            if (handleStandardMultiMessage(csv, requestID, datedIntervalListenersOfRequestIDs,
+            if (handleStandardMultiMessage(csv, requestID, 1, datedIntervalListenersOfRequestIDs,
                     DATED_INTERVAL_CSV_MAPPER)) {
                 return;
             }

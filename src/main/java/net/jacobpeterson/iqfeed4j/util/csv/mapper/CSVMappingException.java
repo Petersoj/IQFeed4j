@@ -1,4 +1,4 @@
-package net.jacobpeterson.iqfeed4j.util.csv.mapper.exception;
+package net.jacobpeterson.iqfeed4j.util.csv.mapper;
 
 /**
  * {@link CSVMappingException} is a {@link RuntimeException} for CSV mapping errors.

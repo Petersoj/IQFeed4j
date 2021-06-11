@@ -1,7 +1,7 @@
 package net.jacobpeterson.iqfeed4j.util.csv.mapper.index;
 
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapping;
-import net.jacobpeterson.iqfeed4j.util.csv.mapper.exception.CSVMappingException;
+import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMappingException;
 
 import java.util.HashMap;
 import java.util.function.BiConsumer;
@@ -118,13 +118,11 @@ public class TrailingIndexCSVMapper<T> extends AbstractIndexCSVMapper<T> {
             }
 
             String trailingCSVString = trailingCSVBuilder.toString();
-            if (!trailingCSVString.isEmpty()) {
-                // apply() could throw a variety of exceptions
-                try {
-                    trailingCSVMapping.apply(instance, trailingCSVString);
-                } catch (Exception exception) {
-                    throw new CSVMappingException(trailingCSVIndex, offset, exception);
-                }
+            // apply() could throw a variety of exceptions
+            try {
+                trailingCSVMapping.apply(instance, trailingCSVString);
+            } catch (Exception exception) {
+                throw new CSVMappingException(trailingCSVIndex, offset, exception);
             }
         }
 

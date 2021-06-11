@@ -4,7 +4,6 @@ import org.jsonschema2pojo.gradle.GenerateJsonSchemaJavaTask
 buildscript {
     repositories {
         mavenCentral()
-        jcenter()
     }
 
     dependencies {
@@ -24,8 +23,8 @@ plugins {
     id 'io.codearte.nexus-staging' version '0.11.0'
 }
 
-// Calling 'apply' here because 'jsonschema2pojo' doesn't exist in the Gradle Central Plugin Repository (it's only
-// in Maven central).
+// 'apply' here instead of in plugins closure because 'jsonschema2pojo' doesn't exist in the
+// Gradle Central Plugin Repository (it's only in Maven central).
 apply plugin: 'jsonschema2pojo'
 tasks.getByName('generateJsonSchema2Pojo').enabled(false) // Disable default 'jsonSchema2Pojo' task
 
@@ -41,7 +40,14 @@ dependencies {
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
 
     // Google Guava for a variety of useful methods
-    implementation group: 'com.google.guava', name: 'guava', version: '20.0'
+    implementation group: 'com.google.guava', name: 'guava', version: '30.1.1-jre'
+
+    // Jackson for XML <-> POJO (de)serialization
+    // Note: not using JAXB since it's slower and Jackson XML has more features
+    implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-xml', version: '2.12.3'
+    implementation group: 'org.codehaus.woodstox', name: 'woodstox-core-asl', version: '4.4.1'
+    // For JDK 8 common Jackson (de)serializers
+    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.12.3'
 }
 
 sourceCompatibility = 1.8

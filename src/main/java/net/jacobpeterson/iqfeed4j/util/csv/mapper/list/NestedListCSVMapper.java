@@ -1,7 +1,7 @@
 package net.jacobpeterson.iqfeed4j.util.csv.mapper.list;
 
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapping;
-import net.jacobpeterson.iqfeed4j.util.csv.mapper.exception.CSVMappingException;
+import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMappingException;
 
 import java.util.HashMap;
 import java.util.List;

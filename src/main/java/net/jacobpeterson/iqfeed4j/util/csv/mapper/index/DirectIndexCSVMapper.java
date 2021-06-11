@@ -1,6 +1,6 @@
 package net.jacobpeterson.iqfeed4j.util.csv.mapper.index;
 
-import net.jacobpeterson.iqfeed4j.util.csv.mapper.exception.CSVMappingException;
+import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMappingException;
 
 import java.util.function.Function;
 

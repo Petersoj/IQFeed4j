@@ -40,8 +40,21 @@ public class MultiMessageIteratorListener<T> extends MultiMessageListener<T> {
     }
 
     /**
-     * Gets an {@link Iterator} for all the messages in {@link #messages}. Note this will block until {@link
+     * Gets the {@link List} for all the messages in {@link #messages}. Note this will block until {@link
      * #onEndOfMultiMessage()} has been called by the underlying feed.
+     *
+     * @return an {@link List}
+     *
+     * @throws ExecutionException   thrown for {@link ExecutionException}s
+     * @throws InterruptedException thrown for {@link InterruptedException}s
+     */
+    public List<T> getMessages() throws ExecutionException, InterruptedException {
+        completionFuture.get();
+        return messages;
+    }
+
+    /**
+     * Calls {@link #getMessages()} {@link List#iterator()}.
      *
      * @return an {@link Iterator}
      *
@@ -49,7 +62,6 @@ public class MultiMessageIteratorListener<T> extends MultiMessageListener<T> {
      * @throws InterruptedException thrown for {@link InterruptedException}s
      */
     public Iterator<T> getIterator() throws ExecutionException, InterruptedException {
-        completionFuture.get();
-        return messages.iterator();
+        return getMessages().iterator();
     }
 }

@@ -205,7 +205,6 @@ public class OptionChainsFeed extends AbstractLookupFeed {
          * @param futureSpread the {@link FutureSpread} instance
          * @param csvValue     the CSV value
          */
-        @SuppressWarnings("UnstableApiUsage")
         public static void futureSpread(FutureSpread futureSpread, String csvValue) {
             // Format of Future spread is two future contract symbols separated by a '-'
 

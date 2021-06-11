@@ -22,6 +22,7 @@ public abstract class MultiMessageListener<T> implements FeedMessageListener<T> 
      */
     public final void handleEndOfMultiMessage() {
         endOfMultiMessage = true;
+        onEndOfMultiMessage();
     }
 
     /**

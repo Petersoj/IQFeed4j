@@ -1,7 +1,13 @@
 package net.jacobpeterson.iqfeed4j.feed.lookup.news;
 
 import net.jacobpeterson.iqfeed4j.feed.lookup.AbstractLookupFeed;
+import net.jacobpeterson.iqfeed4j.feed.lookup.news.xml.configuration.NewsConfiguration;
+import net.jacobpeterson.iqfeed4j.feed.lookup.news.xml.headline.NewsHeadlines;
+import net.jacobpeterson.iqfeed4j.feed.lookup.news.xml.story.NewsStories;
+import net.jacobpeterson.iqfeed4j.feed.lookup.news.xml.storycount.NewsStoryCounts;
+import net.jacobpeterson.iqfeed4j.feed.message.MultiMessageIteratorListener;
 import net.jacobpeterson.iqfeed4j.feed.message.MultiMessageListener;
+import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedMessageType;
 import net.jacobpeterson.iqfeed4j.model.feed.common.message.MessageLine;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.news.enums.NewsCommand;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.news.enums.XMLTextEmailOption;
@@ -16,12 +22,16 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueNotWhitespace;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.DateTimeFormatters.DATE;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.PrimitiveConvertors.STRING;
+import static net.jacobpeterson.iqfeed4j.util.xml.XMLUtil.STANDARD_XML_MAPPER;
 
 /**
  * {@link NewsFeed} is an {@link AbstractLookupFeed} for news data.
@@ -57,14 +67,20 @@ public class NewsFeed extends AbstractLookupFeed {
 
     @Override
     protected void onMessageReceived(String[] csv) {
-        if (isErrorOrInvalidMessage(csv)) {
+        if (valueEquals(csv, 0, FeedMessageType.ERROR.value())) {
+            LOGGER.error("Received error message! {}", (Object) csv);
+            return;
+        }
+
+        // This feed may deliver empty messages so just ignore them
+        if (!valueNotWhitespace(csv, 0)) {
             return;
         }
 
         String requestID = csv[0];
 
         synchronized (messageReceivedLock) {
-            handleStandardMultiMessage(csv, requestID, messageLineListenersOfRequestIDs, MESSAGE_LINE_CSV_MAPPER);
+            handleStandardMultiMessage(csv, requestID, 2, messageLineListenersOfRequestIDs, MESSAGE_LINE_CSV_MAPPER);
         }
     }
 
@@ -100,6 +116,25 @@ public class NewsFeed extends AbstractLookupFeed {
         }
 
         sendAndLogMessage(requestBuilder.toString());
+    }
+
+    /**
+     * Calls {@link #requestNewsConfiguration(XMLTextOption, MultiMessageListener)} and parses the XML data into POJOs.
+     *
+     * @return a {@link NewsConfiguration}
+     *
+     * @throws IOException          thrown for {@link IOException}s
+     * @throws ExecutionException   thrown for {@link ExecutionException}s
+     * @throws InterruptedException thrown for {@link InterruptedException}s
+     */
+    public NewsConfiguration requestNewsConfiguration() throws IOException, ExecutionException, InterruptedException {
+        MultiMessageIteratorListener<MessageLine> asyncListener = new MultiMessageIteratorListener<>();
+        requestNewsConfiguration(XMLTextOption.XML, asyncListener);
+
+        String xmlMessage = asyncListener.getMessages().stream()
+                .map(MessageLine::getLine)
+                .collect(Collectors.joining());
+        return STANDARD_XML_MAPPER.readValue(xmlMessage, NewsConfiguration.class);
     }
 
     /**
@@ -171,6 +206,28 @@ public class NewsFeed extends AbstractLookupFeed {
     }
 
     /**
+     * Calls {@link #requestNewsHeadlines(List, List, XMLTextOption, Integer, List, Map, MultiMessageListener)} and
+     * parses the XML data into POJOs.
+     *
+     * @return {@link NewsHeadlines}
+     *
+     * @throws IOException          thrown for {@link IOException}s
+     * @throws ExecutionException   thrown for {@link ExecutionException}s
+     * @throws InterruptedException thrown for {@link InterruptedException}s
+     */
+    public NewsHeadlines requestNewsHeadlines(List<String> sources, List<String> symbols, XMLTextOption xmlTextOption,
+            Integer limit, List<LocalDate> dates, Map<LocalDate, LocalDate> dateRanges)
+            throws IOException, ExecutionException, InterruptedException {
+        MultiMessageIteratorListener<MessageLine> asyncListener = new MultiMessageIteratorListener<>();
+        requestNewsHeadlines(sources, symbols, xmlTextOption, limit, dates, dateRanges, asyncListener);
+
+        String xmlMessage = asyncListener.getMessages().stream()
+                .map(MessageLine::getLine)
+                .collect(Collectors.joining());
+        return STANDARD_XML_MAPPER.readValue(xmlMessage, NewsHeadlines.class);
+    }
+
+    /**
      * This requests News stories. This sends a {@link NewsCommand#NEWS_STORY} request.
      *
      * @param id                  the headline/story identifier which can be retrieved via {@link
@@ -213,6 +270,27 @@ public class NewsFeed extends AbstractLookupFeed {
         }
 
         sendAndLogMessage(requestBuilder.toString());
+    }
+
+    /**
+     * Calls {@link #requestNewsStory(String, XMLTextEmailOption, String, MultiMessageListener)} and parses the XML data
+     * into POJOs.
+     *
+     * @return {@link NewsStories}
+     *
+     * @throws IOException          thrown for {@link IOException}s
+     * @throws ExecutionException   thrown for {@link ExecutionException}s
+     * @throws InterruptedException thrown for {@link InterruptedException}s
+     */
+    public NewsStories requestNewsStory(String id)
+            throws IOException, ExecutionException, InterruptedException {
+        MultiMessageIteratorListener<MessageLine> asyncListener = new MultiMessageIteratorListener<>();
+        requestNewsStory(id, XMLTextEmailOption.XML, null, asyncListener);
+
+        String xmlMessage = asyncListener.getMessages().stream()
+                .map(MessageLine::getLine)
+                .collect(Collectors.joining());
+        return STANDARD_XML_MAPPER.readValue(xmlMessage, NewsStories.class);
     }
 
     /**
@@ -266,6 +344,27 @@ public class NewsFeed extends AbstractLookupFeed {
         }
 
         sendAndLogMessage(requestBuilder.toString());
+    }
+
+    /**
+     * Calls {@link #requestNewsStoryCount(List, XMLTextOption, List, LocalDate, LocalDate, MultiMessageListener)} and
+     * parses the XML data into POJOs.
+     *
+     * @return {@link NewsStoryCounts}
+     *
+     * @throws IOException          thrown for {@link IOException}s
+     * @throws ExecutionException   thrown for {@link ExecutionException}s
+     * @throws InterruptedException thrown for {@link InterruptedException}s
+     */
+    public NewsStoryCounts requestNewsStoryCount(List<String> symbols, List<String> sources, LocalDate fromDate,
+            LocalDate toDate) throws IOException, ExecutionException, InterruptedException {
+        MultiMessageIteratorListener<MessageLine> asyncListener = new MultiMessageIteratorListener<>();
+        requestNewsStoryCount(symbols, XMLTextOption.XML, sources, fromDate, toDate, asyncListener);
+
+        String xmlMessage = asyncListener.getMessages().stream()
+                .map(MessageLine::getLine)
+                .collect(Collectors.joining());
+        return STANDARD_XML_MAPPER.readValue(xmlMessage, NewsStoryCounts.class);
     }
 
     //
