@@ -25,10 +25,10 @@ public class IQFeed4jProperties {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IQFeed4jProperties.class);
 
-    private static final String KEY_ID_KEY = "key_id";
-    /** The value of {@link #KEY_ID_KEY} in {@link #PROPERTIES_FILE}. */
-    public static final String KEY_ID = getProperty(PROPERTIES_FILE, DEFAULT_PROPERTIES_FILE,
-            KEY_ID_KEY);
+    private static final String IQCONNECT_COMMAND_KEY = "iqconnect_command";
+    /** The value of {@link #IQCONNECT_COMMAND_KEY} in {@link #PROPERTIES_FILE}. */
+    public static final String IQCONNECT_COMMAND = getProperty(PROPERTIES_FILE, DEFAULT_PROPERTIES_FILE,
+            IQCONNECT_COMMAND_KEY);
 
     private static final String PRODUCT_ID_KEY = "product_id";
     /** The value of {@link #PRODUCT_ID_KEY} in {@link #PROPERTIES_FILE}. */

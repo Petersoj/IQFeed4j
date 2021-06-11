@@ -12,7 +12,7 @@ IQFeed4j is a Java API for the market-data-vendor DTN IQFeed. IQFeed provides a 
 - Real-time tick-by-tick data on US and Canadian equities 
 - Real-time equity/index Options and Forex data
 - OHLCV historical data
-- Fundamental Data
+- Fundamental data
 - Real-time streaming news
 
 This library is community developed. If you have any questions, please ask them on [Github Discussions](https://github.com/Petersoj/IQFeed4j/discussions). If you have discovered an issue, open a new issue [here](https://github.com/Petersoj/IQFeed4j/issues).
@@ -44,17 +44,23 @@ Note that you don't have to use the Maven Central artifacts and instead can just
 # Configuration
 Creating an `iqfeed4j.properties` file on the classpath with the following format allows you to easily load properties using the `IQFeed4j()` default constructor:
 ```
-application_version=1.0
-autoconnect=true
-save_login_info=true
+# For IQConnectExecutable
+#iqconnect_command=<this is the command to start the IQConnect.exe program (e.g. wine /home/user/.IQFeed/iqconnect.exe)>
+#product_id=<supply your registered productID here>
+#application_version=<this is the version of YOUR application>
+#login=<IQFeed Datafeed account login ID>
+#password=<IQFeed Datafeed account password>
+#autoconnect=<specifies that IQConnect should automatically try to connect to the server when launched. 'true' or 'false'>
+#save_login_info=<specifies that IQConnect should save the user's login ID and password between runs of IQConnect. 'true' or 'false'>
 
-feed_name=IQFeed4j
-feed_hostname=localhost
-level_1_feed_port=5009
-market_depth_feed_port=9200
-derivative_feed_port=9400
-admin_feed_port=9300
-lookup_feed_port=9100
+# For Feeds
+#feed_name=<name of the feeds that IQFeed4j makes to IQConnect>
+#feed_hostname=<the hostname of IQConnect>
+#level_1_feed_port=<port number>
+#market_depth_feed_port=<port number>
+#derivative_feed_port=<port number>
+#admin_feed_port=<port number>
+#lookup_feed_port=<port number>
 ```
 The default values for `iqfeed4j.properties` can be found [here](https://github.com/Petersoj/IQFeed4j/blob/6.2/src/main/resources/iqfeed4j.default.properties).
 
@@ -62,7 +68,14 @@ The default values for `iqfeed4j.properties` can be found [here](https://github.
 For logging, this library uses [SLF4j](http://www.slf4j.org/) which serves as an interface for various logging frameworks. This enables you to use whatever logging framework you would like. However, if you do not add a logging framework as a dependency in your project, the console will output a message stating that SLF4j is defaulting to a no-operation (NOP) logger implementation. To enable logging, add a logging framework of your choice as a dependency to your project such as [Log4j 2](http://logging.apache.org/log4j/2.x/index.html), [SLF4j-simple](http://www.slf4j.org/manual.html), or [Apache Commons Logging](https://commons.apache.org/proper/commons-logging/).
 
 # Usage
-TODO
+
+## IQConnectExecutable
+
+## IQFeed4j
+
+## Streaming Feeds
+
+## Lookup Feeds
 
 # Building
 To build this project yourself, clone this repository and run:

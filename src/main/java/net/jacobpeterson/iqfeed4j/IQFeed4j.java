@@ -1,5 +1,6 @@
 package net.jacobpeterson.iqfeed4j;
 
+import net.jacobpeterson.iqfeed4j.executable.IQConnectExecutable;
 import net.jacobpeterson.iqfeed4j.feed.AbstractFeed;
 import net.jacobpeterson.iqfeed4j.feed.lookup.AbstractLookupFeed;
 import net.jacobpeterson.iqfeed4j.feed.lookup.historical.HistoricalFeed;
@@ -27,8 +28,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class IQFeed4j {
 
-    private final Logger LOGGER = LoggerFactory.getLogger(IQFeed4j.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(IQFeed4j.class);
 
+    private final IQConnectExecutable iqConnectExecutable;
     private final String feedName;
     private final String feedHostname;
     private final int level1FeedPort;
@@ -52,7 +54,14 @@ public class IQFeed4j {
      * Instantiates a new {@link IQFeed4j} with properties defined in {@link IQFeed4jProperties#PROPERTIES_FILE}.
      */
     public IQFeed4j() {
-        this(IQFeed4jProperties.FEED_NAME,
+        this(IQFeed4jProperties.IQCONNECT_COMMAND,
+                IQFeed4jProperties.PRODUCT_ID,
+                IQFeed4jProperties.APPLICATION_VERSION,
+                IQFeed4jProperties.LOGIN,
+                IQFeed4jProperties.PASSWORD,
+                Boolean.parseBoolean(IQFeed4jProperties.AUTOCONNECT),
+                Boolean.parseBoolean(IQFeed4jProperties.SAVE_LOGIN_INFO),
+                IQFeed4jProperties.FEED_NAME,
                 IQFeed4jProperties.FEED_HOSTNAME,
                 Integer.parseInt(IQFeed4jProperties.LEVEL_1_FEED_PORT),
                 Integer.parseInt(IQFeed4jProperties.MARKET_DEPTH_FEED_PORT),
@@ -62,7 +71,7 @@ public class IQFeed4j {
     }
 
     /**
-     * Instantiates a new {@link IQFeed4j}.
+     * Instantiates a new {@link IQFeed4j} with any {@link IQConnectExecutable} arguments.
      *
      * @param feedName            name of the feeds that IQFeed4j makes to IQConnect
      * @param feedHostname        the hostname of IQConnect
@@ -74,6 +83,39 @@ public class IQFeed4j {
      */
     public IQFeed4j(String feedName, String feedHostname, int level1FeedPort, int marketDepthFeedPort,
             int derivativeFeedPort, int adminFeedPort, int lookupFeedPort) {
+        this(null, null, null, null, null, null, null, feedName, feedHostname, level1FeedPort, marketDepthFeedPort,
+                derivativeFeedPort, adminFeedPort, lookupFeedPort);
+    }
+
+    /**
+     * Instantiates a new {@link IQFeed4j}.
+     *
+     * @param iqConnectCommand    the IQConnect.exe command (optional)
+     * @param productID           the product ID (optional)
+     * @param applicationVersion  the application version (optional)
+     * @param login               the login (optional)
+     * @param password            the password (optional)
+     * @param autoconnect         the autoconnect (optional)
+     * @param saveLoginInfo       the save login info (optional)
+     * @param feedName            name of the feeds that IQFeed4j makes to IQConnect
+     * @param feedHostname        the hostname of IQConnect
+     * @param level1FeedPort      the {@link Level1Feed} port
+     * @param marketDepthFeedPort the {@link MarketDepthFeed} port
+     * @param derivativeFeedPort  the {@link DerivativeFeed} port
+     * @param adminFeedPort       the {@link AdminFeed} port
+     * @param lookupFeedPort      the {@link AbstractLookupFeed} port
+     */
+    public IQFeed4j(String iqConnectCommand, String productID, String applicationVersion, String login,
+            String password, Boolean autoconnect, Boolean saveLoginInfo, String feedName, String feedHostname,
+            int level1FeedPort, int marketDepthFeedPort, int derivativeFeedPort, int adminFeedPort,
+            int lookupFeedPort) {
+        if (iqConnectCommand != null) {
+            iqConnectExecutable = new IQConnectExecutable(iqConnectCommand, productID, applicationVersion,
+                    login, password, autoconnect, saveLoginInfo);
+        } else {
+            iqConnectExecutable = null;
+        }
+
         checkNotNull(feedName);
         checkNotNull(feedHostname);
 
@@ -84,6 +126,24 @@ public class IQFeed4j {
         this.derivativeFeedPort = derivativeFeedPort;
         this.adminFeedPort = adminFeedPort;
         this.lookupFeedPort = lookupFeedPort;
+
+        LOGGER.debug("{}", this);
+    }
+
+    /**
+     * Calls {@link IQConnectExecutable#start()}.
+     *
+     * @throws IOException thrown for {@link IOException}s
+     */
+    public void startIQConnect() throws IOException {
+        iqConnectExecutable.start();
+    }
+
+    /**
+     * Calls {@link IQConnectExecutable#stop()}.
+     */
+    public void stopIQConnect() {
+        iqConnectExecutable.stop();
     }
 
     /**
@@ -273,6 +333,15 @@ public class IQFeed4j {
     }
 
     /**
+     * Gets {@link #iqConnectExecutable}.
+     *
+     * @return the {@link IQConnectExecutable}
+     */
+    public IQConnectExecutable getIQConnectExecutable() {
+        return iqConnectExecutable;
+    }
+
+    /**
      * Gets {@link #level1Feed}
      *
      * @return the {@link Level1Feed}
@@ -342,5 +411,18 @@ public class IQFeed4j {
      */
     public SymbolMarketInfoFeed getSymbolMarketInfoFeed() {
         return symbolMarketInfoFeed;
+    }
+
+    @Override
+    public String toString() {
+        return "IQFeed4j{" +
+                "feedName='" + feedName + '\'' +
+                ", feedHostname='" + feedHostname + '\'' +
+                ", level1FeedPort=" + level1FeedPort +
+                ", marketDepthFeedPort=" + marketDepthFeedPort +
+                ", derivativeFeedPort=" + derivativeFeedPort +
+                ", adminFeedPort=" + adminFeedPort +
+                ", lookupFeedPort=" + lookupFeedPort +
+                '}';
     }
 }

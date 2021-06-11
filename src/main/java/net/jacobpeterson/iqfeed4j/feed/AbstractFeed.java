@@ -26,14 +26,14 @@ public abstract class AbstractFeed implements Runnable {
     public static final String CURRENTLY_SUPPORTED_PROTOCOL_VERSION = "6.2";
 
     /**
-     * A comma (,) delimiter {@link Splitter} that ignores commas in quotes using a Regex {@link Pattern}.
+     * A comma (,) delimited {@link Splitter} that ignores commas surrounded in quotes using a Regex {@link Pattern}.
      *
      * @see <a href="https://stackoverflow.com/a/1757107">"Java: splitting a comma-separated string" reference</a>
      */
     public static final Splitter QUOTE_ESCAPED_COMMA_DELIMITED_SPLITTER =
             Splitter.on(Pattern.compile(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)"));
     /**
-     * A comma (,) delimiter {@link Splitter}. This avoids slow Regex splitting.
+     * A comma (,) delimited {@link Splitter}. This avoids slow Regex splitting.
      */
     public static final Splitter COMMA_DELIMITED_SPLITTER = Splitter.on(',');
 
@@ -245,7 +245,7 @@ public abstract class AbstractFeed implements Runnable {
      */
     protected void onAsyncException(String message, Exception exception) {
         LOGGER.error(message, exception);
-        LOGGER.info("Attempting to close {}...", feedName);
+        LOGGER.debug("Attempting to close {}...", feedName);
         try {
             stop();
         } catch (Exception stopException) {
