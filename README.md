@@ -44,22 +44,22 @@ Note that you don't have to use the Maven Central artifacts and instead can just
 Creating an `iqfeed4j.properties` file on the classpath with the following format allows you to easily load properties using the `IQFeed4j()` default constructor:
 ```
 # For IQConnectExecutable
-#iqconnect_command=<this is the command to start the IQConnect.exe program (e.g. wine /home/user/.IQFeed/iqconnect.exe)>
-#product_id=<supply your registered productID here>
-#application_version=<this is the version of YOUR application>
-#login=<IQFeed Datafeed account login ID>
-#password=<IQFeed Datafeed account password>
-#autoconnect=<specifies that IQConnect should automatically try to connect to the server when launched. 'true' or 'false'>
-#save_login_info=<specifies that IQConnect should save the user's login ID and password between runs of IQConnect. 'true' or 'false'>
+iqconnect_command=<this is the command to start the IQConnect.exe program (e.g. wine /home/user/.IQFeed/iqconnect.exe)>
+product_id=<supply your registered productID here>
+application_version=<this is the version of YOUR application>
+login=<IQFeed Datafeed account login ID>
+password=<IQFeed Datafeed account password>
+autoconnect=<specifies that IQConnect should automatically try to connect to the server when launched. 'true' or 'false'>
+save_login_info=<specifies that IQConnect should save the user's login ID and password between runs of IQConnect. 'true' or 'false'>
 
 # For Feeds
-#feed_name=<name of the feeds that IQFeed4j makes to IQConnect>
-#feed_hostname=<the hostname of IQConnect>
-#level_1_feed_port=<port number>
-#market_depth_feed_port=<port number>
-#derivative_feed_port=<port number>
-#admin_feed_port=<port number>
-#lookup_feed_port=<port number>
+feed_name=<name of the feeds that IQFeed4j makes to IQConnect>
+feed_hostname=<the hostname of IQConnect>
+level_1_feed_port=<port number>
+market_depth_feed_port=<port number>
+derivative_feed_port=<port number>
+admin_feed_port=<port number>
+lookup_feed_port=<port number>
 ```
 The default values for `iqfeed4j.properties` can be found [here](https://github.com/Petersoj/IQFeed4j/blob/6.2/src/main/resources/iqfeed4j.default.properties).
 
