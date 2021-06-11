@@ -215,11 +215,11 @@ public class NewsFeed extends AbstractLookupFeed {
      * @throws ExecutionException   thrown for {@link ExecutionException}s
      * @throws InterruptedException thrown for {@link InterruptedException}s
      */
-    public NewsHeadlines requestNewsHeadlines(List<String> sources, List<String> symbols, XMLTextOption xmlTextOption,
-            Integer limit, List<LocalDate> dates, Map<LocalDate, LocalDate> dateRanges)
+    public NewsHeadlines requestNewsHeadlines(List<String> sources, List<String> symbols, Integer limit,
+            List<LocalDate> dates, Map<LocalDate, LocalDate> dateRanges)
             throws IOException, ExecutionException, InterruptedException {
         MultiMessageIteratorListener<MessageLine> asyncListener = new MultiMessageIteratorListener<>();
-        requestNewsHeadlines(sources, symbols, xmlTextOption, limit, dates, dateRanges, asyncListener);
+        requestNewsHeadlines(sources, symbols, XMLTextOption.XML, limit, dates, dateRanges, asyncListener);
 
         String xmlMessage = asyncListener.getMessages().stream()
                 .map(MessageLine::getLine)
