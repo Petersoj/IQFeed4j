@@ -4,11 +4,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * {@link MultiMessageAdapter} is an adapter for {@link MultiMessageListener}
+ * {@link FeedMessageAdapter} is an adapter for {@link FeedMessageListener}
  */
-public class MultiMessageAdapter<T> extends MultiMessageListener<T> {
+public class FeedMessageAdapter<T> implements FeedMessageListener<T> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MultiMessageAdapter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FeedMessageAdapter.class);
 
     @Override
     public void onMessageReceived(T message) {
@@ -18,10 +18,5 @@ public class MultiMessageAdapter<T> extends MultiMessageListener<T> {
     @Override
     public void onMessageException(Exception exception) {
         LOGGER.error("Multi-message Exception!", exception);
-    }
-
-    @Override
-    public void onEndOfMultiMessage() {
-        LOGGER.debug("Received End Of Message.");
     }
 }

@@ -153,7 +153,7 @@ public class IQFeed4j {
      * @throws InterruptedException thrown for {@link InterruptedException}s
      */
     public void startLevel1Feed() throws IOException, InterruptedException {
-        startFeed(level1Feed, () -> new Level1Feed(feedName, feedHostname, level1FeedPort));
+        level1Feed = startFeed(level1Feed, () -> new Level1Feed(feedName, feedHostname, level1FeedPort));
     }
 
     /**
@@ -174,7 +174,8 @@ public class IQFeed4j {
      * @throws InterruptedException thrown for {@link InterruptedException}s
      */
     public void startDerivativeFeed() throws IOException, InterruptedException {
-        startFeed(derivativeFeed, () -> new DerivativeFeed(feedName, feedHostname, derivativeFeedPort));
+        derivativeFeed = startFeed(derivativeFeed,
+                () -> new DerivativeFeed(feedName, feedHostname, derivativeFeedPort));
     }
 
     /**
@@ -195,7 +196,7 @@ public class IQFeed4j {
      * @throws InterruptedException thrown for {@link InterruptedException}s
      */
     public void startAdminFeed() throws IOException, InterruptedException {
-        startFeed(adminFeed, () -> new AdminFeed(feedName, feedHostname, adminFeedPort));
+        adminFeed = startFeed(adminFeed, () -> new AdminFeed(feedName, feedHostname, adminFeedPort));
     }
 
     /**
@@ -216,7 +217,7 @@ public class IQFeed4j {
      * @throws InterruptedException thrown for {@link InterruptedException}s
      */
     public void startHistoricalFeed() throws IOException, InterruptedException {
-        startFeed(historicalFeed, () -> new HistoricalFeed(feedName, feedHostname, lookupFeedPort));
+        historicalFeed = startFeed(historicalFeed, () -> new HistoricalFeed(feedName, feedHostname, lookupFeedPort));
     }
 
     /**
@@ -237,7 +238,8 @@ public class IQFeed4j {
      * @throws InterruptedException thrown for {@link InterruptedException}s
      */
     public void startMarketSummaryFeed() throws IOException, InterruptedException {
-        startFeed(marketSummaryFeed, () -> new MarketSummaryFeed(feedName, feedHostname, lookupFeedPort));
+        marketSummaryFeed = startFeed(marketSummaryFeed,
+                () -> new MarketSummaryFeed(feedName, feedHostname, lookupFeedPort));
     }
 
     /**
@@ -258,7 +260,7 @@ public class IQFeed4j {
      * @throws InterruptedException thrown for {@link InterruptedException}s
      */
     public void startNewsFeed() throws IOException, InterruptedException {
-        startFeed(newsFeed, () -> new NewsFeed(feedName, feedHostname, lookupFeedPort));
+        newsFeed = startFeed(newsFeed, () -> new NewsFeed(feedName, feedHostname, lookupFeedPort));
     }
 
     /**
@@ -279,7 +281,8 @@ public class IQFeed4j {
      * @throws InterruptedException thrown for {@link InterruptedException}s
      */
     public void startOptionChainsFeed() throws IOException, InterruptedException {
-        startFeed(optionChainsFeed, () -> new OptionChainsFeed(feedName, feedHostname, lookupFeedPort));
+        optionChainsFeed = startFeed(optionChainsFeed,
+                () -> new OptionChainsFeed(feedName, feedHostname, lookupFeedPort));
     }
 
     /**
@@ -300,7 +303,8 @@ public class IQFeed4j {
      * @throws InterruptedException thrown for {@link InterruptedException}s
      */
     public void startSymbolMarketInfoFeed() throws IOException, InterruptedException {
-        startFeed(symbolMarketInfoFeed, () -> new SymbolMarketInfoFeed(feedName, feedHostname, lookupFeedPort));
+        symbolMarketInfoFeed = startFeed(symbolMarketInfoFeed,
+                () -> new SymbolMarketInfoFeed(feedName, feedHostname, lookupFeedPort));
     }
 
     /**
@@ -314,7 +318,7 @@ public class IQFeed4j {
         symbolMarketInfoFeed = null;
     }
 
-    private <F extends AbstractFeed> void startFeed(F feed, Supplier<F> feedInstantiator)
+    private <F extends AbstractFeed> F startFeed(F feed, Supplier<F> feedInstantiator)
             throws IOException, InterruptedException {
         if (feed == null) {
             feed = feedInstantiator.get();
@@ -324,6 +328,8 @@ public class IQFeed4j {
             feed = feedInstantiator.get();
             feed.start();
         }
+
+        return feed;
     }
 
     private <F extends AbstractFeed> void stopFeed(F feed) throws IOException, InterruptedException {
