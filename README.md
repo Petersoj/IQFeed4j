@@ -182,6 +182,7 @@ This feed allows you to request historical ticks (trades) and intervals.
 The following example will request ascending AAPL 1-minute interval bars during market hours from 6/10/2021 to 6/11/2021.
 ```java
 try {
+    // Using synchronous data consumption method (aka consume data as it is being read)
     iqFeed4j.getHistoricalFeed().requestIntervals(
             "AAPL",
             60,
@@ -192,14 +193,34 @@ try {
             LocalTime.of(4, 0),
             DataDirection.OLDEST_TO_NEWEST,
             IntervalType.SECONDS,
-            new MultiMessageAdapter<Interval>(){
+            new MultiMessageAdapter<Interval>() {
                 @Override
                 public void onMessageReceived(Interval minuteInterval) {
-                    System.out.printf("Minute Interval: %s\n", minuteInterval)
+                    System.out.printf("Minute Interval: %s\n", minuteInterval);
                 }
             });
-} catch (IOException exception) {
+
+    // Using data accumulation method (aka all data is read into memory to be consumed asynchronously)
+    Iterator<Interval> aaplIntervals = iqFeed4j.getHistoricalFeed().requestIntervals(
+            "AAPL",
+            60,
+            LocalDateTime.of(2021, 6, 10, 9, 30),
+            LocalDateTime.of(2021, 6, 11, 4, 30),
+            null,
+            LocalTime.of(9, 30),
+            LocalTime.of(4, 0),
+            DataDirection.OLDEST_TO_NEWEST,
+            IntervalType.SECONDS);
+    System.out.println("AAPL minute intervals:");
+    aaplIntervals.forEachRemaining(System.out::println);
+} catch (IOException | InterruptedException exception) {
     exception.printStackTrace();
+} catch (ExecutionException executionException) {
+    if (executionException.getCause() instanceof NoDataException) {
+        System.err.println("No data was found for the requested Interval!");
+    } else {
+        executionException.printStackTrace();
+    }
 }
 ```
 
