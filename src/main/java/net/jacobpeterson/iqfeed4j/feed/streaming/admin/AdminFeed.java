@@ -159,15 +159,11 @@ public class AdminFeed extends AbstractFeed {
             if (feedStatisticsFuture != null) {
                 feedStatisticsFuture.complete(feedStatistics);
                 feedStatisticsFuture = null;
-            } else {
-                LOGGER.error("Could not complete {} future!", AdminSystemMessageType.STATS);
             }
         } catch (Exception exception) {
             if (feedStatisticsFuture != null) {
                 feedStatisticsFuture.completeExceptionally(exception);
                 feedStatisticsFuture = null;
-            } else {
-                LOGGER.error("Could not complete {} future!", AdminSystemMessageType.STATS);
             }
         }
     }
@@ -180,15 +176,11 @@ public class AdminFeed extends AbstractFeed {
             if (clientStatisticsFuture != null) {
                 clientStatisticsFuture.complete(clientStatistics);
                 clientStatisticsFuture = null;
-            } else {
-                LOGGER.error("Could not complete {} future!", AdminSystemMessageType.CLIENTSTATS);
             }
         } catch (Exception exception) {
             if (clientStatisticsFuture != null) {
                 clientStatisticsFuture.completeExceptionally(exception);
                 clientStatisticsFuture = null;
-            } else {
-                LOGGER.error("Could not complete {} future!", AdminSystemMessageType.CLIENTSTATS);
             }
         }
     }

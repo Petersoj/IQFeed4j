@@ -410,7 +410,7 @@ public class OptionChainsFeed extends AbstractLookupFeed {
             requestIDFeedHelper.removeRequestID(requestID);
         } else {
             try {
-                List<T> message = listCSVMapper.mapToList(csv, 1);
+                List<T> message = listCSVMapper.mapToList(csv, 2);
                 future.complete(message);
             } catch (Exception exception) {
                 future.completeExceptionally(exception);

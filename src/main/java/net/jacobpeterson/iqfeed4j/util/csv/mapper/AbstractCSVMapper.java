@@ -45,7 +45,7 @@ public abstract class AbstractCSVMapper<T> {
         /** Format of: <code>yyyyMMdd</code> */
         public static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("yyyyMMdd");
 
-        /** Format of: <code>yyyyMMdd HHmmss</code>. */
+        /** Format of: <code>yyyyMMdd HHmmss</code> */
         public static final DateTimeFormatter DATE_SPACE_TIME =
                 DateTimeFormatter.ofPattern("yyyyMMdd HHmmss");
 
@@ -56,7 +56,7 @@ public abstract class AbstractCSVMapper<T> {
                         .parseDefaulting(ChronoField.YEAR, LocalDate.now().getYear())
                         .toFormatter(Locale.ENGLISH);
 
-        /** Format of: <code>yyyy-MM-dd HH:mm:ss.nnnnnn</code>. */
+        /** Format of: <code>yyyy-MM-dd HH:mm:ss.nnnnnn</code> */
         public static final DateTimeFormatter DASHED_DATE_SPACE_TIME_FRACTIONAL =
                 new DateTimeFormatterBuilder()
                         .parseCaseInsensitive()
@@ -65,17 +65,21 @@ public abstract class AbstractCSVMapper<T> {
                         .append(DateTimeFormatter.ISO_LOCAL_TIME) // Optionally includes micro/nanoseconds
                         .toFormatter(Locale.ENGLISH);
 
-        /** Format of: <code>yyyy-MM-dd</code>. */
+        /** Format of: <code>yyyy-MM-dd</code> */
         public static final DateTimeFormatter DASHED_DATE = DateTimeFormatter.ISO_LOCAL_DATE;
 
-        /** Format of: <code>MM/dd/yyyy</code>. */
+        /** Format of: <code>MM/dd/yyyy</code> */
         public static final DateTimeFormatter SLASHED_DATE = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 
-        /** Format of: <code>HH:mm:ss</code>. */
+        /** Format of: <code>HH:mm:ss</code> */
         public static final DateTimeFormatter COLON_TIME = DateTimeFormatter.ISO_LOCAL_TIME;
 
-        /** Format of: <code>yyyyMMdd HH:mm:ss</code>. */
+        /** Format of: <code>yyyyMMdd HH:mm:ss</code> */
         public static final DateTimeFormatter DATE_SPACE_COLON_TIME = DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss");
+
+        /** Format of: <code>[Hmmss][HHmmss]</code> */
+        public static final DateTimeFormatter OPTIONAL_1_OR_2_DIGIT_HOUR_TIME =
+                DateTimeFormatter.ofPattern("[Hmmss][HHmmss]");
     }
 
     /**
@@ -86,42 +90,56 @@ public abstract class AbstractCSVMapper<T> {
 
         /** Convertor using {@link DateTimeFormatters#TIME} */
         public static final Function<String, LocalTime> TIME =
-                (value) -> LocalTime.parse(value, DateTimeFormatters.TIME);
+                value -> LocalTime.parse(value, DateTimeFormatters.TIME);
 
         /** Convertor using {@link DateTimeFormatters#DATE} */
         public static final Function<String, LocalDate> DATE =
-                (value) -> LocalDate.parse(value, DateTimeFormatters.DATE);
+                value -> LocalDate.parse(value, DateTimeFormatters.DATE);
 
         /** Convertor using {@link DateTimeFormatters#DATE_SPACE_TIME} */
         public static final Function<String, LocalDateTime> DATE_SPACE_TIME =
-                (value) -> LocalDateTime.parse(value, DateTimeFormatters.DATE_SPACE_TIME);
+                value -> LocalDateTime.parse(value, DateTimeFormatters.DATE_SPACE_TIME);
 
         /** Convertor using {@link DateTimeFormatters#MONTH3_DAY_TIME_AM_PM} */
         public static final Function<String, LocalDateTime> MONTH3_DAY_TIME_AM_PM =
-                (value) -> LocalDateTime.parse(value, DateTimeFormatters.MONTH3_DAY_TIME_AM_PM);
+                value -> LocalDateTime.parse(value, DateTimeFormatters.MONTH3_DAY_TIME_AM_PM);
 
         /** Convertor using {@link DateTimeFormatters#DASHED_DATE_SPACE_TIME_FRACTIONAL} */
         public static final Function<String, LocalDateTime> DASHED_DATE_SPACE_TIME_FRACTIONAL =
-                (value) -> LocalDateTime.parse(value, DateTimeFormatters.DASHED_DATE_SPACE_TIME_FRACTIONAL);
+                value -> LocalDateTime.parse(value, DateTimeFormatters.DASHED_DATE_SPACE_TIME_FRACTIONAL);
 
         /** Convertor using {@link DateTimeFormatters#DASHED_DATE_SPACE_TIME_FRACTIONAL} */
         public static final Function<String, LocalDateTime> DASHED_DATE_SPACE_TIME = DASHED_DATE_SPACE_TIME_FRACTIONAL;
 
         /** Convertor using {@link DateTimeFormatters#DASHED_DATE} */
         public static final Function<String, LocalDate> DASHED_DATE =
-                (value) -> LocalDate.parse(value, DateTimeFormatters.DASHED_DATE);
+                value -> LocalDate.parse(value, DateTimeFormatters.DASHED_DATE);
 
         /** Convertor using {@link DateTimeFormatters#SLASHED_DATE} */
         public static final Function<String, LocalDate> SLASHED_DATE =
-                (value) -> LocalDate.parse(value, DateTimeFormatters.SLASHED_DATE);
+                value -> LocalDate.parse(value, DateTimeFormatters.SLASHED_DATE);
 
         /** Convertor using {@link DateTimeFormatters#COLON_TIME} */
         public static final Function<String, LocalTime> COLON_TIME =
-                (value) -> LocalTime.parse(value, DateTimeFormatters.COLON_TIME);
+                value -> LocalTime.parse(value, DateTimeFormatters.COLON_TIME);
 
         /** Convertor using {@link DateTimeFormatters#DATE_SPACE_COLON_TIME} */
         public static final Function<String, LocalDateTime> DATE_SPACE_COLON_TIME =
-                (value) -> LocalDateTime.parse(value, DateTimeFormatters.DATE_SPACE_COLON_TIME);
+                value -> LocalDateTime.parse(value, DateTimeFormatters.DATE_SPACE_COLON_TIME);
+
+        /** Convertor using {@link DateTimeFormatters#OPTIONAL_1_OR_2_DIGIT_HOUR_TIME} */
+        public static final Function<String, LocalTime> OPTIONAL_1_OR_2_DIGIT_HOUR_TIME =
+                value -> LocalTime.parse(value, DateTimeFormatters.OPTIONAL_1_OR_2_DIGIT_HOUR_TIME);
+
+        /** Calls {@link #OPTIONAL_1_OR_2_DIGIT_HOUR_TIME} but returns <code>null</code> on an {@link Exception}. */
+        public static final Function<String, LocalTime> OPTIONAL_1_OR_2_DIGIT_HOUR_TIME_NULLABLE =
+                value -> {
+                    try {
+                        return OPTIONAL_1_OR_2_DIGIT_HOUR_TIME.apply(value);
+                    } catch (Exception exception) {
+                        return null;
+                    }
+                };
     }
 
     protected final Supplier<T> pojoInstantiator;

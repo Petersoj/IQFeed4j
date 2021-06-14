@@ -349,21 +349,22 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     protected final HashMap<String, FeedMessageListener<FundamentalData>> fundamentalDataListenersOfSymbols;
     protected final HashMap<String, FeedMessageListener<SummaryUpdate>> summaryUpdateListenersOfSymbols;
     protected final HashMap<String, FeedMessageListener<RegionalQuote>> regionalQuoteListenersOfSymbols;
+    // Using 'Queue' here since IQConnect.exe handles all requests with FIFO priority
+    protected final Queue<SingleMessageFuture<LocalDateTime>> timestampFuturesQueue;
+    protected final Queue<SingleMessageFuture<FeedStatistics>> feedStatisticsFuturesQueue;
+    protected final Queue<SingleMessageFuture<List<String>>> fundamentalFieldNamesFuturesQueue;
+    protected final Queue<SingleMessageFuture<List<SummaryUpdateField>>> allUpdateFieldNamesFuturesQueue;
+    protected final Queue<SingleMessageFuture<List<SummaryUpdateField>>> currentUpdateFieldNamesFuturesQueue;
+    protected final Queue<SingleMessageFuture<List<LogLevel>>> logLevelsFuturesQueue;
+    protected final Queue<SingleMessageFuture<List<String>>> watchedSymbolsFuturesQueue;
 
     protected Level1FeedEventListener level1FeedEventListener;
     protected IndexCSVMapper<SummaryUpdate> summaryUpdateCSVMapper;
 
     protected FeedMessageListener<NewsHeadline> newsHeadlineListener;
-    protected SingleMessageFuture<LocalDateTime> timestampFuture;
     protected LocalDateTime latestTimestamp;
     protected CustomerInformation customerInformation;
-    protected SingleMessageFuture<FeedStatistics> feedStatisticsFuture;
     protected FeedStatistics latestFeedStatistics;
-    protected SingleMessageFuture<List<String>> fundamentalFieldNamesFuture;
-    protected SingleMessageFuture<List<SummaryUpdateField>> allUpdateFieldNamesFuture;
-    protected SingleMessageFuture<List<SummaryUpdateField>> currentUpdateFieldNamesFuture;
-    protected SingleMessageFuture<List<LogLevel>> logLevelsFuture;
-    protected SingleMessageFuture<List<String>> watchedSymbolsFuture;
 
     /**
      * Instantiates a new {@link Level1Feed}.
@@ -379,6 +380,13 @@ public class Level1Feed extends AbstractServerConnectionFeed {
         fundamentalDataListenersOfSymbols = new HashMap<>();
         summaryUpdateListenersOfSymbols = new HashMap<>();
         regionalQuoteListenersOfSymbols = new HashMap<>();
+        timestampFuturesQueue = new LinkedList<>();
+        feedStatisticsFuturesQueue = new LinkedList<>();
+        fundamentalFieldNamesFuturesQueue = new LinkedList<>();
+        allUpdateFieldNamesFuturesQueue = new LinkedList<>();
+        currentUpdateFieldNamesFuturesQueue = new LinkedList<>();
+        logLevelsFuturesQueue = new LinkedList<>();
+        watchedSymbolsFuturesQueue = new LinkedList<>();
 
         level1FeedEventListener = new Level1FeedEventListener() {
             @Override
@@ -396,7 +404,9 @@ public class Level1Feed extends AbstractServerConnectionFeed {
                 LOGGER.warn("{} symbol not watched!", symbol);
             }
         };
-        currentUpdateFieldNamesFuture = new SingleMessageFuture<>(); // For initial 'CURRENT_UPDATE_FIELDNAMES' message
+
+        // For initial 'CURRENT_UPDATE_FIELDNAMES' message
+        currentUpdateFieldNamesFuturesQueue.add(new SingleMessageFuture<>());
     }
 
     @Override
@@ -448,35 +458,23 @@ public class Level1Feed extends AbstractServerConnectionFeed {
                             handleFeedStatisticsMessage(csv);
                             break;
                         case FUNDAMENTAL_FIELDNAMES:
-                            handleListCSVSystemMessageFuture(systemMessageType, fundamentalFieldNamesFuture,
+                            handleListCSVSystemMessageFuture(systemMessageType, fundamentalFieldNamesFuturesQueue,
                                     STRING_LIST_CSV_MAPPER, csv);
-                            fundamentalFieldNamesFuture = null;
                             break;
                         case UPDATE_FIELDNAMES:
-                            handleListCSVSystemMessageFuture(systemMessageType, allUpdateFieldNamesFuture,
+                            handleListCSVSystemMessageFuture(systemMessageType, allUpdateFieldNamesFuturesQueue,
                                     SUMMARY_UPDATE_FIELDS_CSV_MAPPER, csv);
-                            allUpdateFieldNamesFuture = null;
                             break;
                         case CURRENT_UPDATE_FIELDNAMES:
-                            handleListCSVSystemMessageFuture(systemMessageType, currentUpdateFieldNamesFuture,
-                                    SUMMARY_UPDATE_FIELDS_CSV_MAPPER, csv);
-                            if (currentUpdateFieldNamesFuture != null &&
-                                    !currentUpdateFieldNamesFuture.isCompletedExceptionally()) {
-                                setupSummaryUpdateCSVMapper();
-                            } else {
-                                LOGGER.error("Cannot setup mappings for summary/update messages!");
-                            }
-                            currentUpdateFieldNamesFuture = null;
+                            handleCurrentUpdateFieldnamesMessage(csv);
                             break;
                         case CURRENT_LOG_LEVELS:
-                            handleListCSVSystemMessageFuture(systemMessageType, logLevelsFuture,
+                            handleListCSVSystemMessageFuture(systemMessageType, logLevelsFuturesQueue,
                                     LOG_LEVELS_CSV_MAPPER, csv);
-                            logLevelsFuture = null;
                             break;
                         case WATCHES:
-                            handleListCSVSystemMessageFuture(systemMessageType, watchedSymbolsFuture,
+                            handleListCSVSystemMessageFuture(systemMessageType, watchedSymbolsFuturesQueue,
                                     STRING_LIST_CSV_MAPPER, csv);
-                            watchedSymbolsFuture = null;
                             break;
                         default:
                             LOGGER.error("Unhandled message type: {}", systemMessageType);
@@ -548,25 +546,31 @@ public class Level1Feed extends AbstractServerConnectionFeed {
             FeedStatistics feedStatistics = StreamingCSVMappers.FEED_STATISTICS_CSV_MAPPER.map(csv, 2);
             latestFeedStatistics = feedStatistics;
 
-            if (feedStatisticsFuture != null) {
-                feedStatisticsFuture.complete(feedStatistics);
-                feedStatisticsFuture = null;
+            if (!feedStatisticsFuturesQueue.isEmpty()) {
+                feedStatisticsFuturesQueue.poll().complete(feedStatistics);
             } else {
-                LOGGER.error("Could not complete {} future!", Level1SystemMessageType.STATS);
+                LOGGER.error("Received {} message, but with no Future to handle it!", Level1SystemMessageType.STATS);
             }
         } catch (Exception exception) {
-            if (feedStatisticsFuture != null) {
-                feedStatisticsFuture.completeExceptionally(exception);
-                feedStatisticsFuture = null;
+            if (!feedStatisticsFuturesQueue.isEmpty()) {
+                feedStatisticsFuturesQueue.poll().completeExceptionally(exception);
             } else {
                 LOGGER.error("Could not complete {} future!", Level1SystemMessageType.STATS);
             }
         }
     }
 
-    private void setupSummaryUpdateCSVMapper() {
+    private void handleCurrentUpdateFieldnamesMessage(String[] csv) {
+        SingleMessageFuture<List<SummaryUpdateField>> summaryUpdateFieldsList =
+                handleListCSVSystemMessageFuture(Level1SystemMessageType.CURRENT_UPDATE_FIELDNAMES,
+                        currentUpdateFieldNamesFuturesQueue, SUMMARY_UPDATE_FIELDS_CSV_MAPPER, csv);
+        if (summaryUpdateFieldsList == null || summaryUpdateFieldsList.isCompletedExceptionally()) {
+            LOGGER.error("Cannot setup mappings for summary/update messages!");
+            return;
+        }
+
         try {
-            List<SummaryUpdateField> currentSummaryUpdateFields = currentUpdateFieldNamesFuture.get();
+            List<SummaryUpdateField> currentSummaryUpdateFields = summaryUpdateFieldsList.get();
             summaryUpdateCSVMapper = new IndexCSVMapper<>(SummaryUpdate::new);
 
             for (int index = 0; index < currentSummaryUpdateFields.size(); index++) {
@@ -596,20 +600,25 @@ public class Level1Feed extends AbstractServerConnectionFeed {
      *
      * @param <T>               the type of {@link SingleMessageFuture}
      * @param systemMessageType the {@link Level1SystemMessageType}
-     * @param future            the {@link SingleMessageFuture}
+     * @param futuresQueue      the {@link Queue} of {@link SingleMessageFuture}s
      * @param listCSVMapper     the {@link ListCSVMapper}
      * @param csv               the CSV
+     *
+     * @return the completed {@link SingleMessageFuture} of the {@link List}
      */
-    private <T> void handleListCSVSystemMessageFuture(Level1SystemMessageType systemMessageType,
-            SingleMessageFuture<List<T>> future, AbstractListCSVMapper<T> listCSVMapper, String[] csv) {
-        if (future != null) {
+    private <T> SingleMessageFuture<List<T>> handleListCSVSystemMessageFuture(Level1SystemMessageType systemMessageType,
+            Queue<SingleMessageFuture<List<T>>> futuresQueue, AbstractListCSVMapper<T> listCSVMapper, String[] csv) {
+        if (!futuresQueue.isEmpty()) {
+            SingleMessageFuture<List<T>> future = futuresQueue.poll();
             try {
                 future.complete(listCSVMapper.mapToList(csv, 2));
             } catch (Exception exception) {
                 future.completeExceptionally(exception);
             }
+            return future;
         } else {
             LOGGER.error("Received {} System message, but with no Future to handle it!", systemMessageType);
+            return null;
         }
     }
 
@@ -688,14 +697,12 @@ public class Level1Feed extends AbstractServerConnectionFeed {
             LocalDateTime timestamp = TIMESTAMP_CSV_MAPPER.map(csv, 1);
             latestTimestamp = timestamp;
 
-            if (timestampFuture != null) {
-                timestampFuture.complete(timestamp);
-                timestampFuture = null;
+            if (!timestampFuturesQueue.isEmpty()) {
+                timestampFuturesQueue.poll().complete(timestamp);
             }
         } catch (Exception exception) {
-            if (timestampFuture != null) {
-                timestampFuture.completeExceptionally(exception);
-                timestampFuture = null;
+            if (!timestampFuturesQueue.isEmpty()) {
+                timestampFuturesQueue.poll().completeExceptionally(exception);
             } else {
                 LOGGER.error("Could not handle Timestamp message!", exception);
             }
@@ -847,23 +854,18 @@ public class Level1Feed extends AbstractServerConnectionFeed {
      * @throws IOException thrown for {@link IOException}s
      */
     public SingleMessageFuture<LocalDateTime> requestTimestamp() throws IOException {
-        synchronized (messageReceivedLock) {
-            if (timestampFuture != null) {
-                return timestampFuture;
-            }
-        }
-
         StringBuilder requestBuilder = new StringBuilder();
         requestBuilder.append(Level1Command.TIMESTAMP.value());
         requestBuilder.append(LineEnding.CR_LF.getASCIIString());
 
+        SingleMessageFuture<LocalDateTime> future = new SingleMessageFuture<>();
         synchronized (messageReceivedLock) {
-            timestampFuture = new SingleMessageFuture<>();
+            timestampFuturesQueue.add(future);
         }
 
         sendAndLogMessage(requestBuilder.toString());
 
-        return timestampFuture;
+        return future;
     }
 
     /**
@@ -961,17 +963,14 @@ public class Level1Feed extends AbstractServerConnectionFeed {
      * @throws IOException thrown for {@link IOException}s
      */
     public SingleMessageFuture<FeedStatistics> requestFeedStatistics() throws IOException {
+        SingleMessageFuture<FeedStatistics> future = new SingleMessageFuture<>();
         synchronized (messageReceivedLock) {
-            if (feedStatisticsFuture != null) {
-                return feedStatisticsFuture;
-            }
-
-            feedStatisticsFuture = new SingleMessageFuture<>();
+            feedStatisticsFuturesQueue.add(future);
         }
 
         sendLevel1SystemCommand(Level1SystemCommand.REQUEST_STATS);
 
-        return feedStatisticsFuture;
+        return future;
     }
 
     /**
@@ -983,17 +982,14 @@ public class Level1Feed extends AbstractServerConnectionFeed {
      * @throws IOException thrown for {@link IOException}s
      */
     public SingleMessageFuture<List<String>> requestFundamentalFieldNames() throws IOException {
+        SingleMessageFuture<List<String>> future = new SingleMessageFuture<>();
         synchronized (messageReceivedLock) {
-            if (fundamentalFieldNamesFuture != null) {
-                return fundamentalFieldNamesFuture;
-            }
-
-            fundamentalFieldNamesFuture = new SingleMessageFuture<>();
+            fundamentalFieldNamesFuturesQueue.add(future);
         }
 
         sendLevel1SystemCommand(Level1SystemCommand.REQUEST_FUNDAMENTAL_FIELDNAMES);
 
-        return fundamentalFieldNamesFuture;
+        return future;
     }
 
     /**
@@ -1005,17 +1001,14 @@ public class Level1Feed extends AbstractServerConnectionFeed {
      * @throws IOException thrown for {@link IOException}s
      */
     public SingleMessageFuture<List<SummaryUpdateField>> requestAllUpdateFieldNames() throws IOException {
+        SingleMessageFuture<List<SummaryUpdateField>> future = new SingleMessageFuture<>();
         synchronized (messageReceivedLock) {
-            if (allUpdateFieldNamesFuture != null) {
-                return allUpdateFieldNamesFuture;
-            }
-
-            allUpdateFieldNamesFuture = new SingleMessageFuture<>();
+            allUpdateFieldNamesFuturesQueue.add(future);
         }
 
         sendLevel1SystemCommand(Level1SystemCommand.REQUEST_ALL_UPDATE_FIELDNAMES);
 
-        return allUpdateFieldNamesFuture;
+        return future;
     }
 
     /**
@@ -1027,17 +1020,14 @@ public class Level1Feed extends AbstractServerConnectionFeed {
      * @throws IOException thrown for {@link IOException}s
      */
     public SingleMessageFuture<List<SummaryUpdateField>> requestCurrentUpdateFieldNames() throws IOException {
+        SingleMessageFuture<List<SummaryUpdateField>> future = new SingleMessageFuture<>();
         synchronized (messageReceivedLock) {
-            if (currentUpdateFieldNamesFuture != null) {
-                return currentUpdateFieldNamesFuture;
-            }
-
-            currentUpdateFieldNamesFuture = new SingleMessageFuture<>();
+            currentUpdateFieldNamesFuturesQueue.add(future);
         }
 
         sendLevel1SystemCommand(Level1SystemCommand.REQUEST_CURRENT_UPDATE_FIELDNAMES);
 
-        return currentUpdateFieldNamesFuture;
+        return future;
     }
 
     /**
@@ -1056,16 +1046,15 @@ public class Level1Feed extends AbstractServerConnectionFeed {
      */
     public SingleMessageFuture<List<SummaryUpdateField>> selectUpdateFieldNames(
             SummaryUpdateField... summaryUpdateFields) throws IOException {
+        SingleMessageFuture<List<SummaryUpdateField>> future = new SingleMessageFuture<>();
         synchronized (messageReceivedLock) {
-            if (currentUpdateFieldNamesFuture == null) {
-                currentUpdateFieldNamesFuture = new SingleMessageFuture<>();
-            }
+            currentUpdateFieldNamesFuturesQueue.add(future);
         }
 
         sendLevel1SystemCommand(Level1SystemCommand.SELECT_UPDATE_FIELDS,
                 Arrays.stream(summaryUpdateFields).map(SummaryUpdateField::value).distinct().toArray(String[]::new));
 
-        return currentUpdateFieldNamesFuture;
+        return future;
     }
 
     /**
@@ -1076,18 +1065,15 @@ public class Level1Feed extends AbstractServerConnectionFeed {
      * @throws IOException thrown for {@link IOException}s
      */
     public SingleMessageFuture<List<LogLevel>> setLogLevels(LogLevel... logLevels) throws IOException {
+        SingleMessageFuture<List<LogLevel>> future = new SingleMessageFuture<>();
         synchronized (messageReceivedLock) {
-            if (logLevelsFuture != null) {
-                return logLevelsFuture;
-            }
-
-            logLevelsFuture = new SingleMessageFuture<>();
+            logLevelsFuturesQueue.add(future);
         }
 
         sendLevel1SystemCommand(Level1SystemCommand.SET_LOG_LEVELS,
                 Arrays.stream(logLevels).map(LogLevel::value).distinct().toArray(String[]::new));
 
-        return logLevelsFuture;
+        return future;
     }
 
     /**
@@ -1099,17 +1085,14 @@ public class Level1Feed extends AbstractServerConnectionFeed {
      * @throws IOException thrown for {@link IOException}s
      */
     public SingleMessageFuture<List<String>> requestWatchedSymbols() throws IOException {
+        SingleMessageFuture<List<String>> future = new SingleMessageFuture<>();
         synchronized (messageReceivedLock) {
-            if (currentUpdateFieldNamesFuture != null) {
-                return watchedSymbolsFuture;
-            }
-
-            watchedSymbolsFuture = new SingleMessageFuture<>();
+            watchedSymbolsFuturesQueue.add(future);
         }
 
         sendLevel1SystemCommand(Level1SystemCommand.REQUEST_WATCHES);
 
-        return watchedSymbolsFuture;
+        return future;
     }
 
     /**

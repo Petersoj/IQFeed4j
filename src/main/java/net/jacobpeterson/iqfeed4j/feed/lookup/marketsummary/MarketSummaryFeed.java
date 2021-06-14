@@ -28,7 +28,7 @@ import java.util.concurrent.ExecutionException;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.DateTimeConverters.DATE;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.DateTimeConverters.TIME;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.DateTimeConverters.OPTIONAL_1_OR_2_DIGIT_HOUR_TIME_NULLABLE;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.PrimitiveConvertors.DOUBLE;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.PrimitiveConvertors.INTEGER;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.PrimitiveConvertors.STRING;
@@ -53,7 +53,8 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
         END_OF_DAY_SNAPSHOT_CSV_MAPPER.setMapping("TradeSize", EndOfDaySnapshot::setTradeSize, DOUBLE);
         END_OF_DAY_SNAPSHOT_CSV_MAPPER.setMapping("TradedMarket", EndOfDaySnapshot::setTradedMarket, INTEGER);
         END_OF_DAY_SNAPSHOT_CSV_MAPPER.setMapping("TradeDate", EndOfDaySnapshot::setTradeDate, DATE);
-        END_OF_DAY_SNAPSHOT_CSV_MAPPER.setMapping("TradeTime", EndOfDaySnapshot::setTradeTime, TIME);
+        END_OF_DAY_SNAPSHOT_CSV_MAPPER.setMapping("TradeTime",
+                EndOfDaySnapshot::setTradeTime, OPTIONAL_1_OR_2_DIGIT_HOUR_TIME_NULLABLE);
         END_OF_DAY_SNAPSHOT_CSV_MAPPER.setMapping("Open", EndOfDaySnapshot::setOpen, DOUBLE);
         END_OF_DAY_SNAPSHOT_CSV_MAPPER.setMapping("High", EndOfDaySnapshot::setHigh, DOUBLE);
         END_OF_DAY_SNAPSHOT_CSV_MAPPER.setMapping("Low", EndOfDaySnapshot::setLow, DOUBLE);
@@ -104,8 +105,8 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
         FUNDAMENTAL_SNAPSHOT_CSV_MAPPER.setMapping("MaturityDate", FundamentalSnapshot::setMaturityDate, DATE);
         FUNDAMENTAL_SNAPSHOT_CSV_MAPPER.setMapping("OptionRoots", FundamentalSnapshot::setOptionRoots, STRING);
         FUNDAMENTAL_SNAPSHOT_CSV_MAPPER.setMapping("CouponRate", FundamentalSnapshot::setCouponRate, DOUBLE);
-        FUNDAMENTAL_SNAPSHOT_CSV_MAPPER
-                .setMapping("InstitutionalPercent", FundamentalSnapshot::setInstitutionalPercent, DOUBLE);
+        FUNDAMENTAL_SNAPSHOT_CSV_MAPPER.setMapping("InstitutionalPercent",
+                FundamentalSnapshot::setInstitutionalPercent, DOUBLE);
         FUNDAMENTAL_SNAPSHOT_CSV_MAPPER.setMapping("YearEndClose", FundamentalSnapshot::setYearEndClose, DOUBLE);
         FUNDAMENTAL_SNAPSHOT_CSV_MAPPER.setMapping("Beta", FundamentalSnapshot::setBeta, DOUBLE);
         FUNDAMENTAL_SNAPSHOT_CSV_MAPPER.setMapping("LEAPs", FundamentalSnapshot::setLEAPs, STRING);
@@ -114,8 +115,8 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
         FUNDAMENTAL_SNAPSHOT_CSV_MAPPER.setMapping("Liabilities", FundamentalSnapshot::setLiabilities, DOUBLE);
         FUNDAMENTAL_SNAPSHOT_CSV_MAPPER.setMapping("BalanceSheetDate", FundamentalSnapshot::setBalanceSheetDate, DATE);
         FUNDAMENTAL_SNAPSHOT_CSV_MAPPER.setMapping("LongTermDebt", FundamentalSnapshot::setLongTermDebt, DOUBLE);
-        FUNDAMENTAL_SNAPSHOT_CSV_MAPPER
-                .setMapping("CommonSharesOutstanding", FundamentalSnapshot::setCommonSharesOutstanding, DOUBLE);
+        FUNDAMENTAL_SNAPSHOT_CSV_MAPPER.setMapping("CommonSharesOutstanding",
+                FundamentalSnapshot::setCommonSharesOutstanding, DOUBLE);
         FUNDAMENTAL_SNAPSHOT_CSV_MAPPER.setMapping("MarketCap", FundamentalSnapshot::setMarketCap, DOUBLE);
         FUNDAMENTAL_SNAPSHOT_CSV_MAPPER.setMapping("52WeekHigh", FundamentalSnapshot::set52WeekHigh, DOUBLE);
         FUNDAMENTAL_SNAPSHOT_CSV_MAPPER.setMapping("52WeekHighDate", FundamentalSnapshot::set52WeekHighDate, DATE);
@@ -141,7 +142,8 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
         FIVE_MINUTE_SNAPSHOT_CSV_MAPPER.setMapping("TradeSize", FiveMinuteSnapshot::setTradeSize, DOUBLE);
         FIVE_MINUTE_SNAPSHOT_CSV_MAPPER.setMapping("TradedMarket", FiveMinuteSnapshot::setTradedMarket, INTEGER);
         FIVE_MINUTE_SNAPSHOT_CSV_MAPPER.setMapping("TradeDate", FiveMinuteSnapshot::setTradeDate, DATE);
-        FIVE_MINUTE_SNAPSHOT_CSV_MAPPER.setMapping("TradeTime", FiveMinuteSnapshot::setTradeTime, TIME);
+        FIVE_MINUTE_SNAPSHOT_CSV_MAPPER.setMapping("TradeTime",
+                FiveMinuteSnapshot::setTradeTime, OPTIONAL_1_OR_2_DIGIT_HOUR_TIME_NULLABLE);
         FIVE_MINUTE_SNAPSHOT_CSV_MAPPER.setMapping("Open", FiveMinuteSnapshot::setOpen, DOUBLE);
         FIVE_MINUTE_SNAPSHOT_CSV_MAPPER.setMapping("High", FiveMinuteSnapshot::setHigh, DOUBLE);
         FIVE_MINUTE_SNAPSHOT_CSV_MAPPER.setMapping("Low", FiveMinuteSnapshot::setLow, DOUBLE);
@@ -266,8 +268,8 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
             // already exist, then we know this is the first line and so we can now create the 'csvIndicesOfIndexNames'.
             if (csvIndicesOfIndexNames == null) {
                 csvIndicesOfIndexNames = new HashMap<>();
-                // Start at 1 to exclude Request ID
-                for (int csvIndex = 1; csvIndex < csv.length; csvIndex++) {
+                // Start at 2 to exclude Request ID and 'LM' message identifier
+                for (int csvIndex = 2; csvIndex < csv.length; csvIndex++) {
                     if (!valuePresent(csv, csvIndex)) {
                         LOGGER.error("CSV Field Names should always contain a String value, but " +
                                 "none exists at index {}!", csvIndex);
@@ -279,7 +281,7 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
                 csvIndicesOfIndexNamesOfRequestIDs.put(requestID, csvIndicesOfIndexNames);
             } else {
                 try {
-                    // Offset = 0 since above 'if' block accounts for Request ID offset
+                    // Offset = 0 since 'if' block above accounts for offsets
                     T messageType = namedCSVMapper.map(csv, 0, csvIndicesOfIndexNames);
                     listener.onMessageReceived(messageType);
                 } catch (Exception exception) {

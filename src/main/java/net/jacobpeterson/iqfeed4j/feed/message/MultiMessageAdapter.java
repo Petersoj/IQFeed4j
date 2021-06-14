@@ -17,7 +17,7 @@ public class MultiMessageAdapter<T> extends MultiMessageListener<T> {
 
     @Override
     public void onMessageException(Exception exception) {
-        LOGGER.error("Multi-message Exception!", exception);
+        LOGGER.debug("Multi-message Exception!", exception);
     }
 
     @Override

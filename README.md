@@ -85,13 +85,15 @@ It contains various constructors that allow you to specify various parameters fo
 ### `Level1Feed`
 This feed is used for real-time Level 1 market data.
 
-The following will change what fields are sent when a `SummaryUpdate` occurs on this feed. 
+The following example will change what fields are sent when a `SummaryUpdate` occurs on this feed. 
 ```java
 try {
     iqFeed4j.getLevel1Feed().selectUpdateFieldNames(
             SummaryUpdateField.LAST,
             SummaryUpdateField.LAST_SIZE,
-            SummaryUpdateField.LAST_MARKET_CENTER);
+            SummaryUpdateField.LAST_MARKET_CENTER,
+            SummaryUpdateField.LAST_DATE,
+            SummaryUpdateField.LAST_TIME);
 } catch (IOException exception) {
     exception.printStackTrace();
 }
@@ -110,11 +112,14 @@ try {
             }, new FeedMessageAdapter<SummaryUpdate>() {
                 @Override
                 public void onMessageReceived(SummaryUpdate summaryUpdate) {
-                    System.out.printf(
-                            "AAPL trade occurred with %d shares at %.2f with the market center code %d.\n",
+                    System.out.printf("AAPL trade occurred with %d shares at $%.4f with the market center code" +
+                                    " %d at %s %s with a latency of %s milliseconds.\n",
                             summaryUpdate.getLastSize(),
                             summaryUpdate.getLast(),
-                            summaryUpdate.getLastMarketCenter());
+                            summaryUpdate.getLastMarketCenter(),
+                            summaryUpdate.getLastDate(),
+                            summaryUpdate.getLastTime(),
+                            ChronoUnit.MILLIS.between(summaryUpdate.getLastTime(), LocalTime.now(ZoneId.of("America/New_York"))));
                 }
             });
 } catch (IOException exception) {
@@ -138,7 +143,7 @@ try {
             null,
             null,
             LocalTime.of(9, 30),
-            LocalTime.of(4, 0),
+            LocalTime.of(12 + 4, 0),
             IntervalType.SECONDS,
             null,
             new FeedMessageAdapter<Interval>(){
@@ -161,6 +166,8 @@ try {
     // Set the login ID and password (and wait for confirmation response)
     String currentLoginID = iqFeed4j.getAdminFeed().setLoginID("<login ID>").get();
     String currentPassword = iqFeed4j.getAdminFeed().setPassword("<password>").get();
+    System.out.println(currentLoginID);
+    System.out.println(currentPassword);
 
     // Get the next occurrence of the 'FeedStatistics' message
     System.out.printf("Feed stats: %s\n", iqFeed4j.getAdminFeed().getNextFeedStatistics().get());
@@ -168,7 +175,7 @@ try {
     // Print all 'ClientStatistics' after 5 seconds
     iqFeed4j.getAdminFeed().setClientStatsOn();
     Thread.sleep(5000);
-    iqFeed4j.getAdminFeed().getClientStatisticsOfClientIDs().keySet().forEach(System.out::println);
+    iqFeed4j.getAdminFeed().getClientStatisticsOfClientIDs().entrySet().forEach(System.out::println);
 } catch (IOException | ExecutionException | InterruptedException exception) {
     exception.printStackTrace();
 }
@@ -187,10 +194,10 @@ try {
             "AAPL",
             60,
             LocalDateTime.of(2021, 6, 10, 9, 30),
-            LocalDateTime.of(2021, 6, 11, 4, 30),
+            LocalDateTime.of(2021, 6, 11, 12 + 4, 0),
             null,
             LocalTime.of(9, 30),
-            LocalTime.of(4, 0),
+            LocalTime.of(12 + 4, 0),
             DataDirection.OLDEST_TO_NEWEST,
             IntervalType.SECONDS,
             new MultiMessageAdapter<Interval>() {
@@ -205,10 +212,10 @@ try {
             "AAPL",
             60,
             LocalDateTime.of(2021, 6, 10, 9, 30),
-            LocalDateTime.of(2021, 6, 11, 4, 30),
+            LocalDateTime.of(2021, 6, 11, 12 + 4, 0),
             null,
             LocalTime.of(9, 30),
-            LocalTime.of(4, 0),
+            LocalTime.of(12 + 4, 0),
             DataDirection.OLDEST_TO_NEWEST,
             IntervalType.SECONDS);
     System.out.println("AAPL minute intervals:");
@@ -268,18 +275,19 @@ try {
 ### `OptionChainsFeed`
 This feed allows you to retrieve Option chain data including: equity Option contacts, Future contracts, Future Option contracts, Future Spreads.
 
-The following example gets 5 In-The-Money and 5 Out-Of-The-Money Equity Put and Call Option contracts for AAPL expiring in June.
+The following example gets 5 In-The-Money and 5 Out-Of-The-Money Equity Put and Call Option contracts for AAPL expiring in June and prints them out.
 ```java
 try {
-    iqFeed4j.getOptionChainsFeed().getEquityOptionChainWithITMOTMFilter(
+    List<OptionContract> applOptions = iqFeed4j.getOptionChainsFeed().getEquityOptionChainWithITMOTMFilter(
             "AAPL",
             PutsCallsOption.PUTS_AND_CALLS,
             Arrays.asList(EquityOptionMonth.JUNE_PUT, EquityOptionMonth.JUNE_CALL),
             null,
             5,
             5,
-            NonStandardOptionTypes.INCLUDE);
-} catch (IOException exception) {
+            NonStandardOptionTypes.INCLUDE).get();
+    applOptions.forEach(System.out::println);
+} catch (IOException | InterruptedException | ExecutionException exception) {
     exception.printStackTrace();
 }
 ```
@@ -287,7 +295,7 @@ try {
 ### `SymbolMarketInfoFeed`
 This feed allows you to retrieve current symbol information and current market information.
 
-The following example gets all the current `ListedMarket`s and prints information about the out. 
+The following example gets all the current `ListedMarket`s and prints them out. 
 ```java
 try {
     Iterator<ListedMarket> listedMarkets = iqFeed4j.getSymbolMarketInfoFeed().requestListedMarkets();

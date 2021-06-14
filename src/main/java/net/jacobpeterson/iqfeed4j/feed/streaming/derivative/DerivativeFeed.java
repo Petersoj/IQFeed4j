@@ -23,10 +23,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
@@ -74,8 +71,8 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
     protected final RequestIDFeedHelper requestIDFeedHelper;
     protected final HashMap<String, FeedMessageListener<Interval>> intervalListenersOfRequestIDs;
     protected final HashMap<String, List<FeedMessageListener<Interval>>> intervalListenersOfWatchedSymbols;
+    protected final Queue<SingleMessageFuture<List<WatchedInterval>>> watchedIntervalsFuturesQueue;
     protected DerivativeFeedEventListener derivativeFeedEventListener;
-    protected SingleMessageFuture<List<WatchedInterval>> watchedIntervalsFuture;
 
     /**
      * Instantiates a new {@link DerivativeFeed}.
@@ -108,6 +105,7 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
         requestIDFeedHelper = new RequestIDFeedHelper();
         intervalListenersOfRequestIDs = new HashMap<>();
         intervalListenersOfWatchedSymbols = new HashMap<>();
+        watchedIntervalsFuturesQueue = new LinkedList<>();
     }
 
     @Override
@@ -185,14 +183,13 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
     }
 
     private void handleWatchedIntervalsMessage(String[] csv) {
-        if (watchedIntervalsFuture != null) {
+        if (!watchedIntervalsFuturesQueue.isEmpty()) {
+            SingleMessageFuture<List<WatchedInterval>> watchedIntervalsFuture = watchedIntervalsFuturesQueue.poll();
             try {
                 watchedIntervalsFuture.complete(WATCHED_INTERVALS_CSV_MAPPER.mapToList(csv, 2));
             } catch (Exception exception) {
                 watchedIntervalsFuture.completeExceptionally(exception);
             }
-
-            watchedIntervalsFuture = null;
         } else {
             LOGGER.error("Received {} System message, but with no Future to handle it!",
                     DerivativeSystemMessageType.WATCHED_INTERVALS);
@@ -362,19 +359,14 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
      * @throws IOException thrown for {@link IOException}s
      */
     public SingleMessageFuture<List<WatchedInterval>> requestWatchedIntervals() throws IOException {
-        synchronized (messageReceivedLock) {
-            if (watchedIntervalsFuture != null) {
-                return watchedIntervalsFuture;
-            }
-        }
-
         StringBuilder requestBuilder = new StringBuilder();
         requestBuilder.append(FeedCommand.SYSTEM.value()).append(",");
         requestBuilder.append(DerivativeSystemCommand.REQUEST_WATCHES.value());
         requestBuilder.append(LineEnding.CR_LF.getASCIIString());
 
+        SingleMessageFuture<List<WatchedInterval>> watchedIntervalsFuture = new SingleMessageFuture<>();
         synchronized (messageReceivedLock) {
-            watchedIntervalsFuture = new SingleMessageFuture<>();
+            watchedIntervalsFuturesQueue.add(watchedIntervalsFuture);
         }
 
         sendAndLogMessage(requestBuilder.toString());
