@@ -195,7 +195,7 @@ public abstract class AbstractFeed implements Runnable {
                     cleanupState();
                     return;
                 } else {
-                    // TODO remove in production
+                    // Removed in production for version 6.2-1.2
                     LOGGER.trace("Received message line: {}", line);
 
                     String[] csv = csvSplitter.splitToList(line).toArray(new String[0]);

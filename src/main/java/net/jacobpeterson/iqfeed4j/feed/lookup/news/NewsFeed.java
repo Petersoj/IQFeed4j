@@ -5,7 +5,7 @@ import net.jacobpeterson.iqfeed4j.feed.lookup.news.xml.configuration.NewsConfigu
 import net.jacobpeterson.iqfeed4j.feed.lookup.news.xml.headline.NewsHeadlines;
 import net.jacobpeterson.iqfeed4j.feed.lookup.news.xml.story.NewsStories;
 import net.jacobpeterson.iqfeed4j.feed.lookup.news.xml.storycount.NewsStoryCounts;
-import net.jacobpeterson.iqfeed4j.feed.message.MultiMessageIteratorListener;
+import net.jacobpeterson.iqfeed4j.feed.message.MultiMessageAccumulator;
 import net.jacobpeterson.iqfeed4j.feed.message.MultiMessageListener;
 import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedMessageType;
 import net.jacobpeterson.iqfeed4j.model.feed.common.message.MessageLine;
@@ -128,7 +128,7 @@ public class NewsFeed extends AbstractLookupFeed {
      * @throws InterruptedException thrown for {@link InterruptedException}s
      */
     public NewsConfiguration requestNewsConfiguration() throws IOException, ExecutionException, InterruptedException {
-        MultiMessageIteratorListener<MessageLine> asyncListener = new MultiMessageIteratorListener<>();
+        MultiMessageAccumulator<MessageLine> asyncListener = new MultiMessageAccumulator<>();
         requestNewsConfiguration(XMLTextOption.XML, asyncListener);
 
         String xmlMessage = asyncListener.getMessages().stream()
@@ -218,7 +218,7 @@ public class NewsFeed extends AbstractLookupFeed {
     public NewsHeadlines requestNewsHeadlines(List<String> sources, List<String> symbols, Integer limit,
             List<LocalDate> dates, Map<LocalDate, LocalDate> dateRanges)
             throws IOException, ExecutionException, InterruptedException {
-        MultiMessageIteratorListener<MessageLine> asyncListener = new MultiMessageIteratorListener<>();
+        MultiMessageAccumulator<MessageLine> asyncListener = new MultiMessageAccumulator<>();
         requestNewsHeadlines(sources, symbols, XMLTextOption.XML, limit, dates, dateRanges, asyncListener);
 
         String xmlMessage = asyncListener.getMessages().stream()
@@ -284,7 +284,7 @@ public class NewsFeed extends AbstractLookupFeed {
      */
     public NewsStories requestNewsStory(String id)
             throws IOException, ExecutionException, InterruptedException {
-        MultiMessageIteratorListener<MessageLine> asyncListener = new MultiMessageIteratorListener<>();
+        MultiMessageAccumulator<MessageLine> asyncListener = new MultiMessageAccumulator<>();
         requestNewsStory(id, XMLTextEmailOption.XML, null, asyncListener);
 
         String xmlMessage = asyncListener.getMessages().stream()
@@ -358,7 +358,7 @@ public class NewsFeed extends AbstractLookupFeed {
      */
     public NewsStoryCounts requestNewsStoryCount(List<String> symbols, List<String> sources, LocalDate fromDate,
             LocalDate toDate) throws IOException, ExecutionException, InterruptedException {
-        MultiMessageIteratorListener<MessageLine> asyncListener = new MultiMessageIteratorListener<>();
+        MultiMessageAccumulator<MessageLine> asyncListener = new MultiMessageAccumulator<>();
         requestNewsStoryCount(symbols, XMLTextOption.XML, sources, fromDate, toDate, asyncListener);
 
         String xmlMessage = asyncListener.getMessages().stream()

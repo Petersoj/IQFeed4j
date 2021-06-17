@@ -1,7 +1,7 @@
 package net.jacobpeterson.iqfeed4j.feed.lookup.historical;
 
 import net.jacobpeterson.iqfeed4j.feed.lookup.AbstractLookupFeed;
-import net.jacobpeterson.iqfeed4j.feed.message.MultiMessageIteratorListener;
+import net.jacobpeterson.iqfeed4j.feed.message.MultiMessageAccumulator;
 import net.jacobpeterson.iqfeed4j.feed.message.MultiMessageListener;
 import net.jacobpeterson.iqfeed4j.model.feed.common.interval.IntervalType;
 import net.jacobpeterson.iqfeed4j.model.feed.lookup.historical.DatedInterval;
@@ -23,7 +23,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -187,19 +187,19 @@ public class HistoricalFeed extends AbstractLookupFeed {
 
     /**
      * Calls {@link #requestTicks(String, int, DataDirection, MultiMessageListener)} and will accumulate all requested
-     * data into an {@link Iterator} which can be consumed later.
+     * data into a {@link List} which can be consumed later.
      *
-     * @return an {@link Iterator} of {@link Tick}s
+     * @return a {@link List} of {@link Tick}s
      *
      * @throws IOException          thrown for {@link IOException}s
      * @throws ExecutionException   thrown for {@link ExecutionException}s
      * @throws InterruptedException thrown for {@link InterruptedException}s
      */
-    public Iterator<Tick> requestTicks(String symbol, int maxDataPoints, DataDirection dataDirection)
+    public List<Tick> requestTicks(String symbol, int maxDataPoints, DataDirection dataDirection)
             throws IOException, ExecutionException, InterruptedException {
-        MultiMessageIteratorListener<Tick> asyncListener = new MultiMessageIteratorListener<>();
+        MultiMessageAccumulator<Tick> asyncListener = new MultiMessageAccumulator<>();
         requestTicks(symbol, maxDataPoints, dataDirection, asyncListener);
-        return asyncListener.getIterator();
+        return asyncListener.getMessages();
     }
 
     /**
@@ -264,20 +264,20 @@ public class HistoricalFeed extends AbstractLookupFeed {
 
     /**
      * Calls {@link #requestTicks(String, int, Integer, LocalTime, LocalTime, DataDirection, MultiMessageListener)} and
-     * will accumulate all requested data into an {@link Iterator} which can be consumed later.
+     * will accumulate all requested data into a {@link List} which can be consumed later.
      *
-     * @return an {@link Iterator} of {@link Tick}s
+     * @return a {@link List} of {@link Tick}s
      *
      * @throws IOException          thrown for {@link IOException}s
      * @throws ExecutionException   thrown for {@link ExecutionException}s
      * @throws InterruptedException thrown for {@link InterruptedException}s
      */
-    public Iterator<Tick> requestTicks(String symbol, int maxDays, Integer maxDataPoints, LocalTime beginFilterTime,
+    public List<Tick> requestTicks(String symbol, int maxDays, Integer maxDataPoints, LocalTime beginFilterTime,
             LocalTime endFilterTime, DataDirection dataDirection)
             throws IOException, ExecutionException, InterruptedException {
-        MultiMessageIteratorListener<Tick> asyncListener = new MultiMessageIteratorListener<>();
+        MultiMessageAccumulator<Tick> asyncListener = new MultiMessageAccumulator<>();
         requestTicks(symbol, maxDays, maxDataPoints, beginFilterTime, endFilterTime, dataDirection, asyncListener);
-        return asyncListener.getIterator();
+        return asyncListener.getMessages();
     }
 
     /**
@@ -353,22 +353,21 @@ public class HistoricalFeed extends AbstractLookupFeed {
 
     /**
      * Calls {@link #requestTicks(String, LocalDateTime, LocalDateTime, Integer, LocalTime, LocalTime, DataDirection,
-     * MultiMessageListener)} and will accumulate all requested data into an {@link Iterator} which can be consumed
-     * later.
+     * MultiMessageListener)} and will accumulate all requested data into a {@link List} which can be consumed later.
      *
-     * @return an {@link Iterator} of {@link Tick}s
+     * @return a {@link List} of {@link Tick}s
      *
      * @throws IOException          thrown for {@link IOException}s
      * @throws ExecutionException   thrown for {@link ExecutionException}s
      * @throws InterruptedException thrown for {@link InterruptedException}s
      */
-    public Iterator<Tick> requestTicks(String symbol, LocalDateTime beginDateTime, LocalDateTime endDateTime,
+    public List<Tick> requestTicks(String symbol, LocalDateTime beginDateTime, LocalDateTime endDateTime,
             Integer maxDataPoints, LocalTime beginFilterTime, LocalTime endFilterTime, DataDirection dataDirection)
             throws IOException, ExecutionException, InterruptedException {
-        MultiMessageIteratorListener<Tick> asyncListener = new MultiMessageIteratorListener<>();
+        MultiMessageAccumulator<Tick> asyncListener = new MultiMessageAccumulator<>();
         requestTicks(symbol, beginDateTime, endDateTime, maxDataPoints, beginFilterTime, endFilterTime, dataDirection,
                 asyncListener);
-        return asyncListener.getIterator();
+        return asyncListener.getMessages();
     }
 
     /**
@@ -423,20 +422,20 @@ public class HistoricalFeed extends AbstractLookupFeed {
 
     /**
      * Calls {@link #requestIntervals(String, int, Integer, DataDirection, IntervalType, MultiMessageListener)} and will
-     * accumulate all requested data into an {@link Iterator} which can be consumed later.
+     * accumulate all requested data into a {@link List} which can be consumed later.
      *
-     * @return an {@link Iterator} of {@link Interval}s
+     * @return a {@link List} of {@link Interval}s
      *
      * @throws IOException          thrown for {@link IOException}s
      * @throws ExecutionException   thrown for {@link ExecutionException}s
      * @throws InterruptedException thrown for {@link InterruptedException}s
      */
-    public Iterator<Interval> requestIntervals(String symbol, int intervalLength, Integer maxDataPoints,
+    public List<Interval> requestIntervals(String symbol, int intervalLength, Integer maxDataPoints,
             DataDirection dataDirection, IntervalType intervalType)
             throws IOException, ExecutionException, InterruptedException {
-        MultiMessageIteratorListener<Interval> asyncListener = new MultiMessageIteratorListener<>();
+        MultiMessageAccumulator<Interval> asyncListener = new MultiMessageAccumulator<>();
         requestIntervals(symbol, intervalLength, maxDataPoints, dataDirection, intervalType, asyncListener);
-        return asyncListener.getIterator();
+        return asyncListener.getMessages();
     }
 
     /**
@@ -511,22 +510,21 @@ public class HistoricalFeed extends AbstractLookupFeed {
 
     /**
      * Calls {@link #requestIntervals(String, int, int, Integer, LocalTime, LocalTime, DataDirection, IntervalType,
-     * MultiMessageListener)} and will accumulate all requested data into an {@link Iterator} which can be consumed
-     * later.
+     * MultiMessageListener)} and will accumulate all requested data into a {@link List} which can be consumed later.
      *
-     * @return an {@link Iterator} of {@link Interval}s
+     * @return a {@link List} of {@link Interval}s
      *
      * @throws IOException          thrown for {@link IOException}s
      * @throws ExecutionException   thrown for {@link ExecutionException}s
      * @throws InterruptedException thrown for {@link InterruptedException}s
      */
-    public Iterator<Interval> requestIntervals(String symbol, int intervalLength, int maxDays, Integer maxDataPoints,
+    public List<Interval> requestIntervals(String symbol, int intervalLength, int maxDays, Integer maxDataPoints,
             LocalTime beginFilterTime, LocalTime endFilterTime, DataDirection dataDirection, IntervalType intervalType)
             throws IOException, ExecutionException, InterruptedException {
-        MultiMessageIteratorListener<Interval> asyncListener = new MultiMessageIteratorListener<>();
+        MultiMessageAccumulator<Interval> asyncListener = new MultiMessageAccumulator<>();
         requestIntervals(symbol, intervalLength, maxDays, maxDataPoints, beginFilterTime, endFilterTime, dataDirection,
                 intervalType, asyncListener);
-        return asyncListener.getIterator();
+        return asyncListener.getMessages();
     }
 
     /**
@@ -613,23 +611,23 @@ public class HistoricalFeed extends AbstractLookupFeed {
 
     /**
      * Calls {@link #requestIntervals(String, int, LocalDateTime, LocalDateTime, Integer, LocalTime, LocalTime,
-     * DataDirection, IntervalType, MultiMessageListener)} and will accumulate all requested data into an {@link
-     * Iterator} which can be consumed later.
+     * DataDirection, IntervalType, MultiMessageListener)} and will accumulate all requested data into a {@link List}
+     * which can be consumed later.
      *
-     * @return an {@link Iterator} of {@link Interval}s
+     * @return a {@link List} of {@link Interval}s
      *
      * @throws IOException          thrown for {@link IOException}s
      * @throws ExecutionException   thrown for {@link ExecutionException}s
      * @throws InterruptedException thrown for {@link InterruptedException}s
      */
-    public Iterator<Interval> requestIntervals(String symbol, int intervalLength, LocalDateTime beginDateTime,
+    public List<Interval> requestIntervals(String symbol, int intervalLength, LocalDateTime beginDateTime,
             LocalDateTime endDateTime, Integer maxDataPoints, LocalTime beginFilterTime, LocalTime endFilterTime,
             DataDirection dataDirection, IntervalType intervalType)
             throws IOException, ExecutionException, InterruptedException {
-        MultiMessageIteratorListener<Interval> asyncListener = new MultiMessageIteratorListener<>();
+        MultiMessageAccumulator<Interval> asyncListener = new MultiMessageAccumulator<>();
         requestIntervals(symbol, intervalLength, beginDateTime, endDateTime, maxDataPoints, beginFilterTime,
                 endFilterTime, dataDirection, intervalType, asyncListener);
-        return asyncListener.getIterator();
+        return asyncListener.getMessages();
     }
 
     /**
@@ -682,19 +680,19 @@ public class HistoricalFeed extends AbstractLookupFeed {
 
     /**
      * Calls {@link #requestDayIntervals(String, int, DataDirection, PartialDatapoint, MultiMessageListener)} and will
-     * accumulate all requested data into an {@link Iterator} which can be consumed later.
+     * accumulate all requested data into a {@link List} which can be consumed later.
      *
-     * @return an {@link Iterator} of {@link DatedInterval}s
+     * @return a {@link List} of {@link DatedInterval}s
      *
      * @throws IOException          thrown for {@link IOException}s
      * @throws ExecutionException   thrown for {@link ExecutionException}s
      * @throws InterruptedException thrown for {@link InterruptedException}s
      */
-    public Iterator<DatedInterval> requestDayIntervals(String symbol, int maxDays, DataDirection dataDirection,
+    public List<DatedInterval> requestDayIntervals(String symbol, int maxDays, DataDirection dataDirection,
             PartialDatapoint partialDatapoint) throws IOException, ExecutionException, InterruptedException {
-        MultiMessageIteratorListener<DatedInterval> asyncListener = new MultiMessageIteratorListener<>();
+        MultiMessageAccumulator<DatedInterval> asyncListener = new MultiMessageAccumulator<>();
         requestDayIntervals(symbol, maxDays, dataDirection, partialDatapoint, asyncListener);
-        return asyncListener.getIterator();
+        return asyncListener.getMessages();
     }
 
     /**
@@ -764,21 +762,20 @@ public class HistoricalFeed extends AbstractLookupFeed {
 
     /**
      * Calls {@link #requestDayIntervals(String, LocalDate, LocalDate, Integer, DataDirection, PartialDatapoint,
-     * MultiMessageListener)} and will accumulate all requested data into an {@link Iterator} which can be consumed
-     * later.
+     * MultiMessageListener)} and will accumulate all requested data into a {@link List} which can be consumed later.
      *
-     * @return an {@link Iterator} of {@link DatedInterval}s
+     * @return a {@link List} of {@link DatedInterval}s
      *
      * @throws IOException          thrown for {@link IOException}s
      * @throws ExecutionException   thrown for {@link ExecutionException}s
      * @throws InterruptedException thrown for {@link InterruptedException}s
      */
-    public Iterator<DatedInterval> requestDayIntervals(String symbol, LocalDate beginDate, LocalDate endDate,
+    public List<DatedInterval> requestDayIntervals(String symbol, LocalDate beginDate, LocalDate endDate,
             Integer maxDataPoints, DataDirection dataDirection, PartialDatapoint partialDatapoint)
             throws IOException, ExecutionException, InterruptedException {
-        MultiMessageIteratorListener<DatedInterval> asyncListener = new MultiMessageIteratorListener<>();
+        MultiMessageAccumulator<DatedInterval> asyncListener = new MultiMessageAccumulator<>();
         requestDayIntervals(symbol, beginDate, endDate, maxDataPoints, dataDirection, partialDatapoint, asyncListener);
-        return asyncListener.getIterator();
+        return asyncListener.getMessages();
     }
 
     /**
@@ -831,19 +828,19 @@ public class HistoricalFeed extends AbstractLookupFeed {
 
     /**
      * Calls {@link #requestWeekIntervals(String, int, DataDirection, PartialDatapoint, MultiMessageListener)} and will
-     * accumulate all requested data into an {@link Iterator} which can be consumed later.
+     * accumulate all requested data into a {@link List} which can be consumed later.
      *
-     * @return an {@link Iterator} of {@link DatedInterval}s
+     * @return a {@link List} of {@link DatedInterval}s
      *
      * @throws IOException          thrown for {@link IOException}s
      * @throws ExecutionException   thrown for {@link ExecutionException}s
      * @throws InterruptedException thrown for {@link InterruptedException}s
      */
-    public Iterator<DatedInterval> requestWeekIntervals(String symbol, int maxWeeks, DataDirection dataDirection,
+    public List<DatedInterval> requestWeekIntervals(String symbol, int maxWeeks, DataDirection dataDirection,
             PartialDatapoint partialDatapoint) throws IOException, ExecutionException, InterruptedException {
-        MultiMessageIteratorListener<DatedInterval> asyncListener = new MultiMessageIteratorListener<>();
+        MultiMessageAccumulator<DatedInterval> asyncListener = new MultiMessageAccumulator<>();
         requestWeekIntervals(symbol, maxWeeks, dataDirection, partialDatapoint, asyncListener);
-        return asyncListener.getIterator();
+        return asyncListener.getMessages();
     }
 
     /**
@@ -896,19 +893,19 @@ public class HistoricalFeed extends AbstractLookupFeed {
 
     /**
      * Calls {@link #requestMonthIntervals(String, int, DataDirection, PartialDatapoint, MultiMessageListener)} and will
-     * accumulate all requested data into an {@link Iterator} which can be consumed later.
+     * accumulate all requested data into a {@link List} which can be consumed later.
      *
-     * @return an {@link Iterator} of {@link DatedInterval}s
+     * @return a {@link List} of {@link DatedInterval}s
      *
      * @throws IOException          thrown for {@link IOException}s
      * @throws ExecutionException   thrown for {@link ExecutionException}s
      * @throws InterruptedException thrown for {@link InterruptedException}s
      */
-    public Iterator<DatedInterval> requestMonthIntervals(String symbol, int maxMonths, DataDirection dataDirection,
+    public List<DatedInterval> requestMonthIntervals(String symbol, int maxMonths, DataDirection dataDirection,
             PartialDatapoint partialDatapoint) throws IOException, ExecutionException, InterruptedException {
-        MultiMessageIteratorListener<DatedInterval> asyncListener = new MultiMessageIteratorListener<>();
+        MultiMessageAccumulator<DatedInterval> asyncListener = new MultiMessageAccumulator<>();
         requestMonthIntervals(symbol, maxMonths, dataDirection, partialDatapoint, asyncListener);
-        return asyncListener.getIterator();
+        return asyncListener.getMessages();
     }
 
     //
