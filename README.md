@@ -23,7 +23,7 @@ If you are using Gradle as your build tool, add the following dependency to your
 
 ```
 dependencies {
-    implementation group: 'net.jacobpeterson', name: 'iqfeed4j', version: '6.2-1.2'
+    implementation group: 'net.jacobpeterson', name: 'iqfeed4j', version: '6.2-1.3'
 }
 ```
 
@@ -33,7 +33,7 @@ If you are using Maven as your build tool, add the following dependency to your 
 <dependency>
     <groupId>net.jacobpeterson</groupId>
     <artifactId>iqfeed4j</artifactId>
-    <version>6.2-1.2</version>
+    <version>6.2-1.3</version>
     <scope>compile</scope>
 </dependency>
 ```
@@ -89,11 +89,11 @@ The following example will change what fields are sent when a `SummaryUpdate` oc
 ```java
 try {
     iqFeed4j.getLevel1Feed().selectUpdateFieldNames(
-            SummaryUpdateField.LAST,
-            SummaryUpdateField.LAST_SIZE,
-            SummaryUpdateField.LAST_MARKET_CENTER,
-            SummaryUpdateField.LAST_DATE,
-            SummaryUpdateField.LAST_TIME);
+            SummaryUpdateField.MOST_RECENT_TRADE,
+            SummaryUpdateField.MOST_RECENT_TRADE_SIZE,
+            SummaryUpdateField.MOST_RECENT_TRADE_MARKET_CENTER,
+            SummaryUpdateField.MOST_RECENT_TRADE_DATE,
+            SummaryUpdateField.MOST_RECENT_TRADE_TIME);
 } catch (IOException exception) {
     exception.printStackTrace();
 }
@@ -114,12 +114,12 @@ try {
                 public void onMessageReceived(SummaryUpdate summaryUpdate) {
                     System.out.printf("AAPL trade occurred with %d shares at $%.4f with the market center code" +
                                     " %d at %s %s with a latency of %s milliseconds.\n",
-                            summaryUpdate.getLastSize(),
-                            summaryUpdate.getLast(),
-                            summaryUpdate.getLastMarketCenter(),
-                            summaryUpdate.getLastDate(),
-                            summaryUpdate.getLastTime(),
-                            ChronoUnit.MILLIS.between(summaryUpdate.getLastTime(), LocalTime.now(ZoneId.of("America/New_York"))));
+                            summaryUpdate.getMostRecentTradeSize(),
+                            summaryUpdate.getMostRecentTrade(),
+                            summaryUpdate.getMostRecentTradeMarketCenter(),
+                            summaryUpdate.getMostRecentTradeDate(),
+                            summaryUpdate.getMostRecentTradeTime(),
+                            ChronoUnit.MILLIS.between(summaryUpdate.getMostRecentTradeTime(), LocalTime.now(ZoneId.of("America/New_York"))));
                 }
             });
 } catch (IOException exception) {
