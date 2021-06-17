@@ -12,15 +12,19 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * {@link IQConnectExecutable} provides a convenient way to start/stop the IQConnect.exe program.
+ * {@link IQConnectExecutable} provides a convenient way to start/stop the <code>IQConnect.exe</code> program.
  */
 public class IQConnectExecutable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IQConnectExecutable.class);
+
+    private static final long ADMIN_FEED_POLLING_INTERVAL = 250;
 
     private final String iqConnectCommand;
     private final String productID;
@@ -51,7 +55,7 @@ public class IQConnectExecutable {
     /**
      * Instantiates a new {@link IQConnectExecutable}.
      *
-     * @param iqConnectCommand   the IQConnect.exe command (optional)
+     * @param iqConnectCommand   the <code>IQConnect.exe</code> command (optional)
      * @param productID          the product ID (optional)
      * @param applicationVersion the application version (optional)
      * @param login              the login (optional)
@@ -77,8 +81,8 @@ public class IQConnectExecutable {
     }
 
     /**
-     * Starts the IQConnect executable with the given parameters. Does nothing if it's already started. This method is
-     * synchronized with {@link #stop()}.
+     * Starts the <code>IQConnect.exe</code> executable with the given parameters asynchronously. Does nothing if it's
+     * already started. This method is synchronized with {@link #stop()}.
      *
      * @throws IOException thrown for {@link IOException}s
      */
@@ -158,8 +162,8 @@ public class IQConnectExecutable {
     }
 
     /**
-     * Stops the IQConnect executable. Does nothing if it's already stopped. This method is synchronized with {@link
-     * #start()}.
+     * Stops the <code>IQConnect.exe</code> executable. Does nothing if it's already stopped. This method is
+     * synchronized with {@link #start()}.
      */
     public void stop() {
         synchronized (startStopLock) {
@@ -168,6 +172,53 @@ public class IQConnectExecutable {
                 LOGGER.debug("Stopped IQConnect process.");
             }
         }
+    }
+
+    /**
+     * This method is used to block the current thread until <code>IQConnect.exe</code> has successfully started up. It
+     * will used the passed in 'hostname' and 'port' to continually attempt to connect to <code>IQConnect.exe</code>
+     * until 'timoutMillis' have elapsed or a successful connection was made.
+     *
+     * @param hostname     the hostname
+     * @param port         the port
+     * @param timoutMillis the timeout time in milliseconds
+     *
+     * @return the number of attempts it took to connect
+     *
+     * @throws TimeoutException thrown when 'timoutMillis' have elapsed without a successful connection
+     */
+    public int waitForConnection(String hostname, int port, long timoutMillis) throws TimeoutException {
+        checkNotNull(hostname);
+        checkArgument(port > 0);
+        checkArgument(timoutMillis > 0);
+
+        ExecutablePollingFeed executablePollingFeed = new ExecutablePollingFeed(hostname, port);
+        int attempts = 0;
+        long startTime = System.currentTimeMillis();
+        while ((System.currentTimeMillis() - startTime) < timoutMillis) {
+            try {
+                Thread.sleep(ADMIN_FEED_POLLING_INTERVAL);
+                attempts++;
+
+                executablePollingFeed.start();
+                executablePollingFeed.stop(); // This will execute upon successful 'start()'
+
+                return attempts;
+            } catch (IOException | InterruptedException ignored) {}
+        }
+
+        throw new TimeoutException(String.format("Could not establish connection after %d attempts!", attempts));
+    }
+
+    /**
+     * Calls {@link #waitForConnection(String, int, long)} with {@link IQFeed4jProperties#FEED_HOSTNAME} and {@link
+     * IQFeed4jProperties#ADMIN_FEED_PORT}.
+     *
+     * @see #waitForConnection(String, int, long)
+     */
+    public int waitForConnection(long timeoutMillis) throws TimeoutException {
+        return waitForConnection(IQFeed4jProperties.FEED_HOSTNAME, Integer.parseInt(IQFeed4jProperties.ADMIN_FEED_PORT),
+                timeoutMillis);
     }
 
     /**
