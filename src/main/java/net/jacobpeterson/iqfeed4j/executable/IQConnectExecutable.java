@@ -8,8 +8,6 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
@@ -36,7 +34,6 @@ public class IQConnectExecutable {
     private final Object startStopLock;
 
     private Process iqConnectProcess;
-    private OutputStream processOutputStream;
 
     /**
      * Instantiates a new {@link IQConnectExecutable} with properties defined in {@link
@@ -134,8 +131,8 @@ public class IQConnectExecutable {
     }
 
     /**
-     * Creates a process reader for {@link #iqConnectProcess} outputting to either {@link #processOutputStream} or
-     * {@link #LOGGER}. Used for debugging purposes. This creates a {@link Thread} that dies on its own.
+     * Creates a process reader for {@link #iqConnectProcess} outputting to {@link #LOGGER}. Used for debugging
+     * purposes. This creates a {@link Thread} that dies on its own.
      */
     private void createProcessReader() {
         new Thread(() -> {
@@ -148,8 +145,6 @@ public class IQConnectExecutable {
                     if (line == null) {
                         processReader.close();
                         return;
-                    } else if (processOutputStream != null) {
-                        processOutputStream.write(line.getBytes(StandardCharsets.UTF_8));
                     } else {
                         LOGGER.debug("IQConnect.exe process output: {}", line);
                     }
@@ -222,21 +217,21 @@ public class IQConnectExecutable {
     }
 
     /**
-     * Gets {@link #processOutputStream}.
+     * Checks if {@link #getIQConnectProcess()} is not <code>null</code> and is {@link Process#isAlive() alive}.
      *
-     * @return the process {@link OutputStream}
+     * @return a boolean
      */
-    public OutputStream getProcessOutputStream() {
-        return processOutputStream;
+    public boolean isIQConnectRunning() {
+        return iqConnectProcess != null && !iqConnectProcess.isAlive();
     }
 
     /**
-     * Sets {@link #processOutputStream}.
+     * Gets {@link #iqConnectProcess}.
      *
-     * @param processOutputStream the process {@link OutputStream}
+     * @return a {@link Process}
      */
-    public void setProcessOutputStream(OutputStream processOutputStream) {
-        this.processOutputStream = processOutputStream;
+    public Process getIQConnectProcess() {
+        return iqConnectProcess;
     }
 
     @Override

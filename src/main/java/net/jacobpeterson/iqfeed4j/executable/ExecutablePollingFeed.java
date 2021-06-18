@@ -15,7 +15,7 @@ class ExecutablePollingFeed extends AbstractFeed {
      * @param port     the port
      */
     public ExecutablePollingFeed(String hostname, int port) {
-        super("Executable Polling Feed", hostname, port, COMMA_DELIMITED_SPLITTER, false, false);
+        super("IQFeed4j Polling Feed", hostname, port, COMMA_DELIMITED_SPLITTER, false, false);
     }
 
     @Override
