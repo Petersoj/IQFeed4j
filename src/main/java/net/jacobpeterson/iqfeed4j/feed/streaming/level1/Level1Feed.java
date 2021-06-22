@@ -33,7 +33,6 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static net.jacobpeterson.iqfeed4j.feed.streaming.level1.Level1Feed.CSVPOJOPopulators.splitFactorAndDate;
 import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.*;
@@ -740,8 +739,8 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     public void requestWatch(String symbol, FeedMessageListener<FundamentalData> fundamentalDataListener,
             FeedMessageListener<SummaryUpdate> summaryUpdateListener) throws IOException {
         checkNotNull(symbol);
-        checkArgument(fundamentalDataListener != null || summaryUpdateListener != null,
-                "There must be at least one FundamentalData listener or SummaryUpdate listener!");
+        checkNotNull(fundamentalDataListener);
+        checkNotNull(summaryUpdateListener);
 
         StringBuilder requestBuilder = new StringBuilder();
         requestBuilder.append(Level1Command.WATCH.value());
@@ -749,12 +748,8 @@ public class Level1Feed extends AbstractServerConnectionFeed {
         requestBuilder.append(LineEnding.CR_LF.getASCIIString());
 
         synchronized (messageReceivedLock) {
-            if (fundamentalDataListener != null) {
-                fundamentalDataListenersOfSymbols.put(symbol, fundamentalDataListener);
-            }
-            if (summaryUpdateListener != null) {
-                summaryUpdateListenersOfSymbols.put(symbol, summaryUpdateListener);
-            }
+            fundamentalDataListenersOfSymbols.put(symbol, fundamentalDataListener);
+            summaryUpdateListenersOfSymbols.put(symbol, summaryUpdateListener);
         }
 
         // If symbol is already being watched, nothing happens
@@ -778,8 +773,8 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     public void requestWatchTrades(String symbol, FeedMessageListener<FundamentalData> fundamentalDataListener,
             FeedMessageListener<SummaryUpdate> summaryUpdateListener) throws IOException {
         checkNotNull(symbol);
-        checkArgument(fundamentalDataListener != null || summaryUpdateListener != null,
-                "There must be at least one FundamentalData listener or SummaryUpdate listener!");
+        checkNotNull(fundamentalDataListener);
+        checkNotNull(summaryUpdateListener);
 
         StringBuilder requestBuilder = new StringBuilder();
         requestBuilder.append(Level1Command.WATCH_TRADES.value());
@@ -787,12 +782,8 @@ public class Level1Feed extends AbstractServerConnectionFeed {
         requestBuilder.append(LineEnding.CR_LF.getASCIIString());
 
         synchronized (messageReceivedLock) {
-            if (fundamentalDataListener != null) {
-                fundamentalDataListenersOfSymbols.put(symbol, fundamentalDataListener);
-            }
-            if (summaryUpdateListener != null) {
-                summaryUpdateListenersOfSymbols.put(symbol, summaryUpdateListener);
-            }
+            fundamentalDataListenersOfSymbols.put(symbol, fundamentalDataListener);
+            summaryUpdateListenersOfSymbols.put(symbol, summaryUpdateListener);
         }
 
         // If symbol is already being watched, nothing happens
