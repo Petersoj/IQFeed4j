@@ -41,7 +41,7 @@ If you are using Maven as your build tool, add the following dependency to your 
 Note that you don't have to use the Maven Central artifacts and instead can just install a clone of this project to your local Maven repository as shown in the [Building](#building) section.
 
 # Configuration
-Creating an `iqfeed4j.properties` file on the classpath with the following format allows you to easily load properties using the `IQFeed4j()` default constructor:
+Creating an `iqfeed4j.properties` file on the classpath with the following format allows you to easily load properties using the `IQFeed4j` default constructor and the `IQConnectExecutable` default constructor:
 ```
 # For IQConnectExecutable
 iqconnect_command=<this is the command to start the IQConnect.exe program (e.g. wine /home/user/.IQFeed/iqconnect.exe)>
@@ -71,37 +71,32 @@ For logging, this library uses [SLF4j](http://www.slf4j.org/) which serves as an
 Note that the examples here are not exhaustive. Refer to the [IQFeed4j Javadoc](https://javadoc.io/doc/net.jacobpeterson/iqfeed4j) for all classes and method signatures.
 
 ## IQFeed4j
-`IQFeed4j` is a class that contains feed instances to interface with IQFeed along with an instance of `IQConnectExecutable`. You will generally only need one instance of it in your application. Directly interact with the various feeds that IQFeed4j provides via: `getFeedName();` or `startFeedName();` and `stopFeedName();`.
+`IQFeed4j` is a class that contains feed instances to interface with IQFeed along with an instance of `IQConnectExecutable`. You will generally only need one instance of it in your application. Directly interact with the various feeds that IQFeed4j provides with `getFeedName();` and start/stop the feeds with `startFeedName();` and `stopFeedName();`. You must start the feed with `startFeedName();` before using it via `getFeedName();`.
 
-It contains various constructors that allow you to specify various parameters for the feeds (e.g. port, hostname). The no-args constructor will use the properties specified in the `iqfeed4j.properties` file on the classpath as discussed in the [Configuration section](#configuration). 
+It contains various constructors that allow you to specify parameters for the feeds (e.g. port, hostname). The no-args constructor will use the properties specified in the `iqfeed4j.properties` file on the classpath as discussed in the [Configuration section](#configuration). 
 
 ## IQConnectExecutable
-`IQConnectExecutable` provides a convenient way to start/stop the IQConnect.exe program. This is the program that accepts TCP/IP connections to interface with IQFeed programmatically.
+`IQConnectExecutable` provides a convenient way to start/stop the IQConnect.exe program. IQConnect.exe is the program that accepts TCP/IP connections to interface with IQFeed programmatically.
 
-It contains various constructors that allow you to specify various parameters for the executable (e.g. command to execute, process parameters). The no-args constructor will use the properties specified in the `iqfeed4j.properties` file on the classpath as discussed in the [Configuration section](#configuration).
+It contains various constructors that allow you to specify parameters for the executable (e.g. command to execute, process parameters). The no-args constructor will use the properties specified in the `iqfeed4j.properties` file on the classpath as discussed in the [Configuration section](#configuration).
 
 ## Streaming Feeds
 
 ### `Level1Feed`
 This feed is used for real-time Level 1 market data.
 
-The following example will change what fields are sent when a `SummaryUpdate` occurs on this feed. 
+The following example will change what fields are sent when a `SummaryUpdate` occurs on this feed, prints Apple's most recent split, and prints AAPL trades continuously:
 ```java
 try {
+    iqFeed4j.startLevel1Feed();
+    
     iqFeed4j.getLevel1Feed().selectUpdateFieldNames(
             SummaryUpdateField.MOST_RECENT_TRADE,
             SummaryUpdateField.MOST_RECENT_TRADE_SIZE,
             SummaryUpdateField.MOST_RECENT_TRADE_MARKET_CENTER,
             SummaryUpdateField.MOST_RECENT_TRADE_DATE,
             SummaryUpdateField.MOST_RECENT_TRADE_TIME);
-} catch (IOException exception) {
-    exception.printStackTrace();
-}
-```
-
-The following example will listen to AAPL trades and print Apple's most recent split:
-```java
-try {
+    
     iqFeed4j.getLevel1Feed().requestWatchTrades("AAPL",
             new FeedMessageAdapter<FundamentalData>() {
                 @Override
@@ -136,6 +131,8 @@ This feed allows you to stream real-time interval bar data derived from Level 1 
 The following example will listen to AAPL 1-minute interval bars during Eastern market hours and print them out:
 ```java
 try {
+    iqFeed4j.startDerivativeFeed();
+    
     iqFeed4j.getDerivativeFeed().requestIntervalWatch(
             "AAPL",
             60,
@@ -163,6 +160,8 @@ This feed allows you to manage the IQFeed connection in various ways and retriev
 The following example demonstrates a few things you can do with the `AdminFeed`.
 ```java
 try {
+    iqFeed4j.startAdminFeed();
+    
     // Set the login ID and password (and wait for confirmation response)
     String currentLoginID = iqFeed4j.getAdminFeed().setLoginID("<login ID>").get();
     String currentPassword = iqFeed4j.getAdminFeed().setPassword("<password>").get();
@@ -189,6 +188,8 @@ This feed allows you to request historical ticks (trades) and intervals.
 The following example will request ascending AAPL 1-minute interval bars during market hours from 6/10/2021 to 6/11/2021.
 ```java
 try {
+    iqFeed4j.startHistoricalFeed();
+    
     // Using synchronous data consumption method (aka consume data as it is being read)
     iqFeed4j.getHistoricalFeed().requestIntervals(
             "AAPL",
@@ -208,7 +209,7 @@ try {
             });
 
     // Using data accumulation method (aka all data is read into memory to be consumed asynchronously)
-    Iterator<Interval> aaplIntervals = iqFeed4j.getHistoricalFeed().requestIntervals(
+    List<Interval> aaplIntervals = iqFeed4j.getHistoricalFeed().requestIntervals(
             "AAPL",
             60,
             LocalDateTime.of(2021, 6, 10, 9, 30),
@@ -219,7 +220,7 @@ try {
             DataDirection.OLDEST_TO_NEWEST,
             IntervalType.SECONDS);
     System.out.println("AAPL minute intervals:");
-    aaplIntervals.forEachRemaining(System.out::println);
+    aaplIntervals.forEach(System.out::println);
 } catch (IOException | InterruptedException exception) {
     exception.printStackTrace();
 } catch (ExecutionException executionException) {
@@ -237,10 +238,12 @@ This feed allows you to retrieve a current summary/snapshot of various market da
 The following example will print out all the `FiveMinuteSnapshot`s of NASDAQ equities.
 ```java
 try {
-    Iterator<FiveMinuteSnapshot> fiveMinuteSnapshots = iqFeed4j.getMarketSummaryFeed().request5MinuteSummary(
+    iqFeed4j.startMarketSummaryFeed();
+    
+    List<FiveMinuteSnapshot> fiveMinuteSnapshots = iqFeed4j.getMarketSummaryFeed().request5MinuteSummary(
             "1", // Equity security type
             "5"); // NASDAQ group ID
-    fiveMinuteSnapshots.forEachRemaining(System.out::println);
+    fiveMinuteSnapshots.forEach(System.out::println);
 } catch (IOException | ExecutionException | InterruptedException exception) {
     exception.printStackTrace();
 }
@@ -252,6 +255,8 @@ This feed allows you to retrieve historical news data on various tickers.
 The following example gets all the `NewsConfiguration`s and acquires all the current `NewsMinorSource`s from it and then fetches `NewsHeadlines` for AAPL and TSLA on 6/10/2021 and prints them out.
 ```java
 try {
+    iqFeed4j.startNewsFeed();
+    
     NewsConfiguration newsConfiguration = iqFeed4j.getNewsFeed().requestNewsConfiguration();
     List<String> allMinorNewsSources = newsConfiguration.getCategories().stream()
             .flatMap(newsCategory -> newsCategory.getMajorSources().stream())
@@ -278,6 +283,8 @@ This feed allows you to retrieve Option chain data including: equity Option cont
 The following example gets 5 In-The-Money and 5 Out-Of-The-Money Equity Put and Call Option contracts for AAPL expiring in June and prints them out.
 ```java
 try {
+    iqFeed4j.startOptionChainsFeed();
+    
     List<OptionContract> applOptions = iqFeed4j.getOptionChainsFeed().getEquityOptionChainWithITMOTMFilter(
             "AAPL",
             PutsCallsOption.PUTS_AND_CALLS,
@@ -298,8 +305,10 @@ This feed allows you to retrieve current symbol information and current market i
 The following example gets all the current `ListedMarket`s and prints them out. 
 ```java
 try {
-    Iterator<ListedMarket> listedMarkets = iqFeed4j.getSymbolMarketInfoFeed().requestListedMarkets();
-    listedMarkets.forEachRemaining(System.out::println);
+    iqFeed4j.startSymbolMarketInfoFeed();
+
+    List<ListedMarket> listedMarkets = iqFeed4j.getSymbolMarketInfoFeed().requestListedMarkets();
+    listedMarkets.forEach(System.out::println);
 } catch (IOException | InterruptedException | ExecutionException exception) {
     exception.printStackTrace();
 }

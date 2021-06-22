@@ -33,6 +33,7 @@ public class IQConnectExecutable {
     private final Boolean saveLoginInfo;
     private final Object startStopLock;
 
+    private boolean disableInternalProcessLogging;
     private Process iqConnectProcess;
 
     /**
@@ -73,6 +74,8 @@ public class IQConnectExecutable {
         this.saveLoginInfo = saveLoginInfo;
 
         startStopLock = new Object();
+
+        disableInternalProcessLogging = false;
 
         LOGGER.debug("{}", this);
     }
@@ -125,7 +128,9 @@ public class IQConnectExecutable {
                 LOGGER.debug("Starting IQConnect process with the following command: {}", command);
                 iqConnectProcess = processBuilder.start();
 
-                createProcessReader();
+                if (!disableInternalProcessLogging) {
+                    createProcessReader();
+                }
             }
         }
     }
@@ -223,6 +228,16 @@ public class IQConnectExecutable {
      */
     public boolean isIQConnectRunning() {
         return iqConnectProcess != null && !iqConnectProcess.isAlive();
+    }
+
+    /**
+     * Sets whether to disable internal logging of the {@link #iqConnectProcess} or not. Must be called before {@link
+     * #start()}.
+     *
+     * @param disableInternalProcessLogging a boolean
+     */
+    public void disableInternalProcessLogging(boolean disableInternalProcessLogging) {
+        this.disableInternalProcessLogging = disableInternalProcessLogging;
     }
 
     /**
