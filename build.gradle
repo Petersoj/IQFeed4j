@@ -29,7 +29,7 @@ apply plugin: 'jsonschema2pojo'
 tasks.getByName('generateJsonSchema2Pojo').enabled(false) // Disable default 'jsonSchema2Pojo' task
 
 group 'net.jacobpeterson'
-version '6.2-1.3-SNAPSHOT'
+version '6.2-1.4-SNAPSHOT'
 
 repositories {
     mavenCentral()
