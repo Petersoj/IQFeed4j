@@ -727,7 +727,7 @@ public class Level1Feed extends AbstractServerConnectionFeed {
      * Begins watching a symbol for Level 1 updates. This sends a {@link Level1Command#WATCH} request.
      *
      * @param symbol                  the symbol that you wish to receive updates on
-     * @param fundamentalDataListener the {@link FeedMessageListener} of {@link FundamentalData} Note if a {@link
+     * @param fundamentalDataListener the {@link FeedMessageListener} of {@link FundamentalData}. Note if a {@link
      *                                FeedMessageListener} already exists for the given 'symbol', then it is overwritten
      *                                with this one.
      * @param summaryUpdateListener   the {@link FeedMessageListener} of {@link SummaryUpdate}s. Note if a {@link
@@ -761,7 +761,7 @@ public class Level1Feed extends AbstractServerConnectionFeed {
      * request.
      *
      * @param symbol                  the symbol that you wish to receive updates on
-     * @param fundamentalDataListener the {@link FeedMessageListener} of {@link FundamentalData} Note if a {@link
+     * @param fundamentalDataListener the {@link FeedMessageListener} of {@link FundamentalData}. Note if a {@link
      *                                FeedMessageListener} already exists for the given 'symbol', then it is overwritten
      *                                with this one.
      * @param summaryUpdateListener   the {@link FeedMessageListener} of {@link SummaryUpdate}s. Note if a {@link
@@ -898,7 +898,7 @@ public class Level1Feed extends AbstractServerConnectionFeed {
      * Level1SystemCommand#REGON} request.
      *
      * @param symbol                the symbol that you wish to receive updates on
-     * @param regionalQuoteListener the {@link FeedMessageListener} of {@link RegionalQuote}s.Note if a {@link
+     * @param regionalQuoteListener the {@link FeedMessageListener} of {@link RegionalQuote}s. Note if a {@link
      *                              FeedMessageListener} already exists for the given 'symbol', then it is overwritten
      *                              with this one.
      *

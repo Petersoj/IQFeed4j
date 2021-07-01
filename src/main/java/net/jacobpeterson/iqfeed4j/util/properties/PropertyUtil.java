@@ -118,7 +118,7 @@ public class PropertyUtil {
             // Load the properties
             try {
                 properties.load(propertyStream);
-                LOGGER.debug("Loaded properties file: {}", propertyFile);
+                LOGGER.info("Loaded properties file: {}", propertyFile);
             } catch (IOException exception) {
                 LOGGER.error("Could not load property file: {}\n{}", propertyFile, exception);
             }
@@ -130,10 +130,10 @@ public class PropertyUtil {
                 LOGGER.error("Could not close property file stream: {}\n{}", propertyFile, exception);
             }
         } else {
-            LOGGER.error("Could not find property file: {}", propertyFile);
+            LOGGER.debug("Could not find property file: {}", propertyFile);
 
             if (defaultProperties != null) {
-                LOGGER.debug("Using default properties for: {}", propertyFile);
+                LOGGER.info("Using default properties for: {}", propertyFile);
                 properties = defaultProperties;
             }
         }
