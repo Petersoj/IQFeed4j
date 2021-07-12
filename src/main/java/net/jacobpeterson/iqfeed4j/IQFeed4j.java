@@ -319,6 +319,18 @@ public class IQFeed4j {
         symbolMarketInfoFeed = null;
     }
 
+    /**
+     * Starts an {@link AbstractFeed}.
+     *
+     * @param <F>              the {@link AbstractFeed} type parameter
+     * @param feed             the {@link AbstractFeed}
+     * @param feedInstantiator the {@link AbstractFeed} instantiator {@link Supplier}
+     *
+     * @return the started {@link AbstractFeed}
+     *
+     * @throws IOException          thrown for {@link IOException}s
+     * @throws InterruptedException thrown for {@link InterruptedException}s
+     */
     private <F extends AbstractFeed> F startFeed(F feed, Supplier<F> feedInstantiator)
             throws IOException, InterruptedException {
         if (feed == null) {
@@ -333,6 +345,15 @@ public class IQFeed4j {
         return feed;
     }
 
+    /**
+     * Stops an {@link AbstractFeed} if not <code>null</code>.
+     *
+     * @param <F>  the {@link AbstractFeed} type parameter
+     * @param feed the {@link AbstractFeed}
+     *
+     * @throws IOException          thrown for {@link IOException}s
+     * @throws InterruptedException thrown for {@link InterruptedException}s
+     */
     private <F extends AbstractFeed> void stopFeed(F feed) throws IOException, InterruptedException {
         if (feed != null) {
             feed.stop();
@@ -353,7 +374,7 @@ public class IQFeed4j {
      *
      * @return the {@link Level1Feed}
      */
-    public Level1Feed getLevel1Feed() {
+    public Level1Feed level1() {
         return level1Feed;
     }
 
@@ -362,7 +383,7 @@ public class IQFeed4j {
      *
      * @return the {@link DerivativeFeed}
      */
-    public DerivativeFeed getDerivativeFeed() {
+    public DerivativeFeed derivative() {
         return derivativeFeed;
     }
 
@@ -371,7 +392,7 @@ public class IQFeed4j {
      *
      * @return the {@link AdminFeed}
      */
-    public AdminFeed getAdminFeed() {
+    public AdminFeed admin() {
         return adminFeed;
     }
 
@@ -380,7 +401,7 @@ public class IQFeed4j {
      *
      * @return the {@link HistoricalFeed}
      */
-    public HistoricalFeed getHistoricalFeed() {
+    public HistoricalFeed historical() {
         return historicalFeed;
     }
 
@@ -389,7 +410,7 @@ public class IQFeed4j {
      *
      * @return the {@link MarketSummaryFeed}
      */
-    public MarketSummaryFeed getMarketSummaryFeed() {
+    public MarketSummaryFeed marketSummary() {
         return marketSummaryFeed;
     }
 
@@ -398,7 +419,7 @@ public class IQFeed4j {
      *
      * @return the {@link NewsFeed}
      */
-    public NewsFeed getNewsFeed() {
+    public NewsFeed news() {
         return newsFeed;
     }
 
@@ -407,7 +428,7 @@ public class IQFeed4j {
      *
      * @return the {@link OptionChainsFeed}
      */
-    public OptionChainsFeed getOptionChainsFeed() {
+    public OptionChainsFeed optionChains() {
         return optionChainsFeed;
     }
 
@@ -416,7 +437,7 @@ public class IQFeed4j {
      *
      * @return the {@link SymbolMarketInfoFeed}
      */
-    public SymbolMarketInfoFeed getSymbolMarketInfoFeed() {
+    public SymbolMarketInfoFeed symbolMarketInfo() {
         return symbolMarketInfoFeed;
     }
 

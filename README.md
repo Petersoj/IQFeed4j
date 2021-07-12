@@ -71,7 +71,7 @@ For logging, this library uses [SLF4j](http://www.slf4j.org/) which serves as an
 Note that the examples here are not exhaustive. Refer to the [IQFeed4j Javadoc](https://javadoc.io/doc/net.jacobpeterson/iqfeed4j) for all classes and method signatures.
 
 ## IQFeed4j
-`IQFeed4j` is a class that contains feed instances to interface with IQFeed along with an instance of `IQConnectExecutable`. You will generally only need one instance of it in your application. Directly interact with the various feeds that IQFeed4j provides with `getFeedName();` and start/stop the feeds with `startFeedName();` and `stopFeedName();`. You must start the feed with `startFeedName();` before using it via `getFeedName();`.
+`IQFeed4j` is a class that contains feed instances to interface with IQFeed along with an instance of `IQConnectExecutable`. You will generally only need one instance of it in your application. Directly interact with the various feeds that IQFeed4j provides with `feedName();` and start/stop the feeds with `startFeedName();` and `stopFeedName();`. You must start the feed with `startFeedName();` before using it via `feedName();`.
 
 It contains various constructors that allow you to specify parameters for the feeds (e.g. port, hostname). The no-args constructor will use the properties specified in the `iqfeed4j.properties` file on the classpath as discussed in the [Configuration section](#configuration). 
 
@@ -90,14 +90,14 @@ The following example will change what fields are sent when a `SummaryUpdate` oc
 try {
     iqFeed4j.startLevel1Feed();
     
-    iqFeed4j.getLevel1Feed().selectUpdateFieldNames(
+    iqFeed4j.level1Feed().selectUpdateFieldNames(
             SummaryUpdateField.MOST_RECENT_TRADE,
             SummaryUpdateField.MOST_RECENT_TRADE_SIZE,
             SummaryUpdateField.MOST_RECENT_TRADE_MARKET_CENTER,
             SummaryUpdateField.MOST_RECENT_TRADE_DATE,
             SummaryUpdateField.MOST_RECENT_TRADE_TIME);
     
-    iqFeed4j.getLevel1Feed().requestWatchTrades("AAPL",
+    iqFeed4j.level1Feed().requestWatchTrades("AAPL",
             new FeedMessageAdapter<FundamentalData>() {
                 @Override
                 public void onMessageReceived(FundamentalData fundamentalData) {
@@ -133,7 +133,7 @@ The following example will listen to AAPL 1-minute interval bars during Eastern 
 try {
     iqFeed4j.startDerivativeFeed();
     
-    iqFeed4j.getDerivativeFeed().requestIntervalWatch(
+    iqFeed4j.derivativeFeed().requestIntervalWatch(
             "AAPL",
             60,
             LocalDateTime.now(),
@@ -163,18 +163,18 @@ try {
     iqFeed4j.startAdminFeed();
     
     // Set the login ID and password (and wait for confirmation response)
-    String currentLoginID = iqFeed4j.getAdminFeed().setLoginID("<login ID>").get();
-    String currentPassword = iqFeed4j.getAdminFeed().setPassword("<password>").get();
+    String currentLoginID = iqFeed4j.adminFeed().setLoginID("<login ID>").get();
+    String currentPassword = iqFeed4j.adminFeed().setPassword("<password>").get();
     System.out.println(currentLoginID);
     System.out.println(currentPassword);
 
     // Get the next occurrence of the 'FeedStatistics' message
-    System.out.printf("Feed stats: %s\n", iqFeed4j.getAdminFeed().getNextFeedStatistics().get());
+    System.out.printf("Feed stats: %s\n", iqFeed4j.adminFeed().getNextFeedStatistics().get());
 
     // Print all 'ClientStatistics' after 5 seconds
-    iqFeed4j.getAdminFeed().setClientStatsOn();
+    iqFeed4j.adminFeed().setClientStatsOn();
     Thread.sleep(5000);
-    iqFeed4j.getAdminFeed().getClientStatisticsOfClientIDs().entrySet().forEach(System.out::println);
+    iqFeed4j.adminFeed().getClientStatisticsOfClientIDs().entrySet().forEach(System.out::println);
 } catch (IOException | ExecutionException | InterruptedException exception) {
     exception.printStackTrace();
 }
@@ -191,7 +191,7 @@ try {
     iqFeed4j.startHistoricalFeed();
     
     // Using synchronous data consumption method (aka consume data as it is being read)
-    iqFeed4j.getHistoricalFeed().requestIntervals(
+    iqFeed4j.historicalFeed().requestIntervals(
             "AAPL",
             60,
             LocalDateTime.of(2021, 6, 10, 9, 30),
@@ -209,7 +209,7 @@ try {
             });
 
     // Using data accumulation method (aka all data is read into memory to be consumed asynchronously)
-    List<Interval> aaplIntervals = iqFeed4j.getHistoricalFeed().requestIntervals(
+    List<Interval> aaplIntervals = iqFeed4j.historicalFeed().requestIntervals(
             "AAPL",
             60,
             LocalDateTime.of(2021, 6, 10, 9, 30),
@@ -240,7 +240,7 @@ The following example will print out all the `FiveMinuteSnapshot`s of NASDAQ equ
 try {
     iqFeed4j.startMarketSummaryFeed();
     
-    List<FiveMinuteSnapshot> fiveMinuteSnapshots = iqFeed4j.getMarketSummaryFeed().request5MinuteSummary(
+    List<FiveMinuteSnapshot> fiveMinuteSnapshots = iqFeed4j.marketSummaryFeed().request5MinuteSummary(
             "1", // Equity security type
             "5"); // NASDAQ group ID
     fiveMinuteSnapshots.forEach(System.out::println);
@@ -257,14 +257,14 @@ The following example gets all the `NewsConfiguration`s and acquires all the cur
 try {
     iqFeed4j.startNewsFeed();
     
-    NewsConfiguration newsConfiguration = iqFeed4j.getNewsFeed().requestNewsConfiguration();
+    NewsConfiguration newsConfiguration = iqFeed4j.newsFeed().requestNewsConfiguration();
     List<String> allMinorNewsSources = newsConfiguration.getCategories().stream()
             .flatMap(newsCategory -> newsCategory.getMajorSources().stream())
             .flatMap(newsMajorSource -> newsMajorSource.getMinorSources().stream())
             .map(NewsMinorSource::getID)
             .collect(Collectors.toList());
 
-    NewsHeadlines newsHeadlines = iqFeed4j.getNewsFeed().requestNewsHeadlines(
+    NewsHeadlines newsHeadlines = iqFeed4j.newsFeed().requestNewsHeadlines(
             allMinorNewsSources,
             Arrays.asList("AAPL", "TSLA"),
             null,
@@ -285,7 +285,7 @@ The following example gets 5 In-The-Money and 5 Out-Of-The-Money Equity Put and 
 try {
     iqFeed4j.startOptionChainsFeed();
     
-    List<OptionContract> applOptions = iqFeed4j.getOptionChainsFeed().getEquityOptionChainWithITMOTMFilter(
+    List<OptionContract> applOptions = iqFeed4j.optionChainsFeed().getEquityOptionChainWithITMOTMFilter(
             "AAPL",
             PutsCallsOption.PUTS_AND_CALLS,
             Arrays.asList(EquityOptionMonth.JUNE_PUT, EquityOptionMonth.JUNE_CALL),
@@ -307,7 +307,7 @@ The following example gets all the current `ListedMarket`s and prints them out.
 try {
     iqFeed4j.startSymbolMarketInfoFeed();
 
-    List<ListedMarket> listedMarkets = iqFeed4j.getSymbolMarketInfoFeed().requestListedMarkets();
+    List<ListedMarket> listedMarkets = iqFeed4j.symbolMarketInfo().requestListedMarkets();
     listedMarkets.forEach(System.out::println);
 } catch (IOException | InterruptedException | ExecutionException exception) {
     exception.printStackTrace();
@@ -331,3 +331,4 @@ Contributions are welcome!
 # TODO
 - Level 2 Feed
 - Unit testing
+- Use [TA4j](https://github.com/ta4j/ta4j) `Num` interface instead of `Double` for number variables so that users can use either `Double` or `BigDecimal` for performance or precision in price data. 
