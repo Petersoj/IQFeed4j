@@ -46,8 +46,8 @@ public class IQConnectExecutable {
                 IQFeed4jProperties.APPLICATION_VERSION,
                 IQFeed4jProperties.LOGIN,
                 IQFeed4jProperties.PASSWORD,
-                Boolean.parseBoolean(IQFeed4jProperties.AUTOCONNECT),
-                Boolean.parseBoolean(IQFeed4jProperties.SAVE_LOGIN_INFO));
+                IQFeed4jProperties.AUTOCONNECT,
+                IQFeed4jProperties.SAVE_LOGIN_INFO);
     }
 
     /**
@@ -217,8 +217,7 @@ public class IQConnectExecutable {
      * @see #waitForConnection(String, int, long)
      */
     public int waitForConnection(long timeoutMillis) throws TimeoutException {
-        return waitForConnection(IQFeed4jProperties.FEED_HOSTNAME, Integer.parseInt(IQFeed4jProperties.ADMIN_FEED_PORT),
-                timeoutMillis);
+        return waitForConnection(IQFeed4jProperties.FEED_HOSTNAME, IQFeed4jProperties.ADMIN_FEED_PORT, timeoutMillis);
     }
 
     /**

@@ -60,15 +60,15 @@ public class IQFeed4j {
                 IQFeed4jProperties.APPLICATION_VERSION,
                 IQFeed4jProperties.LOGIN,
                 IQFeed4jProperties.PASSWORD,
-                Boolean.parseBoolean(IQFeed4jProperties.AUTOCONNECT),
-                Boolean.parseBoolean(IQFeed4jProperties.SAVE_LOGIN_INFO),
+                IQFeed4jProperties.AUTOCONNECT,
+                IQFeed4jProperties.SAVE_LOGIN_INFO,
                 IQFeed4jProperties.FEED_NAME,
                 IQFeed4jProperties.FEED_HOSTNAME,
-                Integer.parseInt(IQFeed4jProperties.LEVEL_1_FEED_PORT),
-                Integer.parseInt(IQFeed4jProperties.MARKET_DEPTH_FEED_PORT),
-                Integer.parseInt(IQFeed4jProperties.DERIVATIVE_FEED_PORT),
-                Integer.parseInt(IQFeed4jProperties.ADMIN_FEED_PORT),
-                Integer.parseInt(IQFeed4jProperties.LOOKUP_FEED_PORT));
+                IQFeed4jProperties.LEVEL_1_FEED_PORT,
+                IQFeed4jProperties.MARKET_DEPTH_FEED_PORT,
+                IQFeed4jProperties.DERIVATIVE_FEED_PORT,
+                IQFeed4jProperties.ADMIN_FEED_PORT,
+                IQFeed4jProperties.LOOKUP_FEED_PORT);
     }
 
     /**
