@@ -22,8 +22,6 @@ public class IQConnectExecutable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IQConnectExecutable.class);
 
-    private static final long ADMIN_FEED_POLLING_INTERVAL = 250;
-
     private final String iqConnectCommand;
     private final String productID;
     private final String applicationVersion;
@@ -175,19 +173,32 @@ public class IQConnectExecutable {
     }
 
     /**
+     * Calls {@link #waitForConnection(String, int, int, long)} with {@link IQFeed4jProperties#FEED_HOSTNAME} and {@link
+     * IQFeed4jProperties#ADMIN_FEED_PORT} and a <code>pollingInterval</code> of 250ms.
+     *
+     * @see #waitForConnection(String, int, int, long)
+     */
+    public int waitForConnection(long timeoutMillis) throws TimeoutException {
+        return waitForConnection(IQFeed4jProperties.FEED_HOSTNAME, IQFeed4jProperties.ADMIN_FEED_PORT,
+                250, timeoutMillis);
+    }
+
+    /**
      * This method is used to block the current thread until <code>IQConnect.exe</code> has successfully started up. It
-     * will used the passed in 'hostname' and 'port' to continually attempt to connect to <code>IQConnect.exe</code>
+     * will used the passed in 'hostname' and 'port' to continuously attempt connections to <code>IQConnect.exe</code>
      * until 'timoutMillis' have elapsed or a successful connection was made.
      *
-     * @param hostname     the hostname
-     * @param port         the port
-     * @param timoutMillis the timeout time in milliseconds
+     * @param hostname        the hostname
+     * @param port            the port
+     * @param pollingInterval the time to wait between connection attempts
+     * @param timoutMillis    the timeout time in milliseconds
      *
      * @return the number of attempts it took to connect
      *
      * @throws TimeoutException thrown when 'timoutMillis' have elapsed without a successful connection
      */
-    public int waitForConnection(String hostname, int port, long timoutMillis) throws TimeoutException {
+    public int waitForConnection(String hostname, int port, int pollingInterval, long timoutMillis)
+            throws TimeoutException {
         checkNotNull(hostname);
         checkArgument(port > 0);
         checkArgument(timoutMillis > 0);
@@ -197,27 +208,19 @@ public class IQConnectExecutable {
         long startTime = System.currentTimeMillis();
         while ((System.currentTimeMillis() - startTime) < timoutMillis) {
             try {
-                Thread.sleep(ADMIN_FEED_POLLING_INTERVAL);
+                Thread.sleep(pollingInterval);
                 attempts++;
 
                 executablePollingFeed.start();
                 executablePollingFeed.stop(); // This will execute upon successful 'start()'
 
                 return attempts;
-            } catch (IOException | InterruptedException ignored) {}
+            } catch (InterruptedException interruptedException) {
+                return 0;
+            } catch (IOException ignored) {}
         }
 
         throw new TimeoutException(String.format("Could not establish connection after %d attempts!", attempts));
-    }
-
-    /**
-     * Calls {@link #waitForConnection(String, int, long)} with {@link IQFeed4jProperties#FEED_HOSTNAME} and {@link
-     * IQFeed4jProperties#ADMIN_FEED_PORT}.
-     *
-     * @see #waitForConnection(String, int, long)
-     */
-    public int waitForConnection(long timeoutMillis) throws TimeoutException {
-        return waitForConnection(IQFeed4jProperties.FEED_HOSTNAME, IQFeed4jProperties.ADMIN_FEED_PORT, timeoutMillis);
     }
 
     /**
