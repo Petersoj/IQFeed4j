@@ -224,12 +224,12 @@ public class IQConnectExecutable {
     }
 
     /**
-     * Checks if {@link #getIQConnectProcess()} is not <code>null</code> and is {@link Process#isAlive() alive}.
+     * Returns true if {@link #iqConnectProcess} is not <code>null</code> and is {@link Process#isAlive() alive}.
      *
      * @return a boolean
      */
     public boolean isIQConnectRunning() {
-        return iqConnectProcess != null && !iqConnectProcess.isAlive();
+        return iqConnectProcess != null && iqConnectProcess.isAlive();
     }
 
     /**
