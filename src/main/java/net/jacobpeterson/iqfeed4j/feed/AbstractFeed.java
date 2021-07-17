@@ -11,6 +11,10 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
 
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
@@ -52,8 +56,9 @@ public abstract class AbstractFeed implements Runnable {
     private Socket feedSocket;
     private BufferedWriter feedWriter;
     private BufferedReader feedReader;
-    private boolean intentionalSocketClose;
-    private boolean protocolVersionValidated;
+    private volatile boolean intentionalSocketClose;
+    private boolean protocolVersionValidated; // Non-volatile to allow cache use even though used across threads
+    private volatile CompletableFuture<Void> protocolVersionValidatedFuture;
     protected FeedMessageListener<String[]> customFeedMessageListener;
 
     /**
@@ -213,6 +218,9 @@ public abstract class AbstractFeed implements Runnable {
 
                         protocolVersionValidated = true;
                         onProtocolVersionValidated();
+                        if (protocolVersionValidatedFuture != null) {
+                            protocolVersionValidatedFuture.complete(null);
+                        }
                     } else {
                         // Call message handlers
                         onMessageReceived(csv);
@@ -325,6 +333,29 @@ public abstract class AbstractFeed implements Runnable {
      */
     public boolean isProtocolVersionValidated() {
         return !validateProtocolVersion || protocolVersionValidated;
+    }
+
+    /**
+     * Blocks until the protocol version is validated for this feed (uses {@link #protocolVersionValidated} {@link
+     * CompletableFuture} internally).
+     *
+     * @param timeout     the timeout time
+     * @param timeoutUnit the {@link TimeUnit} of <code>timeout</code>
+     *
+     * @throws TimeoutException thrown when <code>timeout</code> time has elapsed
+     */
+    public void waitForProtocolVersionValidation(long timeout, TimeUnit timeoutUnit) throws TimeoutException {
+        if (isProtocolVersionValidated()) {
+            return;
+        }
+
+        if (protocolVersionValidatedFuture == null) {
+            protocolVersionValidatedFuture = new CompletableFuture<>();
+        }
+
+        try {
+            protocolVersionValidatedFuture.get(timeout, timeoutUnit);
+        } catch (InterruptedException | ExecutionException ignored) {}
     }
 
     /**
