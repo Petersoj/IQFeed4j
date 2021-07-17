@@ -10,6 +10,7 @@ import net.jacobpeterson.iqfeed4j.feed.AbstractFeed;
  *
  * @param <T> the type of message
  */
+@FunctionalInterface
 public interface FeedMessageListener<T> {
 
     /**
@@ -27,5 +28,7 @@ public interface FeedMessageListener<T> {
      *
      * @param exception the {@link Exception}
      */
-    void onMessageException(Exception exception);
+    default void onMessageException(Exception exception) {
+        exception.printStackTrace();
+    }
 }
