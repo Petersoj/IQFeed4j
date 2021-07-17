@@ -41,7 +41,7 @@ If you are using Maven as your build tool, add the following dependency to your 
 Note that you don't have to use the Maven Central artifacts and instead can just install a clone of this project to your local Maven repository as shown in the [Building](#building) section.
 
 # Configuration
-Creating an `iqfeed4j.properties` file on the classpath with the following format allows you to easily load properties using the `IQFeed4j` default constructor and the `IQConnectExecutable` default constructor:
+Creating an `iqfeed4j.properties` file on the classpath with the following format allows you to easily load properties using the [`IQFeed4j`](src/main/java/net/jacobpeterson/iqfeed4j/IQFeed4j.java) default constructor and the [`IQConnectExecutable`](src/main/java/net/jacobpeterson/iqfeed4j/executable/IQConnectExecutable.java) default constructor:
 ```
 # For IQConnectExecutable
 iqconnect_command=<this is the command to start the IQConnect.exe program (e.g. wine /home/user/.IQFeed/iqconnect.exe)>
@@ -71,18 +71,18 @@ For logging, this library uses [SLF4j](http://www.slf4j.org/) which serves as an
 Note that the examples here are not exhaustive. Refer to the [IQFeed4j Javadoc](https://javadoc.io/doc/net.jacobpeterson/iqfeed4j) for all classes and method signatures.
 
 ## IQFeed4j
-`IQFeed4j` is a class that contains feed instances to interface with IQFeed along with an instance of `IQConnectExecutable`. You will generally only need one instance of it in your application. Directly interact with the various feeds that IQFeed4j provides with `feedName();` and start/stop the feeds with `startFeedName();` and `stopFeedName();`. You must start the feed with `startFeedName();` before using it via `feedName();`.
+[`IQFeed4j`](src/main/java/net/jacobpeterson/iqfeed4j/IQFeed4j.java) is a class that contains feed instances to interface with IQFeed along with an instance of [`IQConnectExecutable`](src/main/java/net/jacobpeterson/iqfeed4j/executable/IQConnectExecutable.java). You will generally only need one instance of it in your application. Directly interact with the various feeds that IQFeed4j provides with `feedName();` and start/stop the feeds with `startFeedName();` and `stopFeedName();`. You must start the feed with `startFeedName();` before using it via `feedName();`.
 
 It contains various constructors that allow you to specify parameters for the feeds (e.g. port, hostname). The no-args constructor will use the properties specified in the `iqfeed4j.properties` file on the classpath as discussed in the [Configuration section](#configuration). 
 
-## IQConnectExecutable
-`IQConnectExecutable` provides a convenient way to start/stop the IQConnect.exe program. IQConnect.exe is the program that accepts TCP/IP connections to interface with IQFeed programmatically.
+## [`IQConnectExecutable`](src/main/java/net/jacobpeterson/iqfeed4j/executable/IQConnectExecutable.java)
+[`IQConnectExecutable`](src/main/java/net/jacobpeterson/iqfeed4j/executable/IQConnectExecutable.java) provides a convenient way to start/stop the IQConnect.exe program. IQConnect.exe is the program that accepts TCP/IP connections to interface with IQFeed programmatically.
 
 It contains various constructors that allow you to specify parameters for the executable (e.g. command to execute, process parameters). The no-args constructor will use the properties specified in the `iqfeed4j.properties` file on the classpath as discussed in the [Configuration section](#configuration).
 
 ## Streaming Feeds
 
-### `Level1Feed`
+### [`Level1Feed`](src/main/java/net/jacobpeterson/iqfeed4j/feed/streaming/level1/Level1Feed.java)
 This feed is used for real-time Level 1 market data.
 
 The following example will change what fields are sent when a `SummaryUpdate` occurs on this feed, prints Apple's most recent split, and prints AAPL trades continuously:
@@ -122,10 +122,10 @@ try {
 }
 ```
 
-### `MarketDepthFeed`
+### [`MarketDepthFeed`](src/main/java/net/jacobpeterson/iqfeed4j/feed/streaming/marketdepth/MarketDepthFeed.java)
 Not implemented yet. See [TODO](#todo).
 
-### `DerivativeFeed`
+### [`DerivativeFeed`](src/main/java/net/jacobpeterson/iqfeed4j/feed/streaming/derivative/DerivativeFeed.java)
 This feed allows you to stream real-time interval bar data derived from Level 1 data.
 
 The following example will listen to AAPL 1-minute interval bars during Eastern market hours and print them out:
@@ -154,7 +154,7 @@ try {
 }
 ```
 
-### `AdminFeed`
+### [`AdminFeed`](src/main/java/net/jacobpeterson/iqfeed4j/feed/streaming/admin/AdminFeed.java)
 This feed allows you to manage the IQFeed connection in various ways and retrieve connection information.
 
 The following example demonstrates a few things you can do with the `AdminFeed`.
@@ -182,7 +182,7 @@ try {
 
 ## Lookup Feeds
 
-### `HistoricalFeed`
+### [`HistoricalFeed`](src/main/java/net/jacobpeterson/iqfeed4j/feed/lookup/historical/HistoricalFeed.java)
 This feed allows you to request historical ticks (trades) and intervals. 
 
 The following example will request ascending AAPL 1-minute interval bars during market hours from 6/10/2021 to 6/11/2021.
@@ -232,7 +232,7 @@ try {
 }
 ```
 
-### `MarketSummaryFeed`
+### [`MarketSummaryFeed`](src/main/java/net/jacobpeterson/iqfeed4j/feed/lookup/marketsummary/MarketSummaryFeed.java)
 This feed allows you to retrieve a current summary/snapshot of various market data, both historically and currently.
 
 The following example will print out all the `FiveMinuteSnapshot`s of NASDAQ equities.
@@ -249,7 +249,7 @@ try {
 }
 ```
 
-### `NewsFeed`
+### [`NewsFeed`](src/main/java/net/jacobpeterson/iqfeed4j/feed/lookup/news/NewsFeed.java)
 This feed allows you to retrieve historical news data on various tickers.
 
 The following example gets all the `NewsConfiguration`s and acquires all the current `NewsMinorSource`s from it and then fetches `NewsHeadlines` for AAPL and TSLA on 6/10/2021 and prints them out.
@@ -277,7 +277,7 @@ try {
 }
 ```
 
-### `OptionChainsFeed`
+### [`OptionChainsFeed`](src/main/java/net/jacobpeterson/iqfeed4j/feed/lookup/optionchains/OptionChainsFeed.java)
 This feed allows you to retrieve Option chain data including: equity Option contacts, Future contracts, Future Option contracts, Future Spreads.
 
 The following example gets 5 In-The-Money and 5 Out-Of-The-Money Equity Put and Call Option contracts for AAPL expiring in June and prints them out.
@@ -299,7 +299,7 @@ try {
 }
 ```
 
-### `SymbolMarketInfoFeed`
+### [`SymbolMarketInfoFeed`](src/main/java/net/jacobpeterson/iqfeed4j/feed/lookup/symbolmarketinfo/SymbolMarketInfoFeed.java)
 This feed allows you to retrieve current symbol information and current market information.
 
 The following example gets all the current `ListedMarket`s and prints them out. 

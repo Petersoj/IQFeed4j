@@ -6,7 +6,7 @@ import net.jacobpeterson.iqfeed4j.feed.lookup.AbstractLookupFeed;
 import net.jacobpeterson.iqfeed4j.feed.lookup.historical.HistoricalFeed;
 import net.jacobpeterson.iqfeed4j.feed.lookup.marketsummary.MarketSummaryFeed;
 import net.jacobpeterson.iqfeed4j.feed.lookup.news.NewsFeed;
-import net.jacobpeterson.iqfeed4j.feed.lookup.optionschains.OptionChainsFeed;
+import net.jacobpeterson.iqfeed4j.feed.lookup.optionchains.OptionChainsFeed;
 import net.jacobpeterson.iqfeed4j.feed.lookup.symbolmarketinfo.SymbolMarketInfoFeed;
 import net.jacobpeterson.iqfeed4j.feed.streaming.admin.AdminFeed;
 import net.jacobpeterson.iqfeed4j.feed.streaming.derivative.DerivativeFeed;

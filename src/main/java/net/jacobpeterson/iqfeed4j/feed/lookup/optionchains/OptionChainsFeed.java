@@ -1,4 +1,4 @@
-package net.jacobpeterson.iqfeed4j.feed.lookup.optionschains;
+package net.jacobpeterson.iqfeed4j.feed.lookup.optionchains;
 
 import com.google.common.base.Splitter;
 import net.jacobpeterson.iqfeed4j.feed.exception.IQFeedRuntimeException;
