@@ -1,8 +1,8 @@
 package net.jacobpeterson.iqfeed4j.feed.exception;
 
 /**
- * {@link IQFeedRuntimeException} represents IQFeed {@link RuntimeException}s resembling an unrecoverable error due to
- * faulty program logic.
+ * {@link IQFeedRuntimeException} represents (unchecked) IQFeed {@link RuntimeException}s resembling an unrecoverable
+ * error due to faulty program logic.
  */
 public class IQFeedRuntimeException extends RuntimeException {
 

@@ -4,7 +4,9 @@ import net.jacobpeterson.iqfeed4j.feed.lookup.AbstractLookupFeed;
 import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedMessageType;
 import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedSpecialMessage;
 
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Set;
 
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
 
@@ -13,13 +15,13 @@ import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
  */
 public class RequestIDFeedHelper {
 
-    private final HashSet<Integer> requestIDs;
+    private final Set<Integer> requestIDs;
 
     /**
      * Instantiates a new {@link AbstractLookupFeed}.
      */
     public RequestIDFeedHelper() {
-        requestIDs = new HashSet<>();
+        requestIDs = Collections.synchronizedSet(new HashSet<>());
     }
 
     /**
@@ -77,26 +79,32 @@ public class RequestIDFeedHelper {
     }
 
     /**
-     * Gets a new Request ID. This method is synchronized with {@link #removeRequestID(String)}.
+     * Gets a new Request ID. This method is thread safe.
      *
      * @return a new request ID
      */
     public String getNewRequestID() {
+        int maxRequestID;
         synchronized (requestIDs) {
-            int maxRequestID = requestIDs.stream().max(Integer::compareTo).orElse(0) + 1;
-            requestIDs.add(maxRequestID);
-            return String.valueOf(maxRequestID);
+            maxRequestID = requestIDs.stream().max(Integer::compareTo).orElse(0) + 1;
         }
+        requestIDs.add(maxRequestID);
+        return String.valueOf(maxRequestID);
     }
 
     /**
-     * Removes a Request ID. This method is synchronized with {@link #getNewRequestID()}.
+     * Removes a Request ID. This method is thread safe.
      *
      * @param requestID the request ID
      */
     public void removeRequestID(String requestID) {
-        synchronized (requestIDs) {
-            requestIDs.remove(Integer.parseInt(requestID));
-        }
+        requestIDs.remove(Integer.parseInt(requestID));
+    }
+
+    /**
+     * Clears all Request IDs so that {@link #getNewRequestID()} starts at 0.
+     */
+    public void clearRequestIDs() {
+        requestIDs.clear();
     }
 }

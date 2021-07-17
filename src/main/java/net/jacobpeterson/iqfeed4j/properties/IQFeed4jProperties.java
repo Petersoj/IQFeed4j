@@ -9,13 +9,9 @@ import static net.jacobpeterson.iqfeed4j.util.properties.PropertyUtil.getPropert
  */
 public class IQFeed4jProperties {
 
-    /**
-     * The properties file name.
-     */
+    /** The properties file name. */
     public static final String PROPERTIES_FILE = "iqfeed4j.properties";
-    /**
-     * The default properties file name.
-     */
+    /** The default properties file name. */
     public static final String DEFAULT_PROPERTIES_FILE = "iqfeed4j.default.properties";
 
     private static final String IQCONNECT_COMMAND_KEY = "iqconnect_command";

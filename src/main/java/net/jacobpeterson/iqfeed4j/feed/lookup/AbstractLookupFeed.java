@@ -16,9 +16,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.Map;
 
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueNotWhitespace;
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.*;
 
 /**
  * {@link AbstractLookupFeed} represents a {@link AbstractFeed} for Lookup data.
@@ -42,6 +40,13 @@ public abstract class AbstractLookupFeed extends AbstractFeed {
         super(lookupFeedName + FEED_NAME_SUFFIX, hostname, port, csvSplitter, true, true);
 
         requestIDFeedHelper = new RequestIDFeedHelper();
+    }
+
+    @Override
+    protected void cleanupState() {
+        super.cleanupState();
+
+        requestIDFeedHelper.clearRequestIDs();
     }
 
     /**

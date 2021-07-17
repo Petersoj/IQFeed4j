@@ -4,7 +4,7 @@ import net.jacobpeterson.iqfeed4j.feed.AbstractFeed;
 
 /**
  * {@link ExecutablePollingFeed} is an {@link AbstractFeed} used exclusively for {@link
- * IQConnectExecutable#waitForConnection(String, int, long)}.
+ * IQConnectExecutable#waitForConnection(String, int, int, long)}.
  */
 class ExecutablePollingFeed extends AbstractFeed {
 

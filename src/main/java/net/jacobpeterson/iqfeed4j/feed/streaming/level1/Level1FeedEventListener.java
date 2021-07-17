@@ -3,8 +3,8 @@ package net.jacobpeterson.iqfeed4j.feed.streaming.level1;
 /**
  * {@link Level1FeedEventListener} is an arbitrary event listener for {@link Level1Feed}.
  * <br>
- * NOTE: Calling methods in {@link Level1Feed} that send feed messages will result in dead-lock! Use a separate thread
- * as needed.
+ * <strong>Calling methods in {@link Level1Feed} that send feed messages (which is most methods in that class) will
+ * result in dead-lock! Use a separate thread as needed.</strong>
  */
 public abstract class Level1FeedEventListener {
 

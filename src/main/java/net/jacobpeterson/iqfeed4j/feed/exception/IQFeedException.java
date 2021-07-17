@@ -1,8 +1,8 @@
 package net.jacobpeterson.iqfeed4j.feed.exception;
 
 /**
- * {@link IQFeedException} represents IQFeed {@link Exception}s resembling a recoverable error due to an issue outside
- * the control of this program.
+ * {@link IQFeedException} represents IQFeed (checked) {@link Exception}s resembling a recoverable error due to an issue
+ * outside the control of this program.
  */
 public class IQFeedException extends Exception {
 

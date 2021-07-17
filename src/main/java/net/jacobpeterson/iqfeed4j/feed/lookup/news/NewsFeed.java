@@ -19,8 +19,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -140,14 +140,15 @@ public class NewsFeed extends AbstractLookupFeed {
     /**
      * This requests News headlines. This sends a {@link NewsCommand#NEWS_HEADLINE} request.
      *
-     * @param sources             a {@link List} of news sources which can be retrieved via {@link
+     * @param sources             a {@link Collection} of news sources which can be retrieved via {@link
      *                            #requestNewsConfiguration(XMLTextOption, MultiMessageListener)}. (optional)
-     * @param symbols             a {@link List} of symbols for which to receive headlines (optional)
+     * @param symbols             a {@link Collection} of symbols for which to receive headlines (optional)
      * @param xmlTextOption       the {@link XMLTextOption}. See
      *                            <a href="https://www.iqfeed.net/dev/api/docs//NewsLookupviaTCPIP.cfm">News
      *                            Lookup via TCP/IP</a> for the response formats.
      * @param limit               the maximum number of headlines to retrieve per source (optional)
-     * @param dates               the dates of the News headlines. Requires a symbol be specified. (optional)
+     * @param dates               a {@link Collection} of {@link LocalDate}s of the News headlines. Requires a symbol be
+     *                            specified. (optional)
      * @param dateRanges          the date ranges of the News headlines where the key in the {@link Map} is the 'from'
      *                            and the value in the {@link Map} is the 'to'. Requires a symbol be specified.
      *                            (optional)
@@ -155,9 +156,10 @@ public class NewsFeed extends AbstractLookupFeed {
      *
      * @throws IOException thrown for {@link IOException}s
      */
-    public void requestNewsHeadlines(List<String> sources, List<String> symbols, XMLTextOption xmlTextOption,
-            Integer limit, List<LocalDate> dates, Map<LocalDate, LocalDate> dateRanges,
-            MultiMessageListener<MessageLine> messageLineListener) throws IOException {
+    public void requestNewsHeadlines(Collection<String> sources, Collection<String> symbols,
+            XMLTextOption xmlTextOption, Integer limit, Collection<LocalDate> dates,
+            Map<LocalDate, LocalDate> dateRanges, MultiMessageListener<MessageLine> messageLineListener)
+            throws IOException {
         checkNotNull(xmlTextOption);
         checkNotNull(messageLineListener);
 
@@ -206,8 +208,8 @@ public class NewsFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Calls {@link #requestNewsHeadlines(List, List, XMLTextOption, Integer, List, Map, MultiMessageListener)} and
-     * parses the XML data into POJOs.
+     * Calls {@link #requestNewsHeadlines(Collection, Collection, XMLTextOption, Integer, Collection, Map,
+     * MultiMessageListener)} and parses the XML data into POJOs.
      *
      * @return {@link NewsHeadlines}
      *
@@ -215,8 +217,8 @@ public class NewsFeed extends AbstractLookupFeed {
      * @throws ExecutionException   thrown for {@link ExecutionException}s
      * @throws InterruptedException thrown for {@link InterruptedException}s
      */
-    public NewsHeadlines requestNewsHeadlines(List<String> sources, List<String> symbols, Integer limit,
-            List<LocalDate> dates, Map<LocalDate, LocalDate> dateRanges)
+    public NewsHeadlines requestNewsHeadlines(Collection<String> sources, Collection<String> symbols, Integer limit,
+            Collection<LocalDate> dates, Map<LocalDate, LocalDate> dateRanges)
             throws IOException, ExecutionException, InterruptedException {
         MultiMessageAccumulator<MessageLine> asyncListener = new MultiMessageAccumulator<>();
         requestNewsHeadlines(sources, symbols, XMLTextOption.XML, limit, dates, dateRanges, asyncListener);
@@ -231,7 +233,7 @@ public class NewsFeed extends AbstractLookupFeed {
      * This requests News stories. This sends a {@link NewsCommand#NEWS_STORY} request.
      *
      * @param id                  the headline/story identifier which can be retrieved via {@link
-     *                            #requestNewsHeadlines(List, List, XMLTextOption, Integer, List, Map,
+     *                            #requestNewsHeadlines(Collection, Collection, XMLTextOption, Integer, Collection, Map,
      *                            MultiMessageListener)}.
      * @param xmlTextEmailOption  the {@link XMLTextEmailOption}. See
      *                            <a href="https://www.iqfeed.net/dev/api/docs//NewsLookupviaTCPIP.cfm">News
@@ -296,11 +298,11 @@ public class NewsFeed extends AbstractLookupFeed {
     /**
      * This requests the count of News stories. This sends a {@link NewsCommand#NEWS_STORY_COUNT} request.
      *
-     * @param symbols             a {@link List} of symbols
+     * @param symbols             a {@link Collection} of symbols
      * @param xmlTextOption       the {@link XMLTextOption}. See
      *                            <a href="https://www.iqfeed.net/dev/api/docs//NewsLookupviaTCPIP.cfm">News
      *                            Lookup via TCP/IP</a> for the response formats.
-     * @param sources             a {@link List} of news sources which can be retrieved via {@link
+     * @param sources             a {@link Collection} of news sources which can be retrieved via {@link
      *                            #requestNewsConfiguration(XMLTextOption, MultiMessageListener)}. (optional)
      * @param fromDate            the 'from' {@link LocalDate} (optional if 'toDate' is also <code>null</code>)
      * @param toDate              the 'to' {@link LocalDate} (optional if 'fromDate' is also <code>null</code>)
@@ -308,9 +310,9 @@ public class NewsFeed extends AbstractLookupFeed {
      *
      * @throws IOException thrown for {@link IOException}s
      */
-    public void requestNewsStoryCount(List<String> symbols, XMLTextOption xmlTextOption, List<String> sources,
-            LocalDate fromDate, LocalDate toDate, MultiMessageListener<MessageLine> messageLineListener)
-            throws IOException {
+    public void requestNewsStoryCount(Collection<String> symbols, XMLTextOption xmlTextOption,
+            Collection<String> sources, LocalDate fromDate, LocalDate toDate,
+            MultiMessageListener<MessageLine> messageLineListener) throws IOException {
         checkNotNull(symbols);
         checkArgument(!symbols.isEmpty(), "'symbols' cannot be empty!");
         checkNotNull(xmlTextOption);
@@ -347,8 +349,8 @@ public class NewsFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Calls {@link #requestNewsStoryCount(List, XMLTextOption, List, LocalDate, LocalDate, MultiMessageListener)} and
-     * parses the XML data into POJOs.
+     * Calls {@link #requestNewsStoryCount(Collection, XMLTextOption, Collection, LocalDate, LocalDate,
+     * MultiMessageListener)} and parses the XML data into POJOs.
      *
      * @return {@link NewsStoryCounts}
      *
@@ -356,8 +358,8 @@ public class NewsFeed extends AbstractLookupFeed {
      * @throws ExecutionException   thrown for {@link ExecutionException}s
      * @throws InterruptedException thrown for {@link InterruptedException}s
      */
-    public NewsStoryCounts requestNewsStoryCount(List<String> symbols, List<String> sources, LocalDate fromDate,
-            LocalDate toDate) throws IOException, ExecutionException, InterruptedException {
+    public NewsStoryCounts requestNewsStoryCount(Collection<String> symbols, Collection<String> sources,
+            LocalDate fromDate, LocalDate toDate) throws IOException, ExecutionException, InterruptedException {
         MultiMessageAccumulator<MessageLine> asyncListener = new MultiMessageAccumulator<>();
         requestNewsStoryCount(symbols, XMLTextOption.XML, sources, fromDate, toDate, asyncListener);
 

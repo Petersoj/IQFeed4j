@@ -436,8 +436,8 @@ public class OptionChainsFeed extends AbstractLookupFeed {
      *
      * @throws IOException thrown for {@link IOException}s
      */
-    public SingleMessageFuture<List<FutureContract>> getFutureChain(String symbol, List<FutureMonth> months,
-            List<Integer> years, Integer nearMonths) throws IOException {
+    public SingleMessageFuture<List<FutureContract>> getFutureChain(String symbol, Collection<FutureMonth> months,
+            Collection<Integer> years, Integer nearMonths) throws IOException {
         checkNotNull(symbol);
         checkArgument(months == null || !months.isEmpty());
         checkNotNull(years);
@@ -493,8 +493,8 @@ public class OptionChainsFeed extends AbstractLookupFeed {
      *
      * @throws IOException thrown for {@link IOException}s
      */
-    public SingleMessageFuture<List<FutureSpread>> getFutureSpreadChain(String symbol, List<FutureMonth> months,
-            List<Integer> years, Integer nearMonths) throws IOException {
+    public SingleMessageFuture<List<FutureSpread>> getFutureSpreadChain(String symbol, Collection<FutureMonth> months,
+            Collection<Integer> years, Integer nearMonths) throws IOException {
         checkNotNull(symbol);
         checkArgument(months == null || !months.isEmpty());
         checkNotNull(years);
@@ -553,8 +553,8 @@ public class OptionChainsFeed extends AbstractLookupFeed {
      * @throws IOException thrown for {@link IOException}s
      */
     public SingleMessageFuture<List<OptionContract>> getFutureOptionChain(String symbol,
-            PutsCallsOption putsCallsOption, List<FutureMonth> months, List<Integer> years, Integer nearMonths)
-            throws IOException {
+            PutsCallsOption putsCallsOption, Collection<FutureMonth> months, Collection<Integer> years,
+            Integer nearMonths) throws IOException {
         checkNotNull(symbol);
         checkNotNull(putsCallsOption);
         checkArgument(months == null || !months.isEmpty());
@@ -615,7 +615,7 @@ public class OptionChainsFeed extends AbstractLookupFeed {
      * @throws IOException thrown for {@link IOException}s
      */
     public SingleMessageFuture<List<OptionContract>> getEquityOptionChain(String symbol,
-            PutsCallsOption putsCallsOption, List<EquityOptionMonth> months, Integer nearMonths,
+            PutsCallsOption putsCallsOption, Collection<EquityOptionMonth> months, Integer nearMonths,
             NonStandardOptionTypes nonStandardOptionTypes) throws IOException {
         return getEquityOptionChainWithFilter(symbol, putsCallsOption, months, nearMonths, OptionFilterType.NONE, null,
                 null, nonStandardOptionTypes);
@@ -638,7 +638,7 @@ public class OptionChainsFeed extends AbstractLookupFeed {
      * @throws IOException thrown for {@link IOException}s
      */
     public SingleMessageFuture<List<OptionContract>> getEquityOptionChainWithStrikeFilter(String symbol,
-            PutsCallsOption putsCallsOption, List<EquityOptionMonth> months, Integer nearMonths,
+            PutsCallsOption putsCallsOption, Collection<EquityOptionMonth> months, Integer nearMonths,
             Double beginningStrikePrice, Double endingStrikePrice, NonStandardOptionTypes nonStandardOptionTypes)
             throws IOException {
         return getEquityOptionChainWithFilter(symbol, putsCallsOption, months, nearMonths,
@@ -663,7 +663,7 @@ public class OptionChainsFeed extends AbstractLookupFeed {
      * @throws IOException thrown for {@link IOException}s
      */
     public SingleMessageFuture<List<OptionContract>> getEquityOptionChainWithITMOTMFilter(String symbol,
-            PutsCallsOption putsCallsOption, List<EquityOptionMonth> months, Integer nearMonths, Integer itmCount,
+            PutsCallsOption putsCallsOption, Collection<EquityOptionMonth> months, Integer nearMonths, Integer itmCount,
             Integer otmCount, NonStandardOptionTypes nonStandardOptionTypes) throws IOException {
         return getEquityOptionChainWithFilter(symbol, putsCallsOption, months, nearMonths,
                 OptionFilterType.IN_OR_OUT_OF_THE_MONEY, itmCount.toString(), otmCount.toString(),
@@ -690,7 +690,7 @@ public class OptionChainsFeed extends AbstractLookupFeed {
      * @throws IOException thrown for {@link IOException}s
      */
     private SingleMessageFuture<List<OptionContract>> getEquityOptionChainWithFilter(String symbol,
-            PutsCallsOption putsCallsOption, List<EquityOptionMonth> months, Integer nearMonths,
+            PutsCallsOption putsCallsOption, Collection<EquityOptionMonth> months, Integer nearMonths,
             OptionFilterType optionFilterType, String filter1, String filter2,
             NonStandardOptionTypes nonStandardOptionTypes) throws IOException {
         checkNotNull(symbol);

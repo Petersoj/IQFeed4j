@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -184,7 +185,7 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
      * @throws IOException thrown for {@link IOException}s
      */
     public void searchSymbols(SearchField searchField, String searchString, SymbolFilterType symbolFilterType,
-            List<Integer> filterValues, MultiMessageListener<SymbolSearchResult> symbolSearchResultListener)
+            Collection<Integer> filterValues, MultiMessageListener<SymbolSearchResult> symbolSearchResultListener)
             throws IOException {
         checkNotNull(searchField);
         checkNotNull(searchString);
@@ -212,7 +213,7 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Calls {@link #searchSymbols(SearchField, String, SymbolFilterType, List, MultiMessageListener)} and will
+     * Calls {@link #searchSymbols(SearchField, String, SymbolFilterType, Collection, MultiMessageListener)} and will
      * accumulate all requested data into a {@link List} which can be consumed later.
      *
      * @return a {@link List} of {@link SymbolSearchResult}s
@@ -222,7 +223,7 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
      * @throws InterruptedException thrown for {@link InterruptedException}s
      */
     public List<SymbolSearchResult> searchSymbols(SearchField searchField, String searchString,
-            SymbolFilterType symbolFilterType, List<Integer> filterValues)
+            SymbolFilterType symbolFilterType, Collection<Integer> filterValues)
             throws IOException, ExecutionException, InterruptedException {
         MultiMessageAccumulator<SymbolSearchResult> asyncListener = new MultiMessageAccumulator<>();
         searchSymbols(searchField, searchString, symbolFilterType, filterValues, asyncListener);

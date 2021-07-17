@@ -24,8 +24,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * {@link IQFeed4j} is a class that contains feed instances to interface with IQFeed along with an instance of {@link
  * IQConnectExecutable}. You will generally only need one instance of it in your application. Directly interact with the
- * various feeds that IQFeed4j provides via: <code>getFeedName();</code> or
- * <code>startFeedName();</code> and <code>stopFeedName();</code>.
+ * various feeds that IQFeed4j provides with <code>feedName();</code> and start/stop the feeds with
+ * <code>startFeedName();</code> and <code>stopFeedName();</code>. You must start the feed with
+ * <code>startFeedName();</code> before using it via <code>feedName();</code>.
  */
 public class IQFeed4j {
 
@@ -365,7 +366,7 @@ public class IQFeed4j {
      *
      * @return the {@link IQConnectExecutable}
      */
-    public IQConnectExecutable getIQConnectExecutable() {
+    public IQConnectExecutable iqConnectExecutable() {
         return iqConnectExecutable;
     }
 

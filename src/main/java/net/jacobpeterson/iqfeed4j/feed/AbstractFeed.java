@@ -176,7 +176,7 @@ public abstract class AbstractFeed implements Runnable {
     /**
      * Cleans ups this {@link AbstractFeed} state subsequent feed connections operated correctly.
      */
-    private void cleanupState() {
+    protected void cleanupState() {
         intentionalSocketClose = false;
         protocolVersionValidated = false;
     }

@@ -1,7 +1,12 @@
 package net.jacobpeterson.iqfeed4j.feed.message;
 
+import net.jacobpeterson.iqfeed4j.feed.AbstractFeed;
+
 /**
  * {@link FeedMessageListener} is used to listen to feed messages.
+ * <br>
+ * <strong>Calling methods in an {@link AbstractFeed} implementation that send feed messages will result in dead-lock!
+ * Use a separate thread as needed.</strong>
  *
  * @param <T> the type of message
  */
