@@ -390,17 +390,17 @@ public class Level1Feed extends AbstractServerConnectionFeed {
         level1FeedEventListener = new Level1FeedEventListener() {
             @Override
             public void onServerReconnectFailed() {
-                LOGGER.warn("Server reconnection has failed!");
+                LOGGER.error("Server reconnection has failed!");
             }
 
             @Override
             public void onSymbolLimitReached(String symbol) {
-                LOGGER.warn("Symbol limit reached with symbol: {}!", symbol);
+                LOGGER.error("Symbol limit reached with symbol: {}!", symbol);
             }
 
             @Override
             public void onSymbolNotWatched(String symbol) {
-                LOGGER.warn("{} symbol not watched!", symbol);
+                LOGGER.error("{} symbol not watched!", symbol);
             }
         };
 

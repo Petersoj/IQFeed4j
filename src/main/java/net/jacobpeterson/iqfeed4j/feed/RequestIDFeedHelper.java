@@ -77,7 +77,7 @@ public class RequestIDFeedHelper {
     }
 
     /**
-     * Gets a new Request ID. This method is synchronized.
+     * Gets a new Request ID. This method is synchronized with {@link #removeRequestID(String)}.
      *
      * @return a new request ID
      */
@@ -90,7 +90,7 @@ public class RequestIDFeedHelper {
     }
 
     /**
-     * Removes a Request ID. This method is synchronized.
+     * Removes a Request ID. This method is synchronized with {@link #getNewRequestID()}.
      *
      * @param requestID the request ID
      */
