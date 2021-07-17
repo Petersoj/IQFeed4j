@@ -135,6 +135,10 @@ public abstract class AbstractFeed implements Runnable {
     /**
      * Stop this feed connection (close socket and interrupt thread). This method is synchronized with {@link
      * #start()}.
+     * <br>
+     * Note: calling this does not guarantee that an implementation of {@link AbstractFeed} will clean up its state and
+     * its variables to the point where it's like a new instance of the implementation. Instead, a new instance of the
+     * {@link AbstractFeed} implementation should be created for a fresh state.
      *
      * @throws InterruptedException thrown for {@link InterruptedException}s
      * @throws IOException          thrown for {@link IOException}s
