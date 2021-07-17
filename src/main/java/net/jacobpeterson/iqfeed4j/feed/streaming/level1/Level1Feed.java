@@ -36,9 +36,13 @@ import java.util.stream.IntStream;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static net.jacobpeterson.iqfeed4j.feed.streaming.level1.Level1Feed.CSVPOJOPopulators.splitFactorAndDate;
 import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.*;
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.*;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueExists;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.DateTimeConverters.*;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.PrimitiveConvertors.*;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.PrimitiveConvertors.DOUBLE;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.PrimitiveConvertors.INTEGER;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.PrimitiveConvertors.STRING;
 
 /**
  * {@link Level1Feed} is an {@link AbstractServerConnectionFeed} for Level 1 market data.
@@ -724,11 +728,11 @@ public class Level1Feed extends AbstractServerConnectionFeed {
      *
      * @param symbol                  the symbol that you wish to receive updates on
      * @param fundamentalDataListener the {@link FeedMessageListener} of {@link FundamentalData}. Note if a {@link
-     *                                FeedMessageListener} already exists for the given 'symbol', then it is overwritten
-     *                                with this one.
+     *                                FeedMessageListener} already exists for the given <code>symbol</code>, then it is
+     *                                overwritten with this one.
      * @param summaryUpdateListener   the {@link FeedMessageListener} of {@link SummaryUpdate}s. Note if a {@link
-     *                                FeedMessageListener} already exists for the given 'symbol', then it is overwritten
-     *                                with this one.
+     *                                FeedMessageListener} already exists for the given <code>symbol</code>, then it is
+     *                                overwritten with this one.
      *
      * @throws IOException thrown for {@link IOException}s
      */
@@ -758,11 +762,11 @@ public class Level1Feed extends AbstractServerConnectionFeed {
      *
      * @param symbol                  the symbol that you wish to receive updates on
      * @param fundamentalDataListener the {@link FeedMessageListener} of {@link FundamentalData}. Note if a {@link
-     *                                FeedMessageListener} already exists for the given 'symbol', then it is overwritten
-     *                                with this one.
+     *                                FeedMessageListener} already exists for the given <code>symbol</code>, then it is
+     *                                overwritten with this one.
      * @param summaryUpdateListener   the {@link FeedMessageListener} of {@link SummaryUpdate}s. Note if a {@link
-     *                                FeedMessageListener} already exists for the given 'symbol', then it is overwritten
-     *                                with this one.
+     *                                FeedMessageListener} already exists for the given <code>symbol</code>, then it is
+     *                                overwritten with this one.
      *
      * @throws IOException thrown for {@link IOException}s
      */
@@ -895,8 +899,8 @@ public class Level1Feed extends AbstractServerConnectionFeed {
      *
      * @param symbol                the symbol that you wish to receive updates on
      * @param regionalQuoteListener the {@link FeedMessageListener} of {@link RegionalQuote}s. Note if a {@link
-     *                              FeedMessageListener} already exists for the given 'symbol', then it is overwritten
-     *                              with this one.
+     *                              FeedMessageListener} already exists for the given <code>symbol</code>, then it is
+     *                              overwritten with this one.
      *
      * @throws IOException thrown for {@link IOException}s
      */

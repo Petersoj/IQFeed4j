@@ -64,7 +64,7 @@ public abstract class AbstractFeed implements Runnable {
      * @param port                    the port
      * @param csvSplitter             the CSV {@link Splitter}
      * @param validateProtocolVersion true to send and validate the {@link #CURRENTLY_SUPPORTED_PROTOCOL_VERSION}
-     * @param sendClientName          true to send the client 'feedName'
+     * @param sendClientName          true to send the client <code>feedName</code>
      */
     public AbstractFeed(String feedName, String hostname, int port, Splitter csvSplitter,
             boolean validateProtocolVersion, boolean sendClientName) {
@@ -266,7 +266,7 @@ public abstract class AbstractFeed implements Runnable {
     }
 
     /**
-     * Calls {@link #sendMessage(String)} and logs the given 'message'.
+     * Calls {@link #sendMessage(String)} and logs the given <code>message</code>.
      *
      * @param message the message
      *

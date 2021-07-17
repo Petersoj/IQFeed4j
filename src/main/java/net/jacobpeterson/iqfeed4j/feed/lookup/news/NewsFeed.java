@@ -238,7 +238,7 @@ public class NewsFeed extends AbstractLookupFeed {
      * @param xmlTextEmailOption  the {@link XMLTextEmailOption}. See
      *                            <a href="https://www.iqfeed.net/dev/api/docs//NewsLookupviaTCPIP.cfm">News
      *                            Lookup via TCP/IP</a> for the response formats.
-     * @param deliverTo           email address to deliver story to if 'xmlTextEmailOption' is {@link
+     * @param deliverTo           email address to deliver story to if <code>xmlTextEmailOption</code> is {@link
      *                            XMLTextEmailOption#EMAIL}
      * @param messageLineListener the {@link MultiMessageListener} for the message {@link MessageLine}s
      *
@@ -304,8 +304,10 @@ public class NewsFeed extends AbstractLookupFeed {
      *                            Lookup via TCP/IP</a> for the response formats.
      * @param sources             a {@link Collection} of news sources which can be retrieved via {@link
      *                            #requestNewsConfiguration(XMLTextOption, MultiMessageListener)}. (optional)
-     * @param fromDate            the 'from' {@link LocalDate} (optional if 'toDate' is also <code>null</code>)
-     * @param toDate              the 'to' {@link LocalDate} (optional if 'fromDate' is also <code>null</code>)
+     * @param fromDate            the 'from' {@link LocalDate} (optional if <code>toDate</code> is also
+     *                            <code>null</code>)
+     * @param toDate              the 'to' {@link LocalDate} (optional if <code>fromDate</code> is also
+     *                            <code>null</code>)
      * @param messageLineListener the {@link MultiMessageListener} for the message {@link MessageLine}s
      *
      * @throws IOException thrown for {@link IOException}s

@@ -16,7 +16,9 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.Map;
 
-import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.*;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueNotWhitespace;
+import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
 
 /**
  * {@link AbstractLookupFeed} represents a {@link AbstractFeed} for Lookup data.
@@ -52,7 +54,7 @@ public abstract class AbstractLookupFeed extends AbstractFeed {
     /**
      * Handles a standard message for a {@link MultiMessageListener} by: checking for request error messages, handling
      * {@link FeedSpecialMessage#END_OF_MESSAGE} messages, and performing {@link AbstractIndexCSVMapper#map(String[],
-     * int)} on the 'CSV' to call {@link MultiMessageListener#onMessageReceived(Object)}.
+     * int)} on the <code>csv</code> to call {@link MultiMessageListener#onMessageReceived(Object)}.
      *
      * @param <T>                   the type of {@link MultiMessageListener}
      * @param csv                   the CSV
@@ -62,7 +64,7 @@ public abstract class AbstractLookupFeed extends AbstractFeed {
      *                              corresponding {@link MultiMessageListener}s
      * @param indexCSVMapper        the {@link AbstractIndexCSVMapper} for the message
      *
-     * @return true if the 'requestID' was a key inside 'listenersOfRequestIDs', false otherwise
+     * @return true if the <code>requestID</code> was a key inside <code>listenersOfRequestIDs</code>, false otherwise
      */
     protected <T> boolean handleStandardMultiMessage(String[] csv, String requestID, int offset,
             Map<String, MultiMessageListener<T>> listenersOfRequestIDs, AbstractIndexCSVMapper<T> indexCSVMapper) {

@@ -1,7 +1,7 @@
 package net.jacobpeterson.iqfeed4j.util.chars;
 
 /**
- * {@link CharUtil} defines utility methods for {@link Character} or the primitive 'char' type.
+ * {@link CharUtil} defines utility methods for {@link Character} or the primitive <code>char</code> type.
  */
 public final class CharUtil {
 
@@ -10,7 +10,7 @@ public final class CharUtil {
      *
      * @param string              the string to search
      * @param qualifyDecimalPoint true to qualify a decimal point as a number
-     * @param qualifyPlusOrMinus  true to qualify a '+' or a '-" character
+     * @param qualifyPlusOrMinus  true to qualify a '+' or a '-' character
      *
      * @return the index
      */

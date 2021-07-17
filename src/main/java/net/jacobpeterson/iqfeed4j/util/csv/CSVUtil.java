@@ -6,7 +6,7 @@ package net.jacobpeterson.iqfeed4j.util.csv;
 public final class CSVUtil {
 
     /**
-     * Tests if the 'csv' array has 'index'.
+     * Tests if the <code>csv</code> array has <code>index</code>.
      *
      * @param csv   the CSV
      * @param index the index
@@ -18,7 +18,7 @@ public final class CSVUtil {
     }
 
     /**
-     * Tests if the 'csv' array has 'index' and if the value at 'index' is not empty.
+     * Tests if the <code>csv</code> array has <code>index</code> and if the value at <code>index</code> is not empty.
      *
      * @param csv   the CSV
      * @param index the index
@@ -30,7 +30,8 @@ public final class CSVUtil {
     }
 
     /**
-     * Tests if the 'csv' array has 'index' and if the value at 'index' is not empty and not whitespace.
+     * Tests if the <code>csv</code> array has <code>index</code> and if the value at <code>index</code> is not empty
+     * and not whitespace.
      *
      * @param csv   the CSV
      * @param index the index
@@ -42,7 +43,7 @@ public final class CSVUtil {
     }
 
     /**
-     * Tests if the 'csv' array has 'match' at 'index'.
+     * Tests if the <code>csv</code> array has <code>match</code> at <code>index</code>.
      *
      * @param csv   the CSV
      * @param index the index

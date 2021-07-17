@@ -24,7 +24,7 @@ public abstract class AbstractListCSVMapper<T> extends AbstractCSVMapper<T> {
     }
 
     /**
-     * Maps the given 'csv' list to a {@link List}.
+     * Maps the given <code>csv</code> list to a {@link List}.
      *
      * @param csv    the CSV
      * @param offset offset to add to CSV indices when applying {@link CSVMapping}s

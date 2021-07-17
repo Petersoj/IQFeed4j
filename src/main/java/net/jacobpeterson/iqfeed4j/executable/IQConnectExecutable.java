@@ -185,8 +185,8 @@ public class IQConnectExecutable {
 
     /**
      * This method is used to block the current thread until <code>IQConnect.exe</code> has successfully started up. It
-     * will used the passed in 'hostname' and 'port' to continuously attempt connections to <code>IQConnect.exe</code>
-     * until 'timoutMillis' have elapsed or a successful connection was made.
+     * will used the passed in <code>hostname</code> and <code>port</code> to continuously attempt connections to
+     * <code>IQConnect.exe</code> until <code>timoutMillis</code> have elapsed or a successful connection was made.
      *
      * @param hostname        the hostname
      * @param port            the port
@@ -195,7 +195,7 @@ public class IQConnectExecutable {
      *
      * @return the number of attempts it took to connect
      *
-     * @throws TimeoutException thrown when 'timoutMillis' have elapsed without a successful connection
+     * @throws TimeoutException thrown when <code>timoutMillis</code> have elapsed without a successful connection
      */
     public int waitForConnection(String hostname, int port, int pollingInterval, long timoutMillis)
             throws TimeoutException {

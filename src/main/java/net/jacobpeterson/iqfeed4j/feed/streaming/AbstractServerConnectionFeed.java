@@ -21,7 +21,7 @@ public abstract class AbstractServerConnectionFeed extends AbstractFeed {
      * @param port                    the port
      * @param csvSplitter             the CSV {@link Splitter}
      * @param validateProtocolVersion true to send and validate the {@link #CURRENTLY_SUPPORTED_PROTOCOL_VERSION}
-     * @param sendClientName          true to send the client 'feedName'
+     * @param sendClientName          true to send the client <code>feedName</code>
      */
     public AbstractServerConnectionFeed(String feedName, String hostname, int port, Splitter csvSplitter,
             boolean validateProtocolVersion, boolean sendClientName) {

@@ -23,10 +23,7 @@ public final class Documentation2JSONSchema {
     /**
      * This is a standalone helper method that converts properties HTML copied from the IQFeed docs page into a JSON
      * schema property list that includes the type and the description. It's kinda hacky, but it helps in the generation
-     * of JSON POJOs with Javadocs. Must be in the format of a list of:
-     * <pre>
-     *
-     * </pre>
+     * of JSON POJOs with Javadocs.
      *
      * @param docHTML the documentation HTML
      */

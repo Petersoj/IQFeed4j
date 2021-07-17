@@ -28,8 +28,13 @@ import java.util.concurrent.ExecutionException;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.DateTimeConverters.*;
-import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.PrimitiveConvertors.*;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.DateTimeConverters.DASHED_DATE;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.DateTimeConverters.DASHED_DATE_SPACE_TIME;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.DateTimeConverters.DASHED_DATE_SPACE_TIME_FRACTIONAL;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.PrimitiveConvertors.DOUBLE;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.PrimitiveConvertors.INTEGER;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.PrimitiveConvertors.LONG;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.PrimitiveConvertors.SHORT;
 
 /**
  * {@link HistoricalFeed} is an {@link AbstractLookupFeed} for historical data.
@@ -142,8 +147,8 @@ public class HistoricalFeed extends AbstractLookupFeed {
     //
 
     /**
-     * Retrieves up to 'maxDataPoints' number of {@link Tick}s for the specified 'symbol'. This sends a {@link
-     * HistoricalCommand#HISTORICAL_TICKS_DATAPOINTS} request.
+     * Retrieves up to <code>maxDataPoints</code> number of {@link Tick}s for the specified <code>symbol</code>. This
+     * sends a {@link HistoricalCommand#HISTORICAL_TICKS_DATAPOINTS} request.
      *
      * @param symbol        the symbol. Max length of 30 characters.
      * @param maxDataPoints the maximum number of datapoints to be retrieved
@@ -198,8 +203,8 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Retrieves {@link Tick}s for the previous 'maxDays' days for the specified 'symbol'. This sends a {@link
-     * HistoricalCommand#HISTORICAL_TICKS_DAYS} request.
+     * Retrieves {@link Tick}s for the previous <code>maxDays</code> days for the specified <code>symbol</code>. This
+     * sends a {@link HistoricalCommand#HISTORICAL_TICKS_DAYS} request.
      *
      * @param symbol          the symbol. Max length of 30 characters.
      * @param maxDays         the max days
@@ -276,8 +281,8 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Retrieves {@link Tick} data between 'beginDateTime' and 'endDateTime' for the specified 'symbol. This sends a
-     * {@link HistoricalCommand#HISTORICAL_TICKS_DATETIMES} request.
+     * Retrieves {@link Tick} data between <code>beginDateTime</code> and <code>endDateTime</code> for the specified
+     * <code>symbol</code>. This sends a {@link HistoricalCommand#HISTORICAL_TICKS_DATETIMES} request.
      *
      * @param symbol          the symbol. Max length of 30 characters.
      * @param beginDateTime   earliest date/time (Eastern) to receive data for.
@@ -366,8 +371,8 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Retrieves up to 'maxDataPoints' number of {@link Interval}s for the specified 'symbol'. This sends a {@link
-     * HistoricalCommand#HISTORICAL_INTERVAL_DATAPOINTS} request.
+     * Retrieves up to <code>maxDataPoints</code> number of {@link Interval}s for the specified <code>symbol</code>.
+     * This sends a {@link HistoricalCommand#HISTORICAL_INTERVAL_DATAPOINTS} request.
      *
      * @param symbol            the symbol. Max length of 30 characters.
      * @param intervalLength    the interval length
@@ -434,8 +439,8 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Retrieves {@link Interval}s for 'maxDays' days for the specified 'symbol'. This sends a {@link
-     * HistoricalCommand#HISTORICAL_INTERVAL_DAYS} request.
+     * Retrieves {@link Interval}s for <code>maxDays</code> days for the specified <code>symbol</code>. This sends a
+     * {@link HistoricalCommand#HISTORICAL_INTERVAL_DAYS} request.
      *
      * @param symbol            the symbol. Max length of 30 characters.
      * @param intervalLength    the interval length
@@ -523,8 +528,9 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Retrieves {@link Interval} data between 'beginDateTime' and 'endDateTime' for the specified 'symbol. This sends a
-     * {@link HistoricalCommand#HISTORICAL_INTERVAL_DATETIMES} request.
+     * Retrieves {@link Interval} data between <code>beginDateTime</code> and <code>endDateTime</code> for the
+     * specified
+     * <code>symbol</code>. This sends a {@link HistoricalCommand#HISTORICAL_INTERVAL_DATETIMES} request.
      *
      * @param symbol            the symbol. Max length of 30 characters.
      * @param intervalLength    the interval length
@@ -626,8 +632,8 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Retrieves up to 'maxDays' days of End-Of-Day {@link DatedInterval} for the specified 'symbol'. This sends a
-     * {@link HistoricalCommand#HISTORICAL_DAILY_DATAPOINTS} request.
+     * Retrieves up to <code>maxDays</code> days of End-Of-Day {@link DatedInterval} for the specified
+     * <code>symbol</code>. This sends a {@link HistoricalCommand#HISTORICAL_DAILY_DATAPOINTS} request.
      *
      * @param symbol                 the symbol. Max length of 30 characters.
      * @param maxDays                the max days
@@ -691,8 +697,8 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Retrieves Daily {@link DatedInterval}s between 'beginDate' and 'endDate' for the specified 'symbol'. This sends a
-     * {@link HistoricalCommand#HISTORICAL_DAILY_DATES} request.
+     * Retrieves Daily {@link DatedInterval}s between <code>beginDate</code> and <code>endDate</code> for the specified
+     * <code>symbol</code>. This sends a {@link HistoricalCommand#HISTORICAL_DAILY_DATES} request.
      *
      * @param symbol                 the symbol. Max length of 30 characters.
      * @param beginDate              earliest date (Eastern) to receive data for.
@@ -774,8 +780,8 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Retrieves up to 'maxWeeks' if composite weekly {@link DatedInterval} for the specified 'symbol'. This sends a
-     * {@link HistoricalCommand#HISTORICAL_WEEKLY_DATAPOINTS} request.
+     * Retrieves up to <code>maxWeeks</code> if composite weekly {@link DatedInterval} for the specified
+     * <code>symbol</code>. This sends a {@link HistoricalCommand#HISTORICAL_WEEKLY_DATAPOINTS} request.
      *
      * @param symbol                 the symbol. Max length of 30 characters.
      * @param maxWeeks               the max weeks
@@ -839,8 +845,8 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Retrieves up to 'maxMonths' if composite monthly {@link DatedInterval} for the specified 'symbol'. This sends a
-     * {@link HistoricalCommand#HISTORICAL_MONTHLY_DATAPOINTS} request.
+     * Retrieves up to <code>maxMonths</code> if composite monthly {@link DatedInterval} for the specified
+     * <code>symbol</code>. This sends a {@link HistoricalCommand#HISTORICAL_MONTHLY_DATAPOINTS} request.
      *
      * @param symbol                 the symbol. Max length of 30 characters.
      * @param maxMonths              the max months

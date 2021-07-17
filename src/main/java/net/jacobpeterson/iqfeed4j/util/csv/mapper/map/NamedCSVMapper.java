@@ -59,9 +59,9 @@ public class NamedCSVMapper<T> extends AbstractCSVMapper<T> {
      *
      * @param csv                    the CSV
      * @param offset                 offset to add to CSV indices when applying {@link CSVMapping}
-     * @param csvIndicesOfIndexNames a {@link Map} with they key being the 'csvIndexName's that were added via {@link
-     *                               #setMapping(String, BiConsumer, Function)} and the values being which CSV indices
-     *                               they correspond to in the given 'csv'.
+     * @param csvIndicesOfIndexNames a {@link Map} with they key being the <code>csvIndexName</code>s that were added
+     *                               via {@link #setMapping(String, BiConsumer, Function)} and the values being which
+     *                               CSV indices they correspond to in the given <code>csv</code>.
      *
      * @return a new POJO
      *

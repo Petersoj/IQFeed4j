@@ -374,7 +374,7 @@ public class OptionChainsFeed extends AbstractLookupFeed {
 
     /**
      * Handles a message for a {@link SingleMessageFuture} {@link List} by: checking for request error messages, and
-     * performing {@link ListCSVMapper#mapToList(String[], int)} on the 'CSV' to complete the {@link
+     * performing {@link ListCSVMapper#mapToList(String[], int)} on the <code>csv</code> to complete the {@link
      * SingleMessageFuture}.
      *
      * @param <T>                   the type of {@link SingleMessageFuture} {@link List}
@@ -384,7 +384,7 @@ public class OptionChainsFeed extends AbstractLookupFeed {
      *                              corresponding {@link SingleMessageFuture}'s {@link List}
      * @param listCSVMapper         the {@link ListCSVMapper} for the message
      *
-     * @return true if the 'requestID' was a key inside 'listenersOfRequestIDs', false otherwise
+     * @return true if the <code>requestID</code> was a key inside <code>listenersOfRequestIDs</code>, false otherwise
      */
     protected <T> boolean handleRequestIDSingleMessageList(String[] csv, String requestID,
             HashMap<String, SingleMessageFuture<List<T>>> listenersOfRequestIDs, ListCSVMapper<T> listCSVMapper) {

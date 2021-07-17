@@ -225,8 +225,8 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
     /**
      * Handles a message for a {@link MultiMessageListener} by: checking for request error messages, handling 'End of
      * Message' messages, populating {@link #csvIndicesOfIndexNamesOfRequestIDs} as needed, and performing {@link
-     * NamedCSVMapper#map(String[], int, Map)} on the 'CSV' to call
-     * {@link MultiMessageListener#onMessageReceived(Object)}.
+     * NamedCSVMapper#map(String[], int, Map)} on the <code>csv</code> to call {@link
+     * MultiMessageListener#onMessageReceived(Object)}.
      *
      * @param <T>                   the type of {@link MultiMessageListener}
      * @param csv                   the CSV
@@ -235,7 +235,7 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
      *                              corresponding {@link MultiMessageListener}s
      * @param namedCSVMapper        the {@link NamedCSVMapper} for the message
      *
-     * @return true if the 'requestID' was a key inside 'listenersOfRequestIDs', false otherwise
+     * @return true if the <code>requestID</code> was a key inside <code>listenersOfRequestIDs</code>, false otherwise
      */
     private <T> boolean handleMultiMessage(String[] csv, String requestID,
             HashMap<String, MultiMessageListener<T>> listenersOfRequestIDs, NamedCSVMapper<T> namedCSVMapper) {
