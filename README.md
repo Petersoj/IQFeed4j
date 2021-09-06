@@ -320,3 +320,4 @@ Contributions are welcome!
 - Level 2 Feed
 - Unit testing
 - Use [TA4j](https://github.com/ta4j/ta4j) `Num` interface instead of `Double` for number variables so that users can use either `Double` or `BigDecimal` for performance or precision in price data. 
+- Add [TimeSeriesDataStore](https://github.com/Petersoj/TimeSeriesDataStore)
