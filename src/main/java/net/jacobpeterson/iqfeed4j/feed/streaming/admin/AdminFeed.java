@@ -71,7 +71,7 @@ public class AdminFeed extends AbstractFeed {
      * @param port          the port
      */
     public AdminFeed(String adminFeedName, String hostname, int port) {
-        super(adminFeedName + FEED_NAME_SUFFIX, hostname, port, COMMA_DELIMITED_SPLITTER, true, true);
+        super(LOGGER, adminFeedName + FEED_NAME_SUFFIX, hostname, port, COMMA_DELIMITED_SPLITTER, true, true);
 
         messageReceivedLock = new Object();
         clientStatisticsOfClientIDs = new HashMap<>();

@@ -4,6 +4,7 @@ import com.google.common.base.Splitter;
 import net.jacobpeterson.iqfeed4j.feed.AbstractFeed;
 import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedMessageType;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.common.enums.ServerConnectionStatus;
+import org.slf4j.Logger;
 
 /**
  * {@link AbstractServerConnectionFeed} is an {@link AbstractFeed} for feeds that receive the <code>S,SERVER
@@ -16,6 +17,7 @@ public abstract class AbstractServerConnectionFeed extends AbstractFeed {
     /**
      * Instantiates a new {@link AbstractServerConnectionFeed}.
      *
+     * @param logger                  the {@link Logger}
      * @param feedName                the feed name
      * @param hostname                the hostname
      * @param port                    the port
@@ -23,9 +25,9 @@ public abstract class AbstractServerConnectionFeed extends AbstractFeed {
      * @param validateProtocolVersion true to send and validate the {@link #CURRENTLY_SUPPORTED_PROTOCOL_VERSION}
      * @param sendClientName          true to send the client <code>feedName</code>
      */
-    public AbstractServerConnectionFeed(String feedName, String hostname, int port, Splitter csvSplitter,
+    public AbstractServerConnectionFeed(Logger logger, String feedName, String hostname, int port, Splitter csvSplitter,
             boolean validateProtocolVersion, boolean sendClientName) {
-        super(feedName, hostname, port, csvSplitter, validateProtocolVersion, sendClientName);
+        super(logger, feedName, hostname, port, csvSplitter, validateProtocolVersion, sendClientName);
     }
 
     /**

@@ -45,9 +45,9 @@ public abstract class AbstractFeed implements Runnable {
      */
     public static final Splitter COMMA_DELIMITED_SPLITTER = Splitter.on(',');
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFeed.class);
     private static final int SOCKET_THREAD_JOIN_WAIT_MILLIS = 5000;
 
+    protected final Logger logger;
     protected final String feedName;
     protected final String hostname;
     protected final int port;
@@ -68,6 +68,7 @@ public abstract class AbstractFeed implements Runnable {
     /**
      * Instantiates a new {@link AbstractFeed}.
      *
+     * @param logger                  the {@link Logger}
      * @param feedName                the feed name
      * @param hostname                the host name
      * @param port                    the port
@@ -75,8 +76,9 @@ public abstract class AbstractFeed implements Runnable {
      * @param validateProtocolVersion true to send and validate the {@link #CURRENTLY_SUPPORTED_PROTOCOL_VERSION}
      * @param sendClientName          true to send the client <code>feedName</code>
      */
-    public AbstractFeed(String feedName, String hostname, int port, Splitter csvSplitter,
+    public AbstractFeed(Logger logger, String feedName, String hostname, int port, Splitter csvSplitter,
             boolean validateProtocolVersion, boolean sendClientName) {
+        this.logger = logger;
         this.feedName = feedName;
         this.hostname = hostname;
         this.port = port;
@@ -116,7 +118,7 @@ public abstract class AbstractFeed implements Runnable {
             feedReader = new BufferedReader(new InputStreamReader(feedSocket.getInputStream(),
                     StandardCharsets.US_ASCII));
 
-            LOGGER.debug("{} feed socket connection established.", feedName);
+            logger.debug("{} feed socket connection established.", feedName);
 
             if (validateProtocolVersion) {
                 // Send protocol version command first
@@ -124,7 +126,7 @@ public abstract class AbstractFeed implements Runnable {
                         FeedCommand.SYSTEM.value(), FeedCommand.SET_PROTOCOL.value(),
                         CURRENTLY_SUPPORTED_PROTOCOL_VERSION,
                         LineEnding.CR_LF.getASCIIString());
-                LOGGER.debug("Setting protocol version: {}", protocolVersionCommand);
+                logger.debug("Setting protocol version: {}", protocolVersionCommand);
                 sendMessage(protocolVersionCommand);
             }
 
@@ -132,7 +134,7 @@ public abstract class AbstractFeed implements Runnable {
                 String clientNameCommand = String.format("%s,%s,%s%s",
                         FeedCommand.SYSTEM.value(), FeedCommand.SET_CLIENT_NAME.value(), feedName,
                         LineEnding.CR_LF.getASCIIString());
-                LOGGER.debug("Setting client name: {}", clientNameCommand);
+                logger.debug("Setting client name: {}", clientNameCommand);
                 sendMessage(clientNameCommand);
             }
 
@@ -158,7 +160,7 @@ public abstract class AbstractFeed implements Runnable {
             interruptAndJoinThread();
             cleanupState();
 
-            LOGGER.debug("{} feed socket stopped.", feedName);
+            logger.debug("{} feed socket stopped.", feedName);
         }
     }
 
@@ -209,7 +211,7 @@ public abstract class AbstractFeed implements Runnable {
                     return;
                 } else {
                     // Removed in production for version 6.2-1.5.1
-                    LOGGER.trace("Received message line: {}", line);
+                    logger.trace("Received message line: {}", line);
 
                     String[] csv = csvSplitter.splitToList(line).toArray(new String[0]);
 
@@ -218,7 +220,7 @@ public abstract class AbstractFeed implements Runnable {
                             valueEquals(csv, 0, FeedMessageType.SYSTEM.value()) &&
                             valueEquals(csv, 1, FeedMessageType.CURRENT_PROTOCOL.value()) &&
                             valueEquals(csv, 2, CURRENTLY_SUPPORTED_PROTOCOL_VERSION)) {
-                        LOGGER.debug("Protocol version validated: {}", (Object) csv);
+                        logger.debug("Protocol version validated: {}", (Object) csv);
 
                         protocolVersionValidated = true;
                         onProtocolVersionValidated();
@@ -260,12 +262,12 @@ public abstract class AbstractFeed implements Runnable {
      * @param exception the {@link Exception}
      */
     protected void onAsyncException(String message, Exception exception) {
-        LOGGER.error(message, exception);
-        LOGGER.debug("Attempting to close {}...", feedName);
+        logger.error(message, exception);
+        logger.debug("Attempting to close {}...", feedName);
         try {
             stop();
         } catch (Exception stopException) {
-            LOGGER.error("Could not close {}!", feedName, stopException);
+            logger.error("Could not close {}!", feedName, stopException);
         }
     }
 
@@ -289,7 +291,7 @@ public abstract class AbstractFeed implements Runnable {
      * @throws IOException thrown for {@link IOException}s
      */
     protected void sendAndLogMessage(String message) throws IOException {
-        LOGGER.debug("Sending message: {}", message);
+        logger.debug("Sending message: {}", message);
         sendMessage(message);
     }
 

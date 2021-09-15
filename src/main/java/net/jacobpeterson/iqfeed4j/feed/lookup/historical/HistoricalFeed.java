@@ -110,7 +110,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
      * @param port               the port
      */
     public HistoricalFeed(String historicalFeedName, String hostname, int port) {
-        super(historicalFeedName + FEED_NAME_SUFFIX, hostname, port, COMMA_DELIMITED_SPLITTER);
+        super(LOGGER, historicalFeedName + FEED_NAME_SUFFIX, hostname, port, COMMA_DELIMITED_SPLITTER);
 
         messageReceivedLock = new Object();
         tickListenersOfRequestIDs = new HashMap<>();

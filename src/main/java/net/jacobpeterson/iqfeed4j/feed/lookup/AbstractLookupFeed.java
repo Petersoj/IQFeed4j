@@ -11,7 +11,6 @@ import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedMessageType;
 import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedSpecialMessage;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.index.AbstractIndexCSVMapper;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -25,7 +24,6 @@ import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
  */
 public abstract class AbstractLookupFeed extends AbstractFeed {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractLookupFeed.class);
     private static final String FEED_NAME_SUFFIX = " Lookup Feed";
 
     protected final RequestIDFeedHelper requestIDFeedHelper;
@@ -33,13 +31,14 @@ public abstract class AbstractLookupFeed extends AbstractFeed {
     /**
      * Instantiates a new {@link AbstractLookupFeed}.
      *
+     * @param logger         the {@link Logger}
      * @param lookupFeedName the lookup feed name
      * @param hostname       the host name
      * @param port           the port
      * @param csvSplitter    the CSV {@link Splitter}
      */
-    public AbstractLookupFeed(String lookupFeedName, String hostname, int port, Splitter csvSplitter) {
-        super(lookupFeedName + FEED_NAME_SUFFIX, hostname, port, csvSplitter, true, true);
+    public AbstractLookupFeed(Logger logger, String lookupFeedName, String hostname, int port, Splitter csvSplitter) {
+        super(logger, lookupFeedName + FEED_NAME_SUFFIX, hostname, port, csvSplitter, true, true);
 
         requestIDFeedHelper = new RequestIDFeedHelper();
     }
@@ -111,13 +110,13 @@ public abstract class AbstractLookupFeed extends AbstractFeed {
      */
     protected boolean isErrorOrInvalidMessage(String[] csv) {
         if (valueEquals(csv, 0, FeedMessageType.ERROR.value())) {
-            LOGGER.error("Received error message! {}", (Object) csv);
+            logger.error("Received error message! {}", (Object) csv);
             return true;
         }
 
         // Messages sent on this feed have a numeric Request ID first
         if (!valueNotWhitespace(csv, 0)) {
-            LOGGER.error("Received unknown message format: {}", (Object) csv);
+            logger.error("Received unknown message format: {}", (Object) csv);
             return true;
         }
 

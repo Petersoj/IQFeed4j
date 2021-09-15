@@ -113,7 +113,7 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
      * @param port                     the port
      */
     public SymbolMarketInfoFeed(String symbolMarketInfoFeedName, String hostname, int port) {
-        super(symbolMarketInfoFeedName + FEED_NAME_SUFFIX, hostname, port, COMMA_DELIMITED_SPLITTER);
+        super(LOGGER, symbolMarketInfoFeedName + FEED_NAME_SUFFIX, hostname, port, COMMA_DELIMITED_SPLITTER);
 
         messageReceivedLock = new Object();
         symbolSearchResultListenersOfRequestIDs = new HashMap<>();

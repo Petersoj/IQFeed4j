@@ -393,7 +393,7 @@ public class Level1Feed extends AbstractServerConnectionFeed {
      * @param port           the port
      */
     public Level1Feed(String level1FeedName, String hostname, int port) {
-        super(level1FeedName + FEED_NAME_SUFFIX, hostname, port, COMMA_DELIMITED_SPLITTER, true, true);
+        super(LOGGER, level1FeedName + FEED_NAME_SUFFIX, hostname, port, COMMA_DELIMITED_SPLITTER, true, true);
 
         messageReceivedLock = new Object();
         fundamentalDataListenersOfSymbols = new HashMap<>();

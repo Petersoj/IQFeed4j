@@ -187,7 +187,7 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
      * @param port                  the port
      */
     public MarketSummaryFeed(String marketSummaryFeedName, String hostname, int port) {
-        super(marketSummaryFeedName + FEED_NAME_SUFFIX, hostname, port, QUOTE_ESCAPED_COMMA_DELIMITED_SPLITTER);
+        super(LOGGER, marketSummaryFeedName + FEED_NAME_SUFFIX, hostname, port, QUOTE_ESCAPED_COMMA_DELIMITED_SPLITTER);
 
         messageReceivedLock = new Object();
         endOfDaySnapshotListenersOfRequestIDs = new HashMap<>();

@@ -59,7 +59,7 @@ public class NewsFeed extends AbstractLookupFeed {
      * @param port         the port
      */
     public NewsFeed(String newsFeedName, String hostname, int port) {
-        super(newsFeedName + FEED_NAME_SUFFIX, hostname, port, COMMA_DELIMITED_SPLITTER);
+        super(LOGGER, newsFeedName + FEED_NAME_SUFFIX, hostname, port, COMMA_DELIMITED_SPLITTER);
 
         messageReceivedLock = new Object();
         messageLineListenersOfRequestIDs = new HashMap<>();

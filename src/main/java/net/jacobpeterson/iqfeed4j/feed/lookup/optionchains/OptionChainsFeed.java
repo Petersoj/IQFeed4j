@@ -343,7 +343,7 @@ public class OptionChainsFeed extends AbstractLookupFeed {
      * @param port                 the port
      */
     public OptionChainsFeed(String optionChainsFeedName, String hostname, int port) {
-        super(optionChainsFeedName + FEED_NAME_SUFFIX, hostname, port, COMMA_DELIMITED_SPLITTER);
+        super(LOGGER, optionChainsFeedName + FEED_NAME_SUFFIX, hostname, port, COMMA_DELIMITED_SPLITTER);
 
         messageReceivedLock = new Object();
         futureContractListFuturesOfRequestIDs = new HashMap<>();

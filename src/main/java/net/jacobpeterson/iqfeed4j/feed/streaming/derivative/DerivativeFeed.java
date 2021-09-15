@@ -89,7 +89,7 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
      * @param port               the port
      */
     public DerivativeFeed(String derivativeFeedName, String hostname, int port) {
-        super(derivativeFeedName + FEED_NAME_SUFFIX, hostname, port, COMMA_DELIMITED_SPLITTER, false, true);
+        super(LOGGER, derivativeFeedName + FEED_NAME_SUFFIX, hostname, port, COMMA_DELIMITED_SPLITTER, false, true);
 
         this.derivativeFeedEventListener = new DerivativeFeedEventListener() {
             @Override
