@@ -465,14 +465,7 @@ public class OptionChainsFeed extends AbstractLookupFeed {
         }
         requestBuilder.append(",");
 
-        // The years argument the last digit of all the years without delimiters.
-        // e.g.: 2005 - 2014 would be "5678901234"
-        requestBuilder.append(years.stream()
-                .map(Object::toString) // Convert ints to strings
-                .map(s -> s.substring(s.length() - 1)) // Get last digit of year string
-                .distinct() // Remove duplicates
-                .collect(Collectors.joining())) // Collect digits back-to-back
-                .append(",");
+        requestBuilder.append(formatYearsArgument(years)).append(",");
 
         if (nearMonths != null) {
             requestBuilder.append(nearMonths);
@@ -522,14 +515,7 @@ public class OptionChainsFeed extends AbstractLookupFeed {
         }
         requestBuilder.append(",");
 
-        // The years argument the last digit of all the years without delimiters.
-        // e.g.: 2005 - 2014 would be "5678901234"
-        requestBuilder.append(years.stream()
-                .map(Object::toString) // Convert ints to strings
-                .map(s -> s.substring(s.length() - 1)) // Get last digit of year string
-                .distinct() // Remove duplicates
-                .collect(Collectors.joining())) // Collect digits back-to-back
-                .append(",");
+        requestBuilder.append(formatYearsArgument(years)).append(",");
 
         if (nearMonths != null) {
             requestBuilder.append(nearMonths);
@@ -584,14 +570,7 @@ public class OptionChainsFeed extends AbstractLookupFeed {
         }
         requestBuilder.append(",");
 
-        // The years argument the last digit of all the years without delimiters.
-        // e.g.: 2005 - 2014 would be "5678901234"
-        requestBuilder.append(years.stream()
-                .map(Object::toString) // Convert ints to strings
-                .map(s -> s.substring(s.length() - 1)) // Get last digit of year string
-                .distinct() // Remove duplicates
-                .collect(Collectors.joining())) // Collect digits back-to-back
-                .append(",");
+        requestBuilder.append(formatYearsArgument(years)).append(",");
 
         if (nearMonths != null) {
             requestBuilder.append(nearMonths);
@@ -609,6 +588,22 @@ public class OptionChainsFeed extends AbstractLookupFeed {
         sendAndLogMessage(requestBuilder.toString());
 
         return future;
+    }
+
+    /**
+     * Returns a {@link String} with the last digit of all the given {@link Integer} years without delimiters. e.g.:
+     * <code>2005 - 2014</code> would be <code>5678901234</code>.
+     *
+     * @param years a {@link Collection} of year {@link Integer}s
+     *
+     * @return a {@link String}
+     */
+    private String formatYearsArgument(Collection<Integer> years) {
+        return years.stream()
+                .map(Object::toString) // Convert ints to strings
+                .map(s -> s.substring(s.length() - 1)) // Get last digit of year string
+                .distinct() // Remove duplicates
+                .collect(Collectors.joining()); // Collect digits back-to-back
     }
 
     /**
