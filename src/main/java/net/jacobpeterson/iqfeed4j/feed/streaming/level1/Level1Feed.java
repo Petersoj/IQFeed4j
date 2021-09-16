@@ -499,7 +499,7 @@ public class Level1Feed extends AbstractServerConnectionFeed {
                             LOGGER.error("Unhandled message type: {}", systemMessageType);
                     }
                 } catch (IllegalArgumentException illegalArgumentException) {
-                    LOGGER.error("Received unknown message type: {}", csv[1], illegalArgumentException);
+                    LOGGER.error("Received unknown System message type for message: {}", csv, illegalArgumentException);
                 }
             } else {
                 try {
@@ -529,7 +529,7 @@ public class Level1Feed extends AbstractServerConnectionFeed {
                             LOGGER.error("Unhandled message type: {}", messageType);
                     }
                 } catch (IllegalArgumentException illegalArgumentException) {
-                    LOGGER.error("Received unknown message type: {}", csv[1], illegalArgumentException);
+                    LOGGER.error("Received unknown message type for message: {}", csv, illegalArgumentException);
                 }
             }
         }

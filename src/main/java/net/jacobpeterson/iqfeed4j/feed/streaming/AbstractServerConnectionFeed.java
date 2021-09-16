@@ -42,6 +42,13 @@ public abstract class AbstractServerConnectionFeed extends AbstractFeed {
     protected boolean checkServerConnectionStatusMessage(String systemMessageType) {
         try {
             serverConnectionStatus = ServerConnectionStatus.fromValue(systemMessageType);
+
+            if (serverConnectionStatus == ServerConnectionStatus.SERVER_CONNECTED) {
+                logger.info("Server is connected.");
+            } else {
+                logger.warn("Server is disconnected!");
+            }
+
             return true;
         } catch (IllegalArgumentException ignored) {
             return false;
