@@ -139,7 +139,7 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
                             DerivativeSystemMessageType.fromValue(systemMessageTypeString);
 
                     if (!valueExists(csv, 2)) {
-                        LOGGER.error("System message needs more arguments!");
+                        LOGGER.error("System message needs more arguments! Received: {}", (Object) csv);
                         return;
                     }
 

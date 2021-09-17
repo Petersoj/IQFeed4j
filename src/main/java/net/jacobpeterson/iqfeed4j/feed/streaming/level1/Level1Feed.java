@@ -543,10 +543,10 @@ public class Level1Feed extends AbstractServerConnectionFeed {
 
     private void handleSymbolLimitReachedMessage(String[] csv) {
         if (level1FeedEventListener != null) {
-            if (!valueExists(csv, 2)) {
-                LOGGER.error("System message needs more arguments!");
+            if (!valueExists(csv, 1)) {
+                LOGGER.error("System message needs more arguments! Received: {}", (Object) csv);
             } else {
-                String symbol = csv[2];
+                String symbol = csv[1];
                 level1FeedEventListener.onSymbolLimitReached(symbol);
             }
         }
@@ -730,10 +730,10 @@ public class Level1Feed extends AbstractServerConnectionFeed {
 
     private void handleSymbolNotWatched(String[] csv) {
         if (level1FeedEventListener != null) {
-            if (!valueExists(csv, 2)) {
-                LOGGER.error("System message needs more arguments!");
+            if (!valueExists(csv, 1)) {
+                LOGGER.error("'Symbol Not Watched' message needs more arguments! Received: {}", (Object) csv);
             } else {
-                String symbol = csv[2];
+                String symbol = csv[1];
                 level1FeedEventListener.onSymbolNotWatched(symbol);
             }
         }
