@@ -23,7 +23,7 @@ If you are using Gradle as your build tool, add the following dependency to your
 
 ```
 dependencies {
-    implementation group: 'net.jacobpeterson', name: 'iqfeed4j', version: '6.2-1.5.1'
+    implementation group: 'net.jacobpeterson', name: 'iqfeed4j', version: '6.2-1.5.2'
 }
 ```
 
@@ -33,7 +33,7 @@ If you are using Maven as your build tool, add the following dependency to your 
 <dependency>
     <groupId>net.jacobpeterson</groupId>
     <artifactId>iqfeed4j</artifactId>
-    <version>6.2-1.5.1</version>
+    <version>6.2-1.5.2</version>
     <scope>compile</scope>
 </dependency>
 ```
