@@ -23,7 +23,7 @@
       "title": "The close."
     },
     "PeriodVolume": {
-      "existingJavaType": "java.lang.Integer",
+      "existingJavaType": "java.lang.Long",
       "title": "The volume in the period."
     },
     "OpenInterest": {

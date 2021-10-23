@@ -66,11 +66,11 @@ public class HistoricalFeed extends AbstractLookupFeed {
         TICK_CSV_MAPPER = new IndexCSVMapper<>(Tick::new);
         TICK_CSV_MAPPER.addMapping(Tick::setTimestamp, DASHED_DATE_SPACE_TIME_FRACTIONAL);
         TICK_CSV_MAPPER.addMapping(Tick::setLast, DOUBLE);
-        TICK_CSV_MAPPER.addMapping(Tick::setLastSize, INTEGER);
+        TICK_CSV_MAPPER.addMapping(Tick::setLastSize, LONG);
         TICK_CSV_MAPPER.addMapping(Tick::setTotalVolume, LONG);
         TICK_CSV_MAPPER.addMapping(Tick::setBid, DOUBLE);
         TICK_CSV_MAPPER.addMapping(Tick::setAsk, DOUBLE);
-        TICK_CSV_MAPPER.addMapping(Tick::setTickID, INTEGER);
+        TICK_CSV_MAPPER.addMapping(Tick::setTickID, LONG);
         TICK_CSV_MAPPER.addMapping(Tick::setBasisForLast, Tick.BasisForLast::fromValue);
         TICK_CSV_MAPPER.addMapping(Tick::setTradeMarketCenter, SHORT);
         TICK_CSV_MAPPER.addMapping(Tick::setTradeConditions, TradeConditionUtil::listFromTradeConditionString);
@@ -84,8 +84,8 @@ public class HistoricalFeed extends AbstractLookupFeed {
         INTERVAL_CSV_MAPPER.addMapping(Interval::setOpen, DOUBLE);
         INTERVAL_CSV_MAPPER.addMapping(Interval::setClose, DOUBLE);
         INTERVAL_CSV_MAPPER.addMapping(Interval::setTotalVolume, LONG);
-        INTERVAL_CSV_MAPPER.addMapping(Interval::setPeriodVolume, INTEGER);
-        INTERVAL_CSV_MAPPER.addMapping(Interval::setNumberOfTrades, INTEGER);
+        INTERVAL_CSV_MAPPER.addMapping(Interval::setPeriodVolume, LONG);
+        INTERVAL_CSV_MAPPER.addMapping(Interval::setNumberOfTrades, LONG);
 
         DATED_INTERVAL_CSV_MAPPER = new IndexCSVMapper<>(DatedInterval::new);
         DATED_INTERVAL_CSV_MAPPER.addMapping(DatedInterval::setDate, DASHED_DATE);
@@ -93,7 +93,7 @@ public class HistoricalFeed extends AbstractLookupFeed {
         DATED_INTERVAL_CSV_MAPPER.addMapping(DatedInterval::setLow, DOUBLE);
         DATED_INTERVAL_CSV_MAPPER.addMapping(DatedInterval::setOpen, DOUBLE);
         DATED_INTERVAL_CSV_MAPPER.addMapping(DatedInterval::setClose, DOUBLE);
-        DATED_INTERVAL_CSV_MAPPER.addMapping(DatedInterval::setPeriodVolume, INTEGER);
+        DATED_INTERVAL_CSV_MAPPER.addMapping(DatedInterval::setPeriodVolume, LONG);
         DATED_INTERVAL_CSV_MAPPER.addMapping(DatedInterval::setOpenInterest, INTEGER);
     }
 

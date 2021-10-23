@@ -11,7 +11,7 @@
       "title": "The last price."
     },
     "LastSize": {
-      "existingJavaType": "java.lang.Integer",
+      "existingJavaType": "java.lang.Long",
       "title": "The last size."
     },
     "TotalVolume": {
@@ -27,7 +27,7 @@
       "title": "The ask price."
     },
     "TickID": {
-      "existingJavaType": "java.lang.Integer",
+      "existingJavaType": "java.lang.Long",
       "title": "The tick ID."
     },
     "BasisForLast": {

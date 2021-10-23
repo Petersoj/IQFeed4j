@@ -27,11 +27,11 @@
       "title": "The total volume."
     },
     "PeriodVolume": {
-      "existingJavaType": "java.lang.Integer",
+      "existingJavaType": "java.lang.Long",
       "title": "The volume in the period."
     },
     "NumberOfTrades": {
-      "existingJavaType": "java.lang.Integer",
+      "existingJavaType": "java.lang.Long",
       "title": "The number of trades. Will be zero for all requests other than tick interval requests."
     }
   }
