@@ -16,7 +16,8 @@ import java.util.Properties;
 public class PropertyUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PropertyUtil.class);
-    private static final Map<String, Properties> CACHED_PROPERTIES = Collections.synchronizedMap(new HashMap<>());
+
+    public static final Map<String, Properties> CACHED_PROPERTIES = Collections.synchronizedMap(new HashMap<>());
 
     /**
      * Gets a string property from a property file. Will try to IO load the properties in the property file if not
@@ -80,11 +81,14 @@ public class PropertyUtil {
      * @return the properties
      */
     public synchronized static Properties loadPropertyFile(String propertyFile, String defaultPropertyFile) {
-        Properties properties = null;
+        ClassLoader classLoader = PropertyUtil.class.getClassLoader();
+        if (classLoader == null) {
+            classLoader = ClassLoader.getSystemClassLoader();
+        }
 
         // Load the default property file if exists
         Properties defaultProperties = null;
-        InputStream defaultPropertyStream = ClassLoader.getSystemClassLoader().getResourceAsStream(defaultPropertyFile);
+        InputStream defaultPropertyStream = classLoader.getResourceAsStream(defaultPropertyFile);
 
         if (defaultPropertyStream != null) {
             defaultProperties = new Properties();
@@ -109,7 +113,8 @@ public class PropertyUtil {
         }
 
         // Load the property file
-        InputStream propertyStream = ClassLoader.getSystemClassLoader().getResourceAsStream(propertyFile);
+        Properties properties = null;
+        InputStream propertyStream = classLoader.getResourceAsStream(propertyFile);
 
         if (propertyStream != null) {
             // Add default properties if they were found
