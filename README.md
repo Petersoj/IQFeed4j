@@ -89,6 +89,7 @@ The following example will change what fields are sent when a `SummaryUpdate` oc
 ```java
 try {
     iqFeed4j.startLevel1Feed();
+    iqFeed4j.level1().waitForProtocolVersionValidation(5, TimeUnit.SECONDS);
     
     iqFeed4j.level1().selectUpdateFieldNames(
             SummaryUpdateField.MOST_RECENT_TRADE,
@@ -125,6 +126,7 @@ The following example will listen to AAPL 1-minute interval bars during Eastern 
 ```java
 try {
     iqFeed4j.startDerivativeFeed();
+    iqFeed4j.derivative().waitForProtocolVersionValidation(5, TimeUnit.SECONDS);
 
     iqFeed4j.derivative().requestIntervalWatch(
             "AAPL",
@@ -149,6 +151,7 @@ The following example demonstrates a few things you can do with the `AdminFeed`.
 ```java
 try {
     iqFeed4j.startAdminFeed();
+    iqFeed4j.admin().waitForProtocolVersionValidation(5, TimeUnit.SECONDS);
     
     // Set the login ID and password (and wait for confirmation response)
     String currentLoginID = iqFeed4j.admin().setLoginID("<login ID>").get();
@@ -177,6 +180,7 @@ The following example will request ascending AAPL 1-minute interval bars during 
 ```java
 try {
     iqFeed4j.startHistoricalFeed();
+    iqFeed4j.historical().waitForProtocolVersionValidation(5, TimeUnit.SECONDS);
     
     // Using synchronous data consumption method (aka consume data as it is being read)
     iqFeed4j.historical().requestIntervals(
@@ -227,6 +231,7 @@ The following example will print out all the `FiveMinuteSnapshot`s of NASDAQ equ
 ```java
 try {
     iqFeed4j.startMarketSummaryFeed();
+    iqFeed4j.marketSummary().waitForProtocolVersionValidation(5, TimeUnit.SECONDS);
     
     List<FiveMinuteSnapshot> fiveMinuteSnapshots = iqFeed4j.marketSummary().request5MinuteSummary(
             "1", // Equity security type
@@ -244,6 +249,7 @@ The following example gets all the `NewsConfiguration`s and acquires all the cur
 ```java
 try {
     iqFeed4j.startNewsFeed();
+    iqFeed4j.news().waitForProtocolVersionValidation(5, TimeUnit.SECONDS);
     
     NewsConfiguration newsConfiguration = iqFeed4j.news().requestNewsConfiguration();
     List<String> allMinorNewsSources = newsConfiguration.getCategories().stream()
@@ -272,6 +278,7 @@ The following example gets 5 In-The-Money and 5 Out-Of-The-Money Equity Put and 
 ```java
 try {
     iqFeed4j.startOptionChainsFeed();
+    iqFeed4j.optionChains().waitForProtocolVersionValidation(5, TimeUnit.SECONDS);
     
     List<OptionContract> applOptions = iqFeed4j.optionChains().getEquityOptionChainWithITMOTMFilter(
             "AAPL",
@@ -294,6 +301,7 @@ The following example gets all the current `ListedMarket`s and prints them out.
 ```java
 try {
     iqFeed4j.startSymbolMarketInfoFeed();
+    iqFeed4j.symbolMarketInfo().waitForProtocolVersionValidation(5, TimeUnit.SECONDS);
 
     List<ListedMarket> listedMarkets = iqFeed4j.symbolMarketInfo().requestListedMarkets();
     listedMarkets.forEach(System.out::println);
@@ -301,7 +309,6 @@ try {
     exception.printStackTrace();
 }
 ```
-
 
 # Building
 To build this project yourself, clone this repository and run:

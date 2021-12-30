@@ -6,7 +6,6 @@ import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedCommand;
 import net.jacobpeterson.iqfeed4j.model.feed.common.enums.FeedMessageType;
 import net.jacobpeterson.iqfeed4j.util.string.LineEnding;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -15,6 +14,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.StringJoiner;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -57,6 +57,7 @@ public abstract class AbstractFeed implements Runnable {
     private final Object startStopLock;
 
     private Thread socketThread;
+    private boolean socketThreadRunning;
     private Socket feedSocket;
     private BufferedWriter feedWriter;
     private BufferedReader feedReader;
@@ -87,8 +88,6 @@ public abstract class AbstractFeed implements Runnable {
         this.sendClientName = sendClientName;
 
         startStopLock = new Object();
-
-        intentionalSocketClose = false;
     }
 
     /**
@@ -102,12 +101,12 @@ public abstract class AbstractFeed implements Runnable {
         synchronized (startStopLock) {
             if (socketThread != null && socketThread.isAlive()) {
                 if (isFeedSocketOpen()) {
-                    return; // thread is alive and socket is connected
-                } else { // thread is alive, but socket is closed or null
-                    interruptAndJoinThread();
+                    return; // Thread is alive and socket is connected
+                } else { // Thread is alive, but socket is closed or null
+                    stopAndJoinThread();
                     cleanupState();
                 }
-            } else if (isFeedSocketOpen()) { // thread is dead, but socket is alive
+            } else if (isFeedSocketOpen()) { // Thread is dead, but socket is alive
                 closeSocket();
                 cleanupState();
             }
@@ -138,14 +137,15 @@ public abstract class AbstractFeed implements Runnable {
                 sendMessage(clientNameCommand);
             }
 
+            socketThreadRunning = true;
+
             socketThread = new Thread(this, feedName);
             socketThread.start();
         }
     }
 
     /**
-     * Stop this feed connection (close socket and interrupt thread). This method is synchronized with {@link
-     * #start()}.
+     * Stop this feed connection (close socket and stops thread). This method is synchronized with {@link #start()}.
      * <br>
      * Note: calling this does not guarantee that an implementation of {@link AbstractFeed} will clean up its state and
      * its variables to the point where it's like a new instance of the implementation. Instead, a new instance of the
@@ -157,7 +157,7 @@ public abstract class AbstractFeed implements Runnable {
     public void stop() throws InterruptedException, IOException {
         synchronized (startStopLock) {
             closeSocket();
-            interruptAndJoinThread();
+            stopAndJoinThread();
             cleanupState();
 
             logger.debug("{} feed socket stopped.", feedName);
@@ -177,13 +177,13 @@ public abstract class AbstractFeed implements Runnable {
     }
 
     /**
-     * Interrupts the {@link #socketThread} and joins it to wait for thread completion.
+     * Stops the {@link #socketThread} and joins it to wait for thread completion.
      *
      * @throws InterruptedException thrown for {@link InterruptedException}s
      */
-    private void interruptAndJoinThread() throws InterruptedException {
+    private void stopAndJoinThread() throws InterruptedException {
         if (socketThread != null) {
-            socketThread.interrupt(); // Stops the thread if alive
+            socketThreadRunning = false; // Prevent thread from continuing further
             socketThread.join(SOCKET_THREAD_JOIN_WAIT_MILLIS); // Wait for thread to complete
         }
     }
@@ -201,7 +201,7 @@ public abstract class AbstractFeed implements Runnable {
         // Confirm start() method has released 'startStopLock' and exited synchronized scope
         synchronized (startStopLock) {}
 
-        while (!Thread.currentThread().isInterrupted()) { // Check if thread has been closed/interrupted
+        while (socketThreadRunning) { // Check if thread should continue running
             try {
                 String line = feedReader.readLine(); // Uses any line ending: CR, LF, or CRLF
 
@@ -210,7 +210,6 @@ public abstract class AbstractFeed implements Runnable {
                     cleanupState();
                     return;
                 } else {
-                    // Removed in production for version 6.2-1.5.4
                     logger.trace("Received message line: {}", line);
 
                     String[] csv = csvSplitter.splitToList(line).toArray(new String[0]);
@@ -293,6 +292,27 @@ public abstract class AbstractFeed implements Runnable {
     protected void sendAndLogMessage(String message) throws IOException {
         logger.debug("Sending message: {}", message);
         sendMessage(message);
+    }
+
+    /**
+     * Sends a {@link FeedCommand#SYSTEM} command.
+     *
+     * @param systemCommand the system command
+     * @param arguments     the arguments. <code>null</code> for no arguments.
+     *
+     * @throws IOException thrown for {@link IOException}s
+     */
+    protected void sendSystemCommand(String systemCommand, String... arguments) throws IOException {
+        StringJoiner commandJoiner = new StringJoiner(",", "", LineEnding.CR_LF.getASCIIString());
+        commandJoiner.add(FeedCommand.SYSTEM.value());
+        commandJoiner.add(systemCommand);
+        if (arguments != null && arguments.length != 0) {
+            for (String argument : arguments) {
+                commandJoiner.add(argument);
+            }
+        }
+
+        sendAndLogMessage(commandJoiner.toString());
     }
 
     /**

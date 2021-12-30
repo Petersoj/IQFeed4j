@@ -132,14 +132,13 @@ public abstract class AbstractCSVMapper<T> {
                 value -> LocalTime.parse(value, DateTimeFormatters.OPTIONAL_1_OR_2_DIGIT_HOUR_TIME);
 
         /** Calls {@link #OPTIONAL_1_OR_2_DIGIT_HOUR_TIME} but returns <code>null</code> on an {@link Exception}. */
-        public static final Function<String, LocalTime> OPTIONAL_1_OR_2_DIGIT_HOUR_TIME_NULLABLE =
-                value -> {
-                    try {
-                        return OPTIONAL_1_OR_2_DIGIT_HOUR_TIME.apply(value);
-                    } catch (Exception exception) {
-                        return null;
-                    }
-                };
+        public static final Function<String, LocalTime> OPTIONAL_1_OR_2_DIGIT_HOUR_TIME_NULLABLE = value -> {
+            try {
+                return OPTIONAL_1_OR_2_DIGIT_HOUR_TIME.apply(value);
+            } catch (Exception exception) {
+                return null;
+            }
+        };
     }
 
     protected final Supplier<T> pojoInstantiator;

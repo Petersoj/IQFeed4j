@@ -37,7 +37,7 @@ repositories {
 
 dependencies {
     // Logging framework
-    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.32'
 
     // Google Guava for a variety of useful methods
     implementation group: 'com.google.guava', name: 'guava', version: '30.1.1-jre'

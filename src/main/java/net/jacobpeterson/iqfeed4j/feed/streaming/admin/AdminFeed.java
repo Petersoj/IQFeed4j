@@ -13,14 +13,12 @@ import net.jacobpeterson.iqfeed4j.model.feed.streaming.admin.enums.OnOffOption;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.common.FeedStatistics;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.common.FeedStatistics.Status;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.index.IndexCSVMapper;
-import net.jacobpeterson.iqfeed4j.util.string.LineEnding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.StringJoiner;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
@@ -198,16 +196,7 @@ public class AdminFeed extends AbstractFeed {
      * @throws IOException thrown for {@link IOException}s
      */
     private void sendAdminSystemCommand(AdminSystemCommand adminSystemCommand, String... arguments) throws IOException {
-        StringJoiner commandJoiner = new StringJoiner(",", "", LineEnding.CR_LF.getASCIIString());
-        commandJoiner.add(FeedCommand.SYSTEM.value());
-        commandJoiner.add(adminSystemCommand.value());
-        if (arguments != null && arguments.length != 0) {
-            for (String argument : arguments) {
-                commandJoiner.add(argument);
-            }
-        }
-
-        sendAndLogMessage(commandJoiner.toString());
+        super.sendSystemCommand(adminSystemCommand.value(), arguments);
     }
 
     /**

@@ -44,7 +44,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.StringJoiner;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -889,16 +888,7 @@ public class Level1Feed extends AbstractServerConnectionFeed {
      */
     private void sendLevel1SystemCommand(Level1SystemCommand level1SystemCommand, String... arguments)
             throws IOException {
-        StringJoiner commandJoiner = new StringJoiner(",", "", LineEnding.CR_LF.getASCIIString());
-        commandJoiner.add(FeedCommand.SYSTEM.value());
-        commandJoiner.add(level1SystemCommand.value());
-        if (arguments != null && arguments.length != 0) {
-            for (String argument : arguments) {
-                commandJoiner.add(argument);
-            }
-        }
-
-        sendAndLogMessage(commandJoiner.toString());
+        super.sendSystemCommand(level1SystemCommand.value(), arguments);
     }
 
     /**
