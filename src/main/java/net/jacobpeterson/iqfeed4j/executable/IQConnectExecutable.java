@@ -193,7 +193,7 @@ public class IQConnectExecutable {
      * @param pollingInterval the time to wait between connection attempts
      * @param timoutMillis    the timeout time in milliseconds
      *
-     * @return the number of attempts it took to connect
+     * @return the number of attempts it took to connect, or <code>-1</code> if waiting for connection was interrupted
      *
      * @throws TimeoutException thrown when <code>timoutMillis</code> have elapsed without a successful connection
      */
@@ -216,7 +216,7 @@ public class IQConnectExecutable {
 
                 return attempts;
             } catch (InterruptedException interruptedException) {
-                return 0;
+                return -1;
             } catch (IOException ignored) {}
         }
 

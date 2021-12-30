@@ -231,6 +231,19 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
         }
     }
 
+    @Override
+    protected void onFeedSocketException(Exception exception) {
+        intervalListenerDataOfRequestIDs.values().stream()
+                .map(IntervalListenerData::getIntervalListener)
+                .forEach(listener -> listener.onMessageException(exception));
+        watchedIntervalsFuturesQueue.forEach(future -> future.completeExceptionally(exception));
+    }
+
+    @Override
+    protected void onFeedSocketClose() {
+        onFeedSocketException(new RuntimeException("Feed socket closed normally while a request was active!"));
+    }
+
     //
     // START Feed commands
     //

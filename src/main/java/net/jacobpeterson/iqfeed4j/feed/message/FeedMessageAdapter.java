@@ -14,9 +14,4 @@ public class FeedMessageAdapter<T> implements FeedMessageListener<T> {
     public void onMessageReceived(T message) {
         LOGGER.info("{}", message);
     }
-
-    @Override
-    public void onMessageException(Exception exception) {
-        LOGGER.error("Multi-message Exception!", exception);
-    }
 }

@@ -1,6 +1,8 @@
 package net.jacobpeterson.iqfeed4j.feed.message;
 
 import net.jacobpeterson.iqfeed4j.feed.AbstractFeed;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link FeedMessageListener} is used to listen to feed messages.
@@ -12,6 +14,8 @@ import net.jacobpeterson.iqfeed4j.feed.AbstractFeed;
  */
 @FunctionalInterface
 public interface FeedMessageListener<T> {
+
+    Logger LOGGER = LoggerFactory.getLogger(FeedMessageListener.class);
 
     /**
      * Called when a message is received. <strong>This method should NEVER throw an {@link Exception}!</strong>
@@ -29,6 +33,6 @@ public interface FeedMessageListener<T> {
      * @param exception the {@link Exception}
      */
     default void onMessageException(Exception exception) {
-        exception.printStackTrace();
+        LOGGER.error("Message Exception!", exception);
     }
 }

@@ -142,6 +142,18 @@ public class HistoricalFeed extends AbstractLookupFeed {
         }
     }
 
+    @Override
+    protected void onFeedSocketException(Exception exception) {
+        tickListenersOfRequestIDs.values().forEach(listener -> listener.onMessageException(exception));
+        intervalListenersOfRequestIDs.values().forEach(listener -> listener.onMessageException(exception));
+        datedIntervalListenersOfRequestIDs.values().forEach(listener -> listener.onMessageException(exception));
+    }
+
+    @Override
+    protected void onFeedSocketClose() {
+        onFeedSocketException(new RuntimeException("Feed socket closed normally while a request was active!"));
+    }
+
     //
     // START Feed commands
     //

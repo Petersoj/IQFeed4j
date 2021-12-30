@@ -293,6 +293,18 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
         return true;
     }
 
+    @Override
+    protected void onFeedSocketException(Exception exception) {
+        endOfDaySnapshotListenersOfRequestIDs.values().forEach(listener -> listener.onMessageException(exception));
+        fundamentalSnapshotListenersOfRequestIDs.values().forEach(listener -> listener.onMessageException(exception));
+        fiveMinuteSnapshotListenersOfRequestIDs.values().forEach(listener -> listener.onMessageException(exception));
+    }
+
+    @Override
+    protected void onFeedSocketClose() {
+        onFeedSocketException(new RuntimeException("Feed socket closed normally while a request was active!"));
+    }
+
     //
     // START Feed commands
     //

@@ -54,7 +54,6 @@ public abstract class AbstractFeed implements Runnable {
     protected final Splitter csvSplitter;
     protected final boolean validateProtocolVersion;
     protected final boolean sendClientName;
-    private final Object startStopLock;
 
     private Thread socketThread;
     private boolean socketThreadRunning;
@@ -86,82 +85,64 @@ public abstract class AbstractFeed implements Runnable {
         this.csvSplitter = csvSplitter;
         this.validateProtocolVersion = validateProtocolVersion;
         this.sendClientName = sendClientName;
-
-        startStopLock = new Object();
     }
 
     /**
-     * Starts this feed connection (starts a new socket, new thread, and send protocol message). This method is
-     * synchronized with {@link #stop()}.
+     * Starts this feed connection (creates a new socket connection on a new thread and sets protocol version) or does
+     * nothing if the feed is currently connected or has been previously connected.
      *
-     * @throws InterruptedException thrown for {@link InterruptedException}s
-     * @throws IOException          thrown for {@link IOException}s
+     * @throws IOException thrown for {@link IOException}s
      */
-    public void start() throws InterruptedException, IOException {
-        synchronized (startStopLock) {
-            if (socketThread != null && socketThread.isAlive()) {
-                if (isFeedSocketOpen()) {
-                    return; // Thread is alive and socket is connected
-                } else { // Thread is alive, but socket is closed or null
-                    stopAndJoinThread();
-                    cleanupState();
-                }
-            } else if (isFeedSocketOpen()) { // Thread is dead, but socket is alive
-                closeSocket();
-                cleanupState();
-            }
-
-            feedSocket = new Socket(hostname, port);
-            feedWriter = new BufferedWriter(new OutputStreamWriter(feedSocket.getOutputStream(),
-                    StandardCharsets.US_ASCII));
-            feedReader = new BufferedReader(new InputStreamReader(feedSocket.getInputStream(),
-                    StandardCharsets.US_ASCII));
-
-            logger.debug("{} feed socket connection established.", feedName);
-
-            if (validateProtocolVersion) {
-                // Send protocol version command first
-                String protocolVersionCommand = String.format("%s,%s,%s%s",
-                        FeedCommand.SYSTEM.value(), FeedCommand.SET_PROTOCOL.value(),
-                        CURRENTLY_SUPPORTED_PROTOCOL_VERSION,
-                        LineEnding.CR_LF.getASCIIString());
-                logger.debug("Setting protocol version: {}", protocolVersionCommand);
-                sendMessage(protocolVersionCommand);
-            }
-
-            if (sendClientName) {
-                String clientNameCommand = String.format("%s,%s,%s%s",
-                        FeedCommand.SYSTEM.value(), FeedCommand.SET_CLIENT_NAME.value(), feedName,
-                        LineEnding.CR_LF.getASCIIString());
-                logger.debug("Setting client name: {}", clientNameCommand);
-                sendMessage(clientNameCommand);
-            }
-
-            socketThreadRunning = true;
-
-            socketThread = new Thread(this, feedName);
-            socketThread.start();
+    public void start() throws IOException {
+        if (socketThread != null) {
+            return;
         }
+
+        feedSocket = new Socket(hostname, port);
+        feedWriter = new BufferedWriter(new OutputStreamWriter(feedSocket.getOutputStream(),
+                StandardCharsets.US_ASCII));
+        feedReader = new BufferedReader(new InputStreamReader(feedSocket.getInputStream(),
+                StandardCharsets.US_ASCII));
+
+        logger.debug("{} feed socket connection established.", feedName);
+
+        if (validateProtocolVersion) {
+            // Send protocol version command first
+            String protocolVersionCommand = String.format("%s,%s,%s%s",
+                    FeedCommand.SYSTEM.value(), FeedCommand.SET_PROTOCOL.value(),
+                    CURRENTLY_SUPPORTED_PROTOCOL_VERSION,
+                    LineEnding.CR_LF.getASCIIString());
+            logger.debug("Setting protocol version: {}", protocolVersionCommand);
+            sendMessage(protocolVersionCommand);
+        }
+
+        if (sendClientName) {
+            String clientNameCommand = String.format("%s,%s,%s%s",
+                    FeedCommand.SYSTEM.value(), FeedCommand.SET_CLIENT_NAME.value(), feedName,
+                    LineEnding.CR_LF.getASCIIString());
+            logger.debug("Setting client name: {}", clientNameCommand);
+            sendMessage(clientNameCommand);
+        }
+
+        socketThreadRunning = true;
+
+        socketThread = new Thread(this, feedName);
+        socketThread.start();
     }
 
     /**
-     * Stop this feed connection (close socket and stops thread). This method is synchronized with {@link #start()}.
+     * Stop this feed connection (closes the socket connection and stops the socket thread).
      * <br>
-     * Note: calling this does not guarantee that an implementation of {@link AbstractFeed} will clean up its state and
-     * its variables to the point where it's like a new instance of the implementation. Instead, a new instance of the
-     * {@link AbstractFeed} implementation should be created for a fresh state.
+     * Note that once this {@link AbstractFeed} has been stopped, it cannot be started again, so a new instance of
+     * {@link AbstractFeed} needs to be created.
      *
-     * @throws InterruptedException thrown for {@link InterruptedException}s
-     * @throws IOException          thrown for {@link IOException}s
+     * @throws IOException thrown for {@link IOException}s
      */
-    public void stop() throws InterruptedException, IOException {
-        synchronized (startStopLock) {
-            closeSocket();
-            stopAndJoinThread();
-            cleanupState();
+    public void stop() throws IOException {
+        socketThreadRunning = false;
+        closeSocket();
 
-            logger.debug("{} feed socket stopped.", feedName);
-        }
+        logger.debug("{} feed socket stopped.", feedName);
     }
 
     /**
@@ -170,44 +151,19 @@ public abstract class AbstractFeed implements Runnable {
      * @throws IOException thrown for {@link IOException}s
      */
     private void closeSocket() throws IOException {
-        if (isFeedSocketOpen()) {
-            intentionalSocketClose = true;
-            feedSocket.close(); // Interrupt blocking IO operations and close socket
-        }
-    }
-
-    /**
-     * Stops the {@link #socketThread} and joins it to wait for thread completion.
-     *
-     * @throws InterruptedException thrown for {@link InterruptedException}s
-     */
-    private void stopAndJoinThread() throws InterruptedException {
-        if (socketThread != null) {
-            socketThreadRunning = false; // Prevent thread from continuing further
-            socketThread.join(SOCKET_THREAD_JOIN_WAIT_MILLIS); // Wait for thread to complete
-        }
-    }
-
-    /**
-     * Cleans ups this {@link AbstractFeed} state subsequent feed connections operated correctly.
-     */
-    protected void cleanupState() {
-        intentionalSocketClose = false;
-        protocolVersionValidated = false;
+        intentionalSocketClose = true;
+        feedSocket.close(); // Interrupt blocking IO operations and close socket
     }
 
     @Override
     public void run() {
-        // Confirm start() method has released 'startStopLock' and exited synchronized scope
-        synchronized (startStopLock) {}
-
         while (socketThreadRunning) { // Check if thread should continue running
             try {
                 String line = feedReader.readLine(); // Uses any line ending: CR, LF, or CRLF
 
-                if (line == null) { // The socket was closed (EOF was sent)
+                if (line == null) { // End of stream has been reached (EOF was sent)
                     closeSocket();
-                    cleanupState();
+                    onFeedSocketClose();
                     return;
                 } else {
                     logger.trace("Received message line: {}", line);
@@ -235,9 +191,19 @@ public abstract class AbstractFeed implements Runnable {
                     }
                 }
             } catch (Exception exception) {
-                if (!intentionalSocketClose) {
-                    onAsyncException("Could not read and process feed socket message line!", exception);
+                if (intentionalSocketClose) {
+                    onFeedSocketClose();
+                } else {
+                    try {
+                        closeSocket();
+                    } catch (Exception stopException) {
+                        logger.error("Could not close {} socket!", feedName, stopException);
+                    }
+
+                    onFeedSocketException(exception);
                 }
+
+                return;
             }
         }
     }
@@ -255,20 +221,20 @@ public abstract class AbstractFeed implements Runnable {
     protected abstract void onMessageReceived(String[] csv);
 
     /**
-     * Called when an asynchronous {@link Exception} relating to the feed connection has occurred.
+     * Called when the underlying {@link Socket} of this {@link AbstractFeed} throws an unexpected {@link Exception}.
+     * {@link #onMessageReceived(String[])} is guaranteed to never be called on this instance after this method has been
+     * invoked.
      *
-     * @param message   the message
-     * @param exception the {@link Exception}
+     * @param exception the {@link Exception} thrown
      */
-    protected void onAsyncException(String message, Exception exception) {
-        logger.error(message, exception);
-        logger.debug("Attempting to close {}...", feedName);
-        try {
-            stop();
-        } catch (Exception stopException) {
-            logger.error("Could not close {}!", feedName, stopException);
-        }
-    }
+    protected abstract void onFeedSocketException(Exception exception);
+
+    /**
+     * Called when the underlying {@link Socket} of this {@link AbstractFeed} is closed gracefully. {@link
+     * #onMessageReceived(String[])} is guaranteed to never be called on this instance after this method has been
+     * invoked.
+     */
+    protected abstract void onFeedSocketClose();
 
     /**
      * Sends a message. This method is synchronized.

@@ -24,4 +24,10 @@ class ExecutablePollingFeed extends AbstractFeed {
 
     @Override
     protected void onMessageReceived(String[] csv) {}
+
+    @Override
+    protected void onFeedSocketException(Exception exception) {}
+
+    @Override
+    protected void onFeedSocketClose() {}
 }

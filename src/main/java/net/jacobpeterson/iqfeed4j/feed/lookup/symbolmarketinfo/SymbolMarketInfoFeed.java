@@ -173,6 +173,21 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
         }
     }
 
+    @Override
+    protected void onFeedSocketException(Exception exception) {
+        symbolSearchResultListenersOfRequestIDs.values().forEach(listener -> listener.onMessageException(exception));
+        listedMarketListenersOfRequestIDs.values().forEach(listener -> listener.onMessageException(exception));
+        securityTypeListenersOfRequestIDs.values().forEach(listener -> listener.onMessageException(exception));
+        tradeConditionListenersOfRequestIDs.values().forEach(listener -> listener.onMessageException(exception));
+        sicCodeListenersOfRequestIDs.values().forEach(listener -> listener.onMessageException(exception));
+        niacCodeListenersOfRequestIDs.values().forEach(listener -> listener.onMessageException(exception));
+    }
+
+    @Override
+    protected void onFeedSocketClose() {
+        onFeedSocketException(new RuntimeException("Feed socket closed normally while a request was active!"));
+    }
+
     //
     // START Feed commands
     //

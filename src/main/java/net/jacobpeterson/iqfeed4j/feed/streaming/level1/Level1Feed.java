@@ -738,6 +738,28 @@ public class Level1Feed extends AbstractServerConnectionFeed {
         }
     }
 
+    @Override
+    protected void onFeedSocketException(Exception exception) {
+        fundamentalDataListenersOfSymbols.values().forEach(listener -> listener.onMessageException(exception));
+        summaryUpdateListenersOfSymbols.values().forEach(listener -> listener.onMessageException(exception));
+        regionalQuoteListenersOfSymbols.values().forEach(listener -> listener.onMessageException(exception));
+        timestampFuturesQueue.forEach(future -> future.completeExceptionally(exception));
+        feedStatisticsFuturesQueue.forEach(future -> future.completeExceptionally(exception));
+        fundamentalFieldNamesFuturesQueue.forEach(future -> future.completeExceptionally(exception));
+        allUpdateFieldNamesFuturesQueue.forEach(future -> future.completeExceptionally(exception));
+        currentUpdateFieldNamesFuturesQueue.forEach(future -> future.completeExceptionally(exception));
+        logLevelsFuturesQueue.forEach(future -> future.completeExceptionally(exception));
+        watchedSymbolsFuturesQueue.forEach(future -> future.completeExceptionally(exception));
+        if (newsHeadlineListener != null) {
+            newsHeadlineListener.onMessageException(exception);
+        }
+    }
+
+    @Override
+    protected void onFeedSocketClose() {
+        onFeedSocketException(new RuntimeException("Feed socket closed normally while a request was active!"));
+    }
+
     //
     // START Feed commands
     //
@@ -882,7 +904,7 @@ public class Level1Feed extends AbstractServerConnectionFeed {
      * Sends a {@link FeedCommand#SYSTEM} {@link Level1SystemCommand}.
      *
      * @param level1SystemCommand the {@link Level1SystemCommand}
-     * @param arguments           the arguments. Null for no arguments.
+     * @param arguments           the arguments. <code>null</code> for no arguments.
      *
      * @throws IOException thrown for {@link IOException}s
      */

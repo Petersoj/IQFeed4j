@@ -16,11 +16,6 @@ public class MultiMessageAdapter<T> extends MultiMessageListener<T> {
     }
 
     @Override
-    public void onMessageException(Exception exception) {
-        LOGGER.debug("Multi-message Exception!", exception);
-    }
-
-    @Override
     public void onEndOfMultiMessage() {
         LOGGER.debug("Received End Of Message.");
     }

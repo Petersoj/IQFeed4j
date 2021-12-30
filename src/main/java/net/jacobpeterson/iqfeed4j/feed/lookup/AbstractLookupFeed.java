@@ -43,13 +43,6 @@ public abstract class AbstractLookupFeed extends AbstractFeed {
         requestIDFeedHelper = new RequestIDFeedHelper();
     }
 
-    @Override
-    protected void cleanupState() {
-        super.cleanupState();
-
-        requestIDFeedHelper.clearRequestIDs();
-    }
-
     /**
      * Handles a standard message for a {@link MultiMessageListener} by: checking for request error messages, handling
      * {@link FeedSpecialMessage#END_OF_MESSAGE} messages, and performing {@link AbstractIndexCSVMapper#map(String[],

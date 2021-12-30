@@ -149,7 +149,7 @@ public class IQFeed4j {
     }
 
     /**
-     * Starts the {@link Level1Feed} instance, or does nothing it it's already started.
+     * Starts the {@link Level1Feed} instance, or does nothing if it's already started.
      *
      * @throws IOException          thrown for {@link IOException}s
      * @throws InterruptedException thrown for {@link InterruptedException}s
@@ -159,7 +159,7 @@ public class IQFeed4j {
     }
 
     /**
-     * Stops the {@link Level1Feed} instance, or does nothing it it's already stopped.
+     * Stops the {@link Level1Feed} instance, or does nothing if it's already stopped.
      *
      * @throws IOException          thrown for {@link IOException}s
      * @throws InterruptedException thrown for {@link InterruptedException}s
@@ -170,7 +170,7 @@ public class IQFeed4j {
     }
 
     /**
-     * Starts the {@link DerivativeFeed} instance, or does nothing it it's already started.
+     * Starts the {@link DerivativeFeed} instance, or does nothing if it's already started.
      *
      * @throws IOException          thrown for {@link IOException}s
      * @throws InterruptedException thrown for {@link InterruptedException}s
@@ -181,7 +181,7 @@ public class IQFeed4j {
     }
 
     /**
-     * Stops the {@link DerivativeFeed} instance, or does nothing it it's already stopped.
+     * Stops the {@link DerivativeFeed} instance, or does nothing if it's already stopped.
      *
      * @throws IOException          thrown for {@link IOException}s
      * @throws InterruptedException thrown for {@link InterruptedException}s
@@ -192,7 +192,7 @@ public class IQFeed4j {
     }
 
     /**
-     * Starts the {@link AdminFeed} instance, or does nothing it it's already started.
+     * Starts the {@link AdminFeed} instance, or does nothing if it's already started.
      *
      * @throws IOException          thrown for {@link IOException}s
      * @throws InterruptedException thrown for {@link InterruptedException}s
@@ -202,7 +202,7 @@ public class IQFeed4j {
     }
 
     /**
-     * Stops the {@link AdminFeed} instance, or does nothing it it's already stopped.
+     * Stops the {@link AdminFeed} instance, or does nothing if it's already stopped.
      *
      * @throws IOException          thrown for {@link IOException}s
      * @throws InterruptedException thrown for {@link InterruptedException}s
@@ -213,7 +213,7 @@ public class IQFeed4j {
     }
 
     /**
-     * Starts the {@link HistoricalFeed} instance, or does nothing it it's already started.
+     * Starts the {@link HistoricalFeed} instance, or does nothing if it's already started.
      *
      * @throws IOException          thrown for {@link IOException}s
      * @throws InterruptedException thrown for {@link InterruptedException}s
@@ -223,7 +223,7 @@ public class IQFeed4j {
     }
 
     /**
-     * Stops the {@link HistoricalFeed} instance, or does nothing it it's already stopped.
+     * Stops the {@link HistoricalFeed} instance, or does nothing if it's already stopped.
      *
      * @throws IOException          thrown for {@link IOException}s
      * @throws InterruptedException thrown for {@link InterruptedException}s
@@ -234,7 +234,7 @@ public class IQFeed4j {
     }
 
     /**
-     * Starts the {@link MarketSummaryFeed} instance, or does nothing it it's already started.
+     * Starts the {@link MarketSummaryFeed} instance, or does nothing if it's already started.
      *
      * @throws IOException          thrown for {@link IOException}s
      * @throws InterruptedException thrown for {@link InterruptedException}s
@@ -245,7 +245,7 @@ public class IQFeed4j {
     }
 
     /**
-     * Stops the {@link MarketSummaryFeed} instance, or does nothing it it's already stopped.
+     * Stops the {@link MarketSummaryFeed} instance, or does nothing if it's already stopped.
      *
      * @throws IOException          thrown for {@link IOException}s
      * @throws InterruptedException thrown for {@link InterruptedException}s
@@ -256,7 +256,7 @@ public class IQFeed4j {
     }
 
     /**
-     * Starts the {@link NewsFeed} instance, or does nothing it it's already started.
+     * Starts the {@link NewsFeed} instance, or does nothing if it's already started.
      *
      * @throws IOException          thrown for {@link IOException}s
      * @throws InterruptedException thrown for {@link InterruptedException}s
@@ -266,7 +266,7 @@ public class IQFeed4j {
     }
 
     /**
-     * Stops the {@link NewsFeed} instance, or does nothing it it's already stopped.
+     * Stops the {@link NewsFeed} instance, or does nothing if it's already stopped.
      *
      * @throws IOException          thrown for {@link IOException}s
      * @throws InterruptedException thrown for {@link InterruptedException}s
@@ -277,7 +277,7 @@ public class IQFeed4j {
     }
 
     /**
-     * Starts the {@link OptionChainsFeed} instance, or does nothing it it's already started.
+     * Starts the {@link OptionChainsFeed} instance, or does nothing if it's already started.
      *
      * @throws IOException          thrown for {@link IOException}s
      * @throws InterruptedException thrown for {@link InterruptedException}s
@@ -288,7 +288,7 @@ public class IQFeed4j {
     }
 
     /**
-     * Stops the {@link OptionChainsFeed} instance, or does nothing it it's already stopped.
+     * Stops the {@link OptionChainsFeed} instance, or does nothing if it's already stopped.
      *
      * @throws IOException          thrown for {@link IOException}s
      * @throws InterruptedException thrown for {@link InterruptedException}s
@@ -299,7 +299,7 @@ public class IQFeed4j {
     }
 
     /**
-     * Starts the {@link SymbolMarketInfoFeed} instance, or does nothing it it's already started.
+     * Starts the {@link SymbolMarketInfoFeed} instance, or does nothing if it's already started.
      *
      * @throws IOException          thrown for {@link IOException}s
      * @throws InterruptedException thrown for {@link InterruptedException}s
@@ -310,7 +310,7 @@ public class IQFeed4j {
     }
 
     /**
-     * Stops the {@link SymbolMarketInfoFeed} instance, or does nothing it it's already stopped.
+     * Stops the {@link SymbolMarketInfoFeed} instance, or does nothing if it's already stopped.
      *
      * @throws IOException          thrown for {@link IOException}s
      * @throws InterruptedException thrown for {@link InterruptedException}s
@@ -329,11 +329,9 @@ public class IQFeed4j {
      *
      * @return the started {@link AbstractFeed}
      *
-     * @throws IOException          thrown for {@link IOException}s
-     * @throws InterruptedException thrown for {@link InterruptedException}s
+     * @throws IOException thrown for {@link IOException}s
      */
-    private <F extends AbstractFeed> F startFeed(F feed, Supplier<F> feedInstantiator)
-            throws IOException, InterruptedException {
+    private <F extends AbstractFeed> F startFeed(F feed, Supplier<F> feedInstantiator) throws IOException {
         if (feed == null) {
             feed = feedInstantiator.get();
             feed.start();
@@ -352,10 +350,9 @@ public class IQFeed4j {
      * @param <F>  the {@link AbstractFeed} type parameter
      * @param feed the {@link AbstractFeed}
      *
-     * @throws IOException          thrown for {@link IOException}s
-     * @throws InterruptedException thrown for {@link InterruptedException}s
+     * @throws IOException thrown for {@link IOException}s
      */
-    private <F extends AbstractFeed> void stopFeed(F feed) throws IOException, InterruptedException {
+    private <F extends AbstractFeed> void stopFeed(F feed) throws IOException {
         if (feed != null) {
             feed.stop();
         }

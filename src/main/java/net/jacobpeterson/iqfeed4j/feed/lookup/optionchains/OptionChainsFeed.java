@@ -431,6 +431,19 @@ public class OptionChainsFeed extends AbstractLookupFeed {
         return true;
     }
 
+    @Override
+    protected void onFeedSocketException(Exception exception) {
+        futureContractListFuturesOfRequestIDs.values().forEach(future -> future.completeExceptionally(exception));
+        futureSpreadListFuturesOfRequestIDs.values().forEach(future -> future.completeExceptionally(exception));
+        futureOptionListFuturesOfRequestIDs.values().forEach(future -> future.completeExceptionally(exception));
+        equityOptionListFuturesOfRequestIDs.values().forEach(future -> future.completeExceptionally(exception));
+    }
+
+    @Override
+    protected void onFeedSocketClose() {
+        onFeedSocketException(new RuntimeException("Feed socket closed normally while a request was active!"));
+    }
+
     //
     // START Feed commands
     //

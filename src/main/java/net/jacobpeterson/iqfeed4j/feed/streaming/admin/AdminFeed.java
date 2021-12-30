@@ -30,7 +30,7 @@ import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.Primi
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.PrimitiveConvertors.STRING;
 
 /**
- * {@link AdminFeed} represents the Admin {@link AbstractFeed}. Methods in this class are not synchronized.
+ * {@link AdminFeed} represents the Admin {@link AbstractFeed}.
  */
 public class AdminFeed extends AbstractFeed {
 
@@ -183,6 +183,23 @@ public class AdminFeed extends AbstractFeed {
         }
     }
 
+    @Override
+    protected void onFeedSocketException(Exception exception) {
+        voidFutureOfAdminSystemMessageTypes.values().forEach(future -> future.completeExceptionally(exception));
+        stringFutureOfAdminSystemMessageTypes.values().forEach(future -> future.completeExceptionally(exception));
+        if (feedStatisticsFuture != null) {
+            feedStatisticsFuture.completeExceptionally(exception);
+        }
+        if (clientStatisticsFuture != null) {
+            clientStatisticsFuture.completeExceptionally(exception);
+        }
+    }
+
+    @Override
+    protected void onFeedSocketClose() {
+        onFeedSocketException(new RuntimeException("Feed socket closed normally while a request was active!"));
+    }
+
     //
     // START Feed commands
     //
@@ -191,7 +208,7 @@ public class AdminFeed extends AbstractFeed {
      * Sends a {@link FeedCommand#SYSTEM} {@link AdminSystemCommand}.
      *
      * @param adminSystemCommand the {@link AdminSystemCommand}
-     * @param arguments          the arguments. Null for no arguments.
+     * @param arguments          the arguments. <code>null</code> for no arguments.
      *
      * @throws IOException thrown for {@link IOException}s
      */
@@ -224,9 +241,9 @@ public class AdminFeed extends AbstractFeed {
                 return messageFuture;
             }
 
-            sendAdminSystemCommand(adminSystemCommand, arguments);
             messageFuture = new SingleMessageFuture<>();
             futureOfAdminSystemMessageTypes.put(adminSystemMessageType, messageFuture);
+            sendAdminSystemCommand(adminSystemCommand, arguments);
             return messageFuture;
         }
     }

@@ -18,7 +18,7 @@ public class MapUtil {
      * @param map   the {@link Map}
      * @param value the value to search for
      *
-     * @return the keys by value {@link Set} or null if none were found
+     * @return the keys by value {@link Set} or <code>null</code> if none were found
      *
      * @see <a href="https://stackoverflow.com/a/2904266">Stackoverflow</a>
      */
