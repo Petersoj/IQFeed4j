@@ -3,12 +3,12 @@
     <a href="https://search.maven.org/artifact/net.jacobpeterson/iqfeed4j" target="_blank"><img alt="Maven Central" src="https://img.shields.io/maven-central/v/net.jacobpeterson/iqfeed4j"></a>
     <a href="https://javadoc.io/doc/net.jacobpeterson/iqfeed4j" target="_blank"><img src="https://javadoc.io/badge/net.jacobpeterson/iqfeed4j.svg" alt="Javadocs"></a>
     <a href="https://travis-ci.com/github/Petersoj/IQFeed4j" target="_blank"><img src="https://travis-ci.com/Petersoj/IQFeed4j.svg?branch=6.2" alt="Build Status"></a>
-    <a href="https://opensource.org/licenses/MIT" target="_blank"><img alt="Github License" src="https://img.shields.io/github/license/petersoj/IQFeed4j"></a>    
+    <a href="https://opensource.org/licenses/MIT" target="_blank"><img alt="Github License" src="https://img.shields.io/github/license/petersoj/IQFeed4j"></a>
 </p>
 
 # Overview
-IQFeed4j is a Java API for the market-data-vendor DTN IQFeed. IQFeed provides a wide variety of market data including: 
-- Real-time tick-by-tick data on US and Canadian equities 
+IQFeed4j is a Java API for the market-data-vendor DTN IQFeed. IQFeed provides a wide variety of market data including:
+- Real-time tick-by-tick data on US and Canadian equities
 - Real-time equity/index Options and Forex data
 - OHLCV historical data
 - Fundamental data
@@ -73,7 +73,7 @@ Note that the examples here are not exhaustive. Refer to the [IQFeed4j Javadoc](
 ## [`IQFeed4j`](src/main/java/net/jacobpeterson/iqfeed4j/IQFeed4j.java)
 [`IQFeed4j`](src/main/java/net/jacobpeterson/iqfeed4j/IQFeed4j.java) is a class that contains feed instances to interface with IQFeed along with an instance of [`IQConnectExecutable`](src/main/java/net/jacobpeterson/iqfeed4j/executable/IQConnectExecutable.java). You will generally only need one instance of it in your application. Directly interact with the various feeds that IQFeed4j provides with `feedName();` and start/stop the feeds with `startFeedName();` and `stopFeedName();`. You must start the feed with `startFeedName();` before using it via `feedName();`.
 
-It contains various constructors that allow you to specify parameters for the feeds (e.g. port, hostname). The no-args constructor will use the properties specified in the `iqfeed4j.properties` file on the classpath as discussed in the [Configuration section](#configuration). 
+It contains various constructors that allow you to specify parameters for the feeds (e.g. port, hostname). The no-args constructor will use the properties specified in the `iqfeed4j.properties` file on the classpath as discussed in the [Configuration section](#configuration).
 
 ## [`IQConnectExecutable`](src/main/java/net/jacobpeterson/iqfeed4j/executable/IQConnectExecutable.java)
 [`IQConnectExecutable`](src/main/java/net/jacobpeterson/iqfeed4j/executable/IQConnectExecutable.java) provides a convenient way to start/stop the IQConnect.exe program. IQConnect.exe is the program that accepts TCP/IP connections to interface with IQFeed programmatically.
@@ -90,14 +90,14 @@ The following example will change what fields are sent when a `SummaryUpdate` oc
 try {
     iqFeed4j.startLevel1Feed();
     iqFeed4j.level1().waitForProtocolVersionValidation(5, TimeUnit.SECONDS);
-    
+
     iqFeed4j.level1().selectUpdateFieldNames(
             SummaryUpdateField.MOST_RECENT_TRADE,
             SummaryUpdateField.MOST_RECENT_TRADE_SIZE,
             SummaryUpdateField.MOST_RECENT_TRADE_MARKET_CENTER,
             SummaryUpdateField.MOST_RECENT_TRADE_DATE,
             SummaryUpdateField.MOST_RECENT_TRADE_TIME);
-    
+
     iqFeed4j.level1().requestWatchTrades("AAPL",
             (fundamentalData) -> System.out.printf("Apple's most recent %.2f split was on %s.\n",
                     fundamentalData.getSplitFactor1(), fundamentalData.getSplitFactor1Date()),
@@ -111,7 +111,7 @@ try {
                     ChronoUnit.MILLIS.between(
                             summaryUpdate.getMostRecentTradeTime(),
                             LocalTime.now(ZoneId.of("America/New_York")))));
-} catch (IOException exception) {
+} catch (IOException | InterruptedException | TimeoutException exception) {
     exception.printStackTrace();
 }
 ```
@@ -139,7 +139,7 @@ try {
             IntervalType.SECONDS,
             null,
             (interval) -> System.out.printf("Received AAPL interval: %s\n", interval));
-} catch (IOException exception) {
+} catch (IOException | InterruptedException | TimeoutException exception) {
     exception.printStackTrace();
 }
 ```
@@ -152,7 +152,7 @@ The following example demonstrates a few things you can do with the `AdminFeed`.
 try {
     iqFeed4j.startAdminFeed();
     iqFeed4j.admin().waitForProtocolVersionValidation(5, TimeUnit.SECONDS);
-    
+
     // Set the login ID and password (and wait for confirmation response)
     String currentLoginID = iqFeed4j.admin().setLoginID("<login ID>").get();
     String currentPassword = iqFeed4j.admin().setPassword("<password>").get();
@@ -166,7 +166,7 @@ try {
     iqFeed4j.admin().setClientStatsOn();
     Thread.sleep(5000);
     iqFeed4j.admin().getClientStatisticsOfClientIDs().entrySet().forEach(System.out::println);
-} catch (IOException | ExecutionException | InterruptedException exception) {
+} catch (IOException | ExecutionException | InterruptedException | TimeoutException exception) {
     exception.printStackTrace();
 }
 ```
@@ -174,14 +174,14 @@ try {
 ## Lookup Feeds
 
 ### [`HistoricalFeed`](src/main/java/net/jacobpeterson/iqfeed4j/feed/lookup/historical/HistoricalFeed.java)
-This feed allows you to request historical ticks (trades) and intervals. 
+This feed allows you to request historical ticks (trades) and intervals.
 
 The following example will request ascending AAPL 1-minute interval bars during market hours from 6/10/2021 to 6/11/2021.
 ```java
 try {
     iqFeed4j.startHistoricalFeed();
     iqFeed4j.historical().waitForProtocolVersionValidation(5, TimeUnit.SECONDS);
-    
+
     // Using synchronous data consumption method (aka consume data as it is being read)
     iqFeed4j.historical().requestIntervals(
             "AAPL",
@@ -213,7 +213,7 @@ try {
             IntervalType.SECONDS);
     System.out.println("AAPL minute intervals:");
     aaplIntervals.forEach(System.out::println);
-} catch (IOException | InterruptedException exception) {
+} catch (IOException | InterruptedException | TimeoutException exception) {
     exception.printStackTrace();
 } catch (ExecutionException executionException) {
     if (executionException.getCause() instanceof NoDataException) {
@@ -232,12 +232,12 @@ The following example will print out all the `FiveMinuteSnapshot`s of NASDAQ equ
 try {
     iqFeed4j.startMarketSummaryFeed();
     iqFeed4j.marketSummary().waitForProtocolVersionValidation(5, TimeUnit.SECONDS);
-    
+
     List<FiveMinuteSnapshot> fiveMinuteSnapshots = iqFeed4j.marketSummary().request5MinuteSummary(
             "1", // Equity security type
             "5"); // NASDAQ group ID
     fiveMinuteSnapshots.forEach(System.out::println);
-} catch (IOException | ExecutionException | InterruptedException exception) {
+} catch (IOException | ExecutionException | InterruptedException | TimeoutException exception) {
     exception.printStackTrace();
 }
 ```
@@ -250,7 +250,7 @@ The following example gets all the `NewsConfiguration`s and acquires all the cur
 try {
     iqFeed4j.startNewsFeed();
     iqFeed4j.news().waitForProtocolVersionValidation(5, TimeUnit.SECONDS);
-    
+
     NewsConfiguration newsConfiguration = iqFeed4j.news().requestNewsConfiguration();
     List<String> allMinorNewsSources = newsConfiguration.getCategories().stream()
             .flatMap(newsCategory -> newsCategory.getMajorSources().stream())
@@ -266,7 +266,7 @@ try {
             null);
 
     newsHeadlines.getHeadlines().forEach(System.out::println);
-} catch (IOException | ExecutionException | InterruptedException exception) {
+} catch (IOException | ExecutionException | InterruptedException | TimeoutException exception) {
     exception.printStackTrace();
 }
 ```
@@ -279,7 +279,7 @@ The following example gets 5 In-The-Money and 5 Out-Of-The-Money Equity Put and 
 try {
     iqFeed4j.startOptionChainsFeed();
     iqFeed4j.optionChains().waitForProtocolVersionValidation(5, TimeUnit.SECONDS);
-    
+
     List<OptionContract> applOptions = iqFeed4j.optionChains().getEquityOptionChainWithITMOTMFilter(
             "AAPL",
             PutsCallsOption.PUTS_AND_CALLS,
@@ -289,7 +289,7 @@ try {
             5,
             NonStandardOptionTypes.INCLUDE).get();
     applOptions.forEach(System.out::println);
-} catch (IOException | InterruptedException | ExecutionException exception) {
+} catch (IOException | InterruptedException | ExecutionException | TimeoutException exception) {
     exception.printStackTrace();
 }
 ```
@@ -297,7 +297,7 @@ try {
 ### [`SymbolMarketInfoFeed`](src/main/java/net/jacobpeterson/iqfeed4j/feed/lookup/symbolmarketinfo/SymbolMarketInfoFeed.java)
 This feed allows you to retrieve current symbol information and current market information.
 
-The following example gets all the current `ListedMarket`s and prints them out. 
+The following example gets all the current `ListedMarket`s and prints them out.
 ```java
 try {
     iqFeed4j.startSymbolMarketInfoFeed();
@@ -305,7 +305,7 @@ try {
 
     List<ListedMarket> listedMarkets = iqFeed4j.symbolMarketInfo().requestListedMarkets();
     listedMarkets.forEach(System.out::println);
-} catch (IOException | InterruptedException | ExecutionException exception) {
+} catch (IOException | InterruptedException | ExecutionException | TimeoutException exception) {
     exception.printStackTrace();
 }
 ```
@@ -324,7 +324,7 @@ To install built artifacts to your local maven repo, run:
 # TODO
 - Level 2 Feed
 - Unit testing
-- Use [TA4j](https://github.com/ta4j/ta4j) `Num` interface instead of `Double` for number variables so that users can use either `Double` or `BigDecimal` for performance or precision in price data. 
+- Use [TA4j](https://github.com/ta4j/ta4j) `Num` interface instead of `Double` for number variables so that users can use either `Double` or `BigDecimal` for performance or precision in price data.
 - Add [TimeSeriesDataStore](https://github.com/Petersoj/TimeSeriesDataStore)
 
 # Contributing
