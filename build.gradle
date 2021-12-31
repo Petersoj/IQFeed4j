@@ -48,6 +48,9 @@ dependencies {
     implementation group: 'org.codehaus.woodstox', name: 'woodstox-core-asl', version: '4.4.1'
     // For JDK 8 common Jackson (de)serializers
     implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.12.3'
+
+    // Apache Commons object pooling
+    implementation group: 'org.apache.commons', name: 'commons-pool2', version: '2.11.1'
 }
 
 sourceCompatibility = 1.8

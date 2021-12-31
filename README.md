@@ -224,6 +224,9 @@ try {
 }
 ```
 
+#### [`HistoricalFeedPool`](src/main/java/net/jacobpeterson/iqfeed4j/feed/lookup/historical/pool/HistoricalFeedPool.java)
+[`HistoricalFeedPool`](src/main/java/net/jacobpeterson/iqfeed4j/feed/lookup/historical/pool/HistoricalFeedPool.java) contains a thread-safe pool of [`HistoricalFeeds`](src/main/java/net/jacobpeterson/iqfeed4j/feed/lookup/historical/HistoricalFeed.java) and has IQFeed's history request rate limit built in. This class is designed to allow a user to make as many simultaneous [`HistoricalFeeds`](src/main/java/net/jacobpeterson/iqfeed4j/feed/lookup/historical/HistoricalFeed.java) requests that IQFeed allows.
+
 ### [`MarketSummaryFeed`](src/main/java/net/jacobpeterson/iqfeed4j/feed/lookup/marketsummary/MarketSummaryFeed.java)
 This feed allows you to retrieve a current summary/snapshot of various market data, both historically and currently.
 

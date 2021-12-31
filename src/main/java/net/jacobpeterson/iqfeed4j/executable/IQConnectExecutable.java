@@ -75,7 +75,7 @@ public class IQConnectExecutable {
 
         disableInternalProcessLogging = false;
 
-        LOGGER.debug("{}", this);
+        LOGGER.trace("{}", this);
     }
 
     /**
@@ -152,7 +152,7 @@ public class IQConnectExecutable {
                         LOGGER.debug("IQConnect.exe process output: {}", line);
                     }
                 } catch (IOException exception) {
-                    LOGGER.debug("Ignored IQConnect.exe process output reading error", exception);
+                    LOGGER.error("IQConnect.exe process output reading error!", exception);
                     return;
                 }
             }
@@ -174,12 +174,12 @@ public class IQConnectExecutable {
 
     /**
      * Calls {@link #waitForConnection(String, int, int, long)} with {@link IQFeed4jProperties#FEED_HOSTNAME} and {@link
-     * IQFeed4jProperties#ADMIN_FEED_PORT} and a <code>pollingInterval</code> of 250ms.
+     * IQFeed4jProperties#LOOKUP_FEED_PORT} and a <code>pollingInterval</code> of 250ms.
      *
      * @see #waitForConnection(String, int, int, long)
      */
     public int waitForConnection(long timeoutMillis) throws TimeoutException {
-        return waitForConnection(IQFeed4jProperties.FEED_HOSTNAME, IQFeed4jProperties.ADMIN_FEED_PORT,
+        return waitForConnection(IQFeed4jProperties.FEED_HOSTNAME, IQFeed4jProperties.LOOKUP_FEED_PORT,
                 250, timeoutMillis);
     }
 
@@ -213,6 +213,8 @@ public class IQConnectExecutable {
 
                 executablePollingFeed.start();
                 executablePollingFeed.stop(); // This will execute upon successful 'start()'
+
+                Thread.sleep(500); // Sleep for a bit longer to ensure that IQConnect ready
 
                 return attempts;
             } catch (InterruptedException interruptedException) {

@@ -125,7 +125,6 @@ public abstract class AbstractFeed implements Runnable {
         }
 
         socketThreadRunning = true;
-
         socketThread = new Thread(this, feedName);
         socketThread.start();
     }
@@ -161,10 +160,8 @@ public abstract class AbstractFeed implements Runnable {
             try {
                 String line = feedReader.readLine(); // Uses any line ending: CR, LF, or CRLF
 
-                if (line == null) { // End of stream has been reached (EOF was sent)
-                    closeSocket();
-                    onFeedSocketClose();
-                    return;
+                if (line == null) {
+                    throw new IOException("EOF was sent by server!");
                 } else {
                     logger.trace("Received message line: {}", line);
 

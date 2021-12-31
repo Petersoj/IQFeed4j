@@ -4,6 +4,7 @@ import net.jacobpeterson.iqfeed4j.executable.IQConnectExecutable;
 import net.jacobpeterson.iqfeed4j.feed.AbstractFeed;
 import net.jacobpeterson.iqfeed4j.feed.lookup.AbstractLookupFeed;
 import net.jacobpeterson.iqfeed4j.feed.lookup.historical.HistoricalFeed;
+import net.jacobpeterson.iqfeed4j.feed.lookup.historical.pool.HistoricalFeedPool;
 import net.jacobpeterson.iqfeed4j.feed.lookup.marketsummary.MarketSummaryFeed;
 import net.jacobpeterson.iqfeed4j.feed.lookup.news.NewsFeed;
 import net.jacobpeterson.iqfeed4j.feed.lookup.optionchains.OptionChainsFeed;
@@ -13,6 +14,8 @@ import net.jacobpeterson.iqfeed4j.feed.streaming.derivative.DerivativeFeed;
 import net.jacobpeterson.iqfeed4j.feed.streaming.level1.Level1Feed;
 import net.jacobpeterson.iqfeed4j.feed.streaming.marketdepth.MarketDepthFeed;
 import net.jacobpeterson.iqfeed4j.properties.IQFeed4jProperties;
+import org.apache.commons.pool2.ObjectPool;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +50,7 @@ public class IQFeed4j {
     private DerivativeFeed derivativeFeed;
     private AdminFeed adminFeed;
     private HistoricalFeed historicalFeed;
+    private HistoricalFeedPool historicalFeedPool;
     private MarketSummaryFeed marketSummaryFeed;
     private NewsFeed newsFeed;
     private OptionChainsFeed optionChainsFeed;
@@ -129,7 +133,7 @@ public class IQFeed4j {
         this.adminFeedPort = adminFeedPort;
         this.lookupFeedPort = lookupFeedPort;
 
-        LOGGER.debug("{}", this);
+        LOGGER.trace("{}", this);
     }
 
     /**
@@ -151,20 +155,18 @@ public class IQFeed4j {
     /**
      * Starts the {@link Level1Feed} instance, or does nothing if it's already started.
      *
-     * @throws IOException          thrown for {@link IOException}s
-     * @throws InterruptedException thrown for {@link InterruptedException}s
+     * @throws IOException thrown for {@link IOException}s
      */
-    public void startLevel1Feed() throws IOException, InterruptedException {
+    public void startLevel1Feed() throws IOException {
         level1Feed = startFeed(level1Feed, () -> new Level1Feed(feedName, feedHostname, level1FeedPort));
     }
 
     /**
      * Stops the {@link Level1Feed} instance, or does nothing if it's already stopped.
      *
-     * @throws IOException          thrown for {@link IOException}s
-     * @throws InterruptedException thrown for {@link InterruptedException}s
+     * @throws IOException thrown for {@link IOException}s
      */
-    public void stopLevel1Feed() throws IOException, InterruptedException {
+    public void stopLevel1Feed() throws IOException {
         stopFeed(level1Feed);
         level1Feed = null;
     }
@@ -172,10 +174,9 @@ public class IQFeed4j {
     /**
      * Starts the {@link DerivativeFeed} instance, or does nothing if it's already started.
      *
-     * @throws IOException          thrown for {@link IOException}s
-     * @throws InterruptedException thrown for {@link InterruptedException}s
+     * @throws IOException thrown for {@link IOException}s
      */
-    public void startDerivativeFeed() throws IOException, InterruptedException {
+    public void startDerivativeFeed() throws IOException {
         derivativeFeed = startFeed(derivativeFeed,
                 () -> new DerivativeFeed(feedName, feedHostname, derivativeFeedPort));
     }
@@ -183,10 +184,9 @@ public class IQFeed4j {
     /**
      * Stops the {@link DerivativeFeed} instance, or does nothing if it's already stopped.
      *
-     * @throws IOException          thrown for {@link IOException}s
-     * @throws InterruptedException thrown for {@link InterruptedException}s
+     * @throws IOException thrown for {@link IOException}s
      */
-    public void stopDerivativeFeed() throws IOException, InterruptedException {
+    public void stopDerivativeFeed() throws IOException {
         stopFeed(derivativeFeed);
         derivativeFeed = null;
     }
@@ -194,20 +194,18 @@ public class IQFeed4j {
     /**
      * Starts the {@link AdminFeed} instance, or does nothing if it's already started.
      *
-     * @throws IOException          thrown for {@link IOException}s
-     * @throws InterruptedException thrown for {@link InterruptedException}s
+     * @throws IOException thrown for {@link IOException}s
      */
-    public void startAdminFeed() throws IOException, InterruptedException {
+    public void startAdminFeed() throws IOException {
         adminFeed = startFeed(adminFeed, () -> new AdminFeed(feedName, feedHostname, adminFeedPort));
     }
 
     /**
      * Stops the {@link AdminFeed} instance, or does nothing if it's already stopped.
      *
-     * @throws IOException          thrown for {@link IOException}s
-     * @throws InterruptedException thrown for {@link InterruptedException}s
+     * @throws IOException thrown for {@link IOException}s
      */
-    public void stopAdminFeed() throws IOException, InterruptedException {
+    public void stopAdminFeed() throws IOException {
         stopFeed(adminFeed);
         adminFeed = null;
     }
@@ -215,31 +213,71 @@ public class IQFeed4j {
     /**
      * Starts the {@link HistoricalFeed} instance, or does nothing if it's already started.
      *
-     * @throws IOException          thrown for {@link IOException}s
-     * @throws InterruptedException thrown for {@link InterruptedException}s
+     * @throws IOException thrown for {@link IOException}s
      */
-    public void startHistoricalFeed() throws IOException, InterruptedException {
+    public void startHistoricalFeed() throws IOException {
         historicalFeed = startFeed(historicalFeed, () -> new HistoricalFeed(feedName, feedHostname, lookupFeedPort));
     }
 
     /**
      * Stops the {@link HistoricalFeed} instance, or does nothing if it's already stopped.
      *
-     * @throws IOException          thrown for {@link IOException}s
-     * @throws InterruptedException thrown for {@link InterruptedException}s
+     * @throws IOException thrown for {@link IOException}s
      */
-    public void stopHistoricalFeed() throws IOException, InterruptedException {
+    public void stopHistoricalFeed() throws IOException {
         stopFeed(historicalFeed);
         historicalFeed = null;
     }
 
     /**
+     * Starts the {@link HistoricalFeedPool} instance, or does nothing if it's already started.
+     */
+    public void startHistoricalFeedPool() {
+        if (historicalFeedPool == null) {
+            historicalFeedPool = new HistoricalFeedPool(feedName, feedHostname, lookupFeedPort);
+        }
+    }
+
+    /**
+     * Starts the {@link HistoricalFeedPool} instance with a {@link GenericObjectPoolConfig}, or does nothing if it's
+     * already started.
+     *
+     * @param feedPoolConfig the {@link HistoricalFeed} {@link GenericObjectPoolConfig}
+     */
+    public void startHistoricalFeedPool(GenericObjectPoolConfig<HistoricalFeed> feedPoolConfig) {
+        if (historicalFeedPool == null) {
+            historicalFeedPool = new HistoricalFeedPool(feedName, feedHostname, lookupFeedPort, feedPoolConfig);
+        }
+    }
+
+    /**
+     * Starts the {@link HistoricalFeedPool} instance with a {@link GenericObjectPoolConfig}, or does nothing if it's
+     * already started.
+     *
+     * @param objectPool the {@link ObjectPool} of {@link HistoricalFeed}s to use
+     */
+    public void startHistoricalFeedPool(ObjectPool<HistoricalFeed> objectPool) {
+        if (historicalFeedPool == null) {
+            historicalFeedPool = new HistoricalFeedPool(objectPool);
+        }
+    }
+
+    /**
+     * Stops the {@link HistoricalFeed} instance, or does nothing if it's already stopped.
+     */
+    public void stopHistoricalFeedPool() {
+        if (historicalFeedPool != null) {
+            historicalFeedPool.stop();
+        }
+        historicalFeedPool = null;
+    }
+
+    /**
      * Starts the {@link MarketSummaryFeed} instance, or does nothing if it's already started.
      *
-     * @throws IOException          thrown for {@link IOException}s
-     * @throws InterruptedException thrown for {@link InterruptedException}s
+     * @throws IOException thrown for {@link IOException}s
      */
-    public void startMarketSummaryFeed() throws IOException, InterruptedException {
+    public void startMarketSummaryFeed() throws IOException {
         marketSummaryFeed = startFeed(marketSummaryFeed,
                 () -> new MarketSummaryFeed(feedName, feedHostname, lookupFeedPort));
     }
@@ -247,10 +285,9 @@ public class IQFeed4j {
     /**
      * Stops the {@link MarketSummaryFeed} instance, or does nothing if it's already stopped.
      *
-     * @throws IOException          thrown for {@link IOException}s
-     * @throws InterruptedException thrown for {@link InterruptedException}s
+     * @throws IOException thrown for {@link IOException}s
      */
-    public void stopMarketSummaryFeed() throws IOException, InterruptedException {
+    public void stopMarketSummaryFeed() throws IOException {
         stopFeed(marketSummaryFeed);
         marketSummaryFeed = null;
     }
@@ -258,20 +295,18 @@ public class IQFeed4j {
     /**
      * Starts the {@link NewsFeed} instance, or does nothing if it's already started.
      *
-     * @throws IOException          thrown for {@link IOException}s
-     * @throws InterruptedException thrown for {@link InterruptedException}s
+     * @throws IOException thrown for {@link IOException}s
      */
-    public void startNewsFeed() throws IOException, InterruptedException {
+    public void startNewsFeed() throws IOException {
         newsFeed = startFeed(newsFeed, () -> new NewsFeed(feedName, feedHostname, lookupFeedPort));
     }
 
     /**
      * Stops the {@link NewsFeed} instance, or does nothing if it's already stopped.
      *
-     * @throws IOException          thrown for {@link IOException}s
-     * @throws InterruptedException thrown for {@link InterruptedException}s
+     * @throws IOException thrown for {@link IOException}s
      */
-    public void stopNewsFeed() throws IOException, InterruptedException {
+    public void stopNewsFeed() throws IOException {
         stopFeed(newsFeed);
         newsFeed = null;
     }
@@ -279,10 +314,9 @@ public class IQFeed4j {
     /**
      * Starts the {@link OptionChainsFeed} instance, or does nothing if it's already started.
      *
-     * @throws IOException          thrown for {@link IOException}s
-     * @throws InterruptedException thrown for {@link InterruptedException}s
+     * @throws IOException thrown for {@link IOException}s
      */
-    public void startOptionChainsFeed() throws IOException, InterruptedException {
+    public void startOptionChainsFeed() throws IOException {
         optionChainsFeed = startFeed(optionChainsFeed,
                 () -> new OptionChainsFeed(feedName, feedHostname, lookupFeedPort));
     }
@@ -290,10 +324,9 @@ public class IQFeed4j {
     /**
      * Stops the {@link OptionChainsFeed} instance, or does nothing if it's already stopped.
      *
-     * @throws IOException          thrown for {@link IOException}s
-     * @throws InterruptedException thrown for {@link InterruptedException}s
+     * @throws IOException thrown for {@link IOException}s
      */
-    public void stopOptionChainsFeed() throws IOException, InterruptedException {
+    public void stopOptionChainsFeed() throws IOException {
         stopFeed(optionChainsFeed);
         optionChainsFeed = null;
     }
@@ -301,10 +334,9 @@ public class IQFeed4j {
     /**
      * Starts the {@link SymbolMarketInfoFeed} instance, or does nothing if it's already started.
      *
-     * @throws IOException          thrown for {@link IOException}s
-     * @throws InterruptedException thrown for {@link InterruptedException}s
+     * @throws IOException thrown for {@link IOException}s
      */
-    public void startSymbolMarketInfoFeed() throws IOException, InterruptedException {
+    public void startSymbolMarketInfoFeed() throws IOException {
         symbolMarketInfoFeed = startFeed(symbolMarketInfoFeed,
                 () -> new SymbolMarketInfoFeed(feedName, feedHostname, lookupFeedPort));
     }
@@ -312,10 +344,9 @@ public class IQFeed4j {
     /**
      * Stops the {@link SymbolMarketInfoFeed} instance, or does nothing if it's already stopped.
      *
-     * @throws IOException          thrown for {@link IOException}s
-     * @throws InterruptedException thrown for {@link InterruptedException}s
+     * @throws IOException thrown for {@link IOException}s
      */
-    public void stopSymbolMarketInfoFeed() throws IOException, InterruptedException {
+    public void stopSymbolMarketInfoFeed() throws IOException {
         stopFeed(symbolMarketInfoFeed);
         symbolMarketInfoFeed = null;
     }
@@ -401,6 +432,15 @@ public class IQFeed4j {
      */
     public HistoricalFeed historical() {
         return historicalFeed;
+    }
+
+    /**
+     * Gets {@link #historicalFeedPool}
+     *
+     * @return the {@link HistoricalFeedPool}
+     */
+    public HistoricalFeedPool historicalPool() {
+        return historicalFeedPool;
     }
 
     /**
