@@ -646,7 +646,7 @@ public class Level1Feed extends AbstractServerConnectionFeed {
             FeedMessageListener<FundamentalData> listener =
                     fundamentalDataListenersOfSymbols.get(fundamentalData.getSymbol());
             if (listener == null) {
-                LOGGER.error("Received FundamentalData, but no listener for symbol {} exists!",
+                LOGGER.trace("Received FundamentalData, but no listener for symbol {} exists!",
                         fundamentalData.getSymbol());
             } else {
                 listener.onMessageReceived(fundamentalData);
@@ -662,7 +662,7 @@ public class Level1Feed extends AbstractServerConnectionFeed {
             FeedMessageListener<SummaryUpdate> listener =
                     summaryUpdateListenersOfSymbols.get(summaryUpdate.getSymbol());
             if (listener == null) {
-                LOGGER.error("Received SummaryUpdate, but no listener for symbol {} exists!",
+                LOGGER.trace("Received SummaryUpdate, but no listener for symbol {} exists!",
                         summaryUpdate.getSymbol());
             } else {
                 switch (messageType) {
@@ -687,7 +687,7 @@ public class Level1Feed extends AbstractServerConnectionFeed {
             FeedMessageListener<RegionalQuote> listener =
                     regionalQuoteListenersOfSymbols.get(regionalQuote.getSymbol());
             if (listener == null) {
-                LOGGER.error("Received RegionalQuote, but no listener for symbol {} exists!",
+                LOGGER.trace("Received RegionalQuote, but no listener for symbol {} exists!",
                         regionalQuote.getSymbol());
             } else {
                 listener.onMessageReceived(regionalQuote);
@@ -699,7 +699,7 @@ public class Level1Feed extends AbstractServerConnectionFeed {
 
     private void handleNewsHeadlineMessage(String[] csv) {
         if (newsHeadlineListener == null) {
-            LOGGER.error("Received NewsHeadline, but no listener exists!");
+            LOGGER.trace("Received NewsHeadline, but no listener exists!");
         } else {
             try {
                 NewsHeadline newsHeadline = NEWS_HEADLINE_CSV_MAPPER.map(csv, 1);

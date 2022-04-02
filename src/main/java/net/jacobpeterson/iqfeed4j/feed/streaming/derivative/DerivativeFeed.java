@@ -219,7 +219,7 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
 
         IntervalListenerData intervalListenerData = intervalListenerDataOfRequestIDs.get(requestID);
         if (intervalListenerData == null) {
-            LOGGER.warn("Received Interval message, but no listener could be found for Request ID: {}", requestID);
+            LOGGER.trace("Received Interval message, but no listener could be found for Request ID: {}", requestID);
             return;
         }
 
