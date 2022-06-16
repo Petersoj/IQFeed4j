@@ -1,0 +1,42 @@
+{
+  "type": "object",
+  "title": "Represents a trade correction message. See <a href=\"http://www.iqfeed.net/dev/api/docs/Level1TradeCorrectionMessage.cfm\">Trade Correction Message Format</a>",
+  "properties": {
+    "Symbol": {
+      "existingJavaType": "java.lang.String",
+      "title": "The symbol ID to match with the watch request."
+    },
+    "CorrectionType": {
+      "existingJavaType": "net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.tradecorrection.CorrectionType",
+      "title": "Either {@link net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.tradecorrection.CorrectionType#INSERTION} indicating a trade insert or {@link net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.tradecorrection.CorrectionType#DELETION} indicating a trade delete."
+    },
+    "TradeDate": {
+      "existingJavaType": "java.time.LocalDate",
+      "title": "Date of the trade that is being inserted or deleted."
+    },
+    "TradeTime": {
+      "existingJavaType": "java.time.LocalTime",
+      "title": "Time (including microseconds) of the trade that is being inserted or deleted."
+    },
+    "TradePrice": {
+      "existingJavaType": "java.lang.Double",
+      "title": "Price of the trade that is being inserted or deleted."
+    },
+    "TradeSize": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "Size of the trade that is being inserted or deleted."
+    },
+    "TickID": {
+      "existingJavaType": "java.lang.Long",
+      "title": "Identifier for the trade that is being inserted or deleted."
+    },
+    "TradeConditions": {
+      "existingJavaType": "java.util.List<java.lang.Integer>",
+      "title": "Conditions that identify the type of trade that occurred for the trade that is being inserted or deleted."
+    },
+    "TradeMarketCenter": {
+      "existingJavaType": "java.lang.Integer",
+      "title": "Market Center of the trade that is being inserted or deleted."
+    }
+  }
+}

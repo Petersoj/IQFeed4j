@@ -71,7 +71,7 @@ public abstract class AbstractCSVMapper<T> {
         /** Format of: <code>MM/dd/yyyy</code> */
         public static final DateTimeFormatter SLASHED_DATE = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 
-        /** Format of: <code>HH:mm:ss</code> */
+        /** Format of: <code>HH:mm:ss[.nnnnnn]</code> */
         public static final DateTimeFormatter COLON_TIME = DateTimeFormatter.ISO_LOCAL_TIME;
 
         /** Format of: <code>yyyyMMdd HH:mm:ss</code> */

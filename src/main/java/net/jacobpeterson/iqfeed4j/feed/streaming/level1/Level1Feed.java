@@ -17,13 +17,15 @@ import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.SummaryUpdate;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.SummaryUpdate.MarketOpen;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.SummaryUpdate.MostRecentTradeAggressor;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.SummaryUpdate.RestrictedCode;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.TradeCorrection;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.Level1Command;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.Level1MessageType;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.Level1SystemCommand;
 import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.Level1SystemMessageType;
-import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.LogLevel;
-import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateContent;
-import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.loglevel.LogLevel;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.summaryupdate.SummaryUpdateContent;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.summaryupdate.SummaryUpdateField;
+import net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.tradecorrection.CorrectionType;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.CSVMapping;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.index.DirectIndexCSVMapper;
 import net.jacobpeterson.iqfeed4j.util.csv.mapper.index.IndexCSVMapper;
@@ -50,7 +52,7 @@ import java.util.stream.IntStream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static net.jacobpeterson.iqfeed4j.feed.streaming.level1.Level1Feed.CSVPOJOPopulators.splitFactorAndDate;
-import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.SummaryUpdateField.*;
+import static net.jacobpeterson.iqfeed4j.model.feed.streaming.level1.enums.summaryupdate.SummaryUpdateField.*;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueEquals;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valueExists;
 import static net.jacobpeterson.iqfeed4j.util.csv.CSVUtil.valuePresent;
@@ -61,6 +63,7 @@ import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.DateT
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.DateTimeConverters.SLASHED_DATE;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.PrimitiveConvertors.DOUBLE;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.PrimitiveConvertors.INTEGER;
+import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.PrimitiveConvertors.LONG;
 import static net.jacobpeterson.iqfeed4j.util.csv.mapper.AbstractCSVMapper.PrimitiveConvertors.STRING;
 
 /**
@@ -78,15 +81,15 @@ public class Level1Feed extends AbstractServerConnectionFeed {
          * This populates {@link FundamentalData} "Split" factor and date from a CSV {@link String} value. Note this
          * could throw a variety of {@link Exception}s.
          *
-         * @param FundamentalData the {@link FundamentalData}
+         * @param fundamentalData the {@link FundamentalData}
          * @param csvValue        the CSV value
          */
-        public static void splitFactorAndDate(FundamentalData FundamentalData, String csvValue,
+        public static void splitFactorAndDate(FundamentalData fundamentalData, String csvValue,
                 BiConsumer<FundamentalData, Double> factorConsumer,
                 BiConsumer<FundamentalData, LocalDate> dateConsumer) {
             String[] spaceSplit = csvValue.split(" ");
-            factorConsumer.accept(FundamentalData, Double.parseDouble(spaceSplit[0]));
-            dateConsumer.accept(FundamentalData, SLASHED_DATE.apply(spaceSplit[1]));
+            factorConsumer.accept(fundamentalData, Double.parseDouble(spaceSplit[0]));
+            dateConsumer.accept(fundamentalData, SLASHED_DATE.apply(spaceSplit[1]));
         }
     }
 
@@ -97,6 +100,7 @@ public class Level1Feed extends AbstractServerConnectionFeed {
             CSV_MAPPINGS_OF_SUMMARY_UPDATE_FIELDS;
     protected static final IndexCSVMapper<FundamentalData> FUNDAMENTAL_DATA_CSV_MAPPER;
     protected static final IndexCSVMapper<RegionalQuote> REGIONAL_QUOTE_CSV_MAPPER;
+    protected static final IndexCSVMapper<TradeCorrection> TRADE_CORRECTION_CSV_MAPPER;
     protected static final IndexCSVMapper<NewsHeadline> NEWS_HEADLINE_CSV_MAPPER;
     protected static final IndexCSVMapper<CustomerInformation> CUSTOMER_INFORMATION_CSV_MAPPER;
     protected static final DirectListCSVMapper<SummaryUpdateField> SUMMARY_UPDATE_FIELDS_CSV_MAPPER;
@@ -288,13 +292,11 @@ public class Level1Feed extends AbstractServerConnectionFeed {
         FUNDAMENTAL_DATA_CSV_MAPPER.addMapping(FundamentalData::setLongTermDebt, DOUBLE);
         FUNDAMENTAL_DATA_CSV_MAPPER.addMapping(FundamentalData::setCommonSharesOutstanding, DOUBLE);
         // For "Split factor 1"
-        FUNDAMENTAL_DATA_CSV_MAPPER.addMapping((fundamentalData, csvValue) ->
-                splitFactorAndDate(fundamentalData, csvValue,
-                        FundamentalData::setSplitFactor1, FundamentalData::setSplitFactor1Date));
+        FUNDAMENTAL_DATA_CSV_MAPPER.addMapping((fundamentalData, csvValue) -> splitFactorAndDate(
+                fundamentalData, csvValue, FundamentalData::setSplitFactor1, FundamentalData::setSplitFactor1Date));
         // For "Split factor 2"
-        FUNDAMENTAL_DATA_CSV_MAPPER.addMapping((fundamentalData, csvValue) ->
-                splitFactorAndDate(fundamentalData, csvValue,
-                        FundamentalData::setSplitFactor2, FundamentalData::setSplitFactor2Date));
+        FUNDAMENTAL_DATA_CSV_MAPPER.addMapping((fundamentalData, csvValue) -> splitFactorAndDate(
+                fundamentalData, csvValue, FundamentalData::setSplitFactor2, FundamentalData::setSplitFactor2Date));
         FUNDAMENTAL_DATA_CSV_MAPPER.addMapping(FundamentalData::setFormatCode, STRING);
         FUNDAMENTAL_DATA_CSV_MAPPER.addMapping(FundamentalData::setPrecision, INTEGER);
         FUNDAMENTAL_DATA_CSV_MAPPER.addMapping(FundamentalData::setSic, INTEGER);
@@ -338,6 +340,18 @@ public class Level1Feed extends AbstractServerConnectionFeed {
         REGIONAL_QUOTE_CSV_MAPPER.addMapping(RegionalQuote::setDecimalPrecision, INTEGER);
         REGIONAL_QUOTE_CSV_MAPPER.addMapping(RegionalQuote::setMarketCenter, INTEGER);
 
+        TRADE_CORRECTION_CSV_MAPPER = new IndexCSVMapper<>(TradeCorrection::new);
+        TRADE_CORRECTION_CSV_MAPPER.addMapping(TradeCorrection::setSymbol, STRING);
+        TRADE_CORRECTION_CSV_MAPPER.addMapping(TradeCorrection::setCorrectionType, CorrectionType::fromValue);
+        TRADE_CORRECTION_CSV_MAPPER.addMapping(TradeCorrection::setTradeDate, SLASHED_DATE);
+        TRADE_CORRECTION_CSV_MAPPER.addMapping(TradeCorrection::setTradeTime, COLON_TIME);
+        TRADE_CORRECTION_CSV_MAPPER.addMapping(TradeCorrection::setTradePrice, DOUBLE);
+        TRADE_CORRECTION_CSV_MAPPER.addMapping(TradeCorrection::setTradeSize, INTEGER);
+        TRADE_CORRECTION_CSV_MAPPER.addMapping(TradeCorrection::setTickID, LONG);
+        TRADE_CORRECTION_CSV_MAPPER.addMapping(TradeCorrection::setTradeConditions,
+                TradeConditionUtil::listFromTradeConditionString);
+        TRADE_CORRECTION_CSV_MAPPER.addMapping(TradeCorrection::setTradeMarketCenter, INTEGER);
+
         NEWS_HEADLINE_CSV_MAPPER = new IndexCSVMapper<>(NewsHeadline::new);
         NEWS_HEADLINE_CSV_MAPPER.addMapping(NewsHeadline::setDistributorCode, STRING);
         NEWS_HEADLINE_CSV_MAPPER.addMapping(NewsHeadline::setStoryID, INTEGER);
@@ -367,6 +381,7 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     protected final HashMap<String, FeedMessageListener<FundamentalData>> fundamentalDataListenersOfSymbols;
     protected final HashMap<String, FeedMessageListener<SummaryUpdate>> summaryUpdateListenersOfSymbols;
     protected final HashMap<String, FeedMessageListener<RegionalQuote>> regionalQuoteListenersOfSymbols;
+    protected final HashMap<String, FeedMessageListener<TradeCorrection>> tradeCorrectionListenersOfSymbols;
     // Using 'Queue' here since IQConnect.exe handles all requests with FIFO priority
     protected final Queue<SingleMessageFuture<LocalDateTime>> timestampFuturesQueue;
     protected final Queue<SingleMessageFuture<FeedStatistics>> feedStatisticsFuturesQueue;
@@ -398,6 +413,7 @@ public class Level1Feed extends AbstractServerConnectionFeed {
         fundamentalDataListenersOfSymbols = new HashMap<>();
         summaryUpdateListenersOfSymbols = new HashMap<>();
         regionalQuoteListenersOfSymbols = new HashMap<>();
+        tradeCorrectionListenersOfSymbols = new HashMap<>();
         timestampFuturesQueue = new LinkedList<>();
         feedStatisticsFuturesQueue = new LinkedList<>();
         fundamentalFieldNamesFuturesQueue = new LinkedList<>();
@@ -505,21 +521,24 @@ public class Level1Feed extends AbstractServerConnectionFeed {
                     Level1MessageType messageType = Level1MessageType.fromValue(csv[0]);
 
                     switch (messageType) {
-                        case FUNDAMENTAL_MESSAGE:
+                        case FUNDAMENTAL:
                             handleFundamentalMessage(csv);
                             break;
-                        case SUMMARY_MESSAGE:
-                        case UPDATE_MESSAGE:
+                        case SUMMARY:
+                        case UPDATE:
                             handleSummaryUpdateMessage(csv, messageType);
                             break;
                         case REGIONAL_UPDATE:
                             handleRegionalUpdateMessage(csv);
                             break;
-                        case NEWS_HEADLINE_MESSAGE:
+                        case NEWS_HEADLINE:
                             handleNewsHeadlineMessage(csv);
                             break;
-                        case TIMESTAMP_MESSAGE:
+                        case TIMESTAMP:
                             handleTimestampMessage(csv);
+                            break;
+                        case TRADE_CORRECTION:
+                            handleTradeCorrectionMessage(csv);
                             break;
                         case SYMBOL_NOT_WATCHED:
                             handleSymbolNotWatched(csv);
@@ -666,10 +685,10 @@ public class Level1Feed extends AbstractServerConnectionFeed {
                         summaryUpdate.getSymbol());
             } else {
                 switch (messageType) {
-                    case SUMMARY_MESSAGE:
+                    case SUMMARY:
                         summaryUpdate.setType(SummaryUpdate.Type.SUMMARY);
                         break;
-                    case UPDATE_MESSAGE:
+                    case UPDATE:
                         summaryUpdate.setType(SummaryUpdate.Type.UPDATE);
                         break;
                 }
@@ -727,6 +746,19 @@ public class Level1Feed extends AbstractServerConnectionFeed {
         }
     }
 
+    private void handleTradeCorrectionMessage(String[] csv) {
+        try {
+            TradeCorrection tradeCorrection = TRADE_CORRECTION_CSV_MAPPER.map(csv, 1);
+            FeedMessageListener<TradeCorrection> listener =
+                    tradeCorrectionListenersOfSymbols.get(tradeCorrection.getSymbol());
+            if (listener != null) { // 'listener' is allowed to be null
+                listener.onMessageReceived(tradeCorrection);
+            }
+        } catch (Exception exception) {
+            LOGGER.error("Could not handle TradeCorrection message!", exception);
+        }
+    }
+
     private void handleSymbolNotWatched(String[] csv) {
         if (level1FeedEventListener != null) {
             if (!valueExists(csv, 1)) {
@@ -743,6 +775,7 @@ public class Level1Feed extends AbstractServerConnectionFeed {
         fundamentalDataListenersOfSymbols.values().forEach(listener -> listener.onMessageException(exception));
         summaryUpdateListenersOfSymbols.values().forEach(listener -> listener.onMessageException(exception));
         regionalQuoteListenersOfSymbols.values().forEach(listener -> listener.onMessageException(exception));
+        tradeCorrectionListenersOfSymbols.values().forEach(listener -> listener.onMessageException(exception));
         timestampFuturesQueue.forEach(future -> future.completeExceptionally(exception));
         feedStatisticsFuturesQueue.forEach(future -> future.completeExceptionally(exception));
         fundamentalFieldNamesFuturesQueue.forEach(future -> future.completeExceptionally(exception));
@@ -765,20 +798,38 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     //
 
     /**
-     * Begins watching a symbol for Level 1 updates. This sends a {@link Level1Command#WATCH} request.
-     *
-     * @param symbol                  the symbol that you wish to receive updates on
-     * @param fundamentalDataListener the {@link FeedMessageListener} of {@link FundamentalData}. Note if a {@link
-     *                                FeedMessageListener} already exists for the given <code>symbol</code>, then it is
-     *                                overwritten with this one.
-     * @param summaryUpdateListener   the {@link FeedMessageListener} of {@link SummaryUpdate}s. Note if a {@link
-     *                                FeedMessageListener} already exists for the given <code>symbol</code>, then it is
-     *                                overwritten with this one.
+     * Calls {@link #requestWatch(String, FeedMessageListener, FeedMessageListener, FeedMessageListener)} with
+     * <code>tradeCorrectionListener</code> set to <code>null</code>.
      *
      * @throws IOException thrown for {@link IOException}s
      */
     public void requestWatch(String symbol, FeedMessageListener<FundamentalData> fundamentalDataListener,
             FeedMessageListener<SummaryUpdate> summaryUpdateListener) throws IOException {
+        requestWatch(symbol, fundamentalDataListener, summaryUpdateListener, null);
+    }
+
+    /**
+     * Begins watching a symbol for Level 1 updates. This sends a {@link Level1Command#WATCH} request. This method and
+     * {@link #requestWatchTrades(String, FeedMessageListener, FeedMessageListener, FeedMessageListener)} should never
+     * be called with the same <code>symbol</code>.
+     *
+     * @param symbol                  the symbol that you wish to receive updates on
+     * @param fundamentalDataListener the {@link FeedMessageListener} of {@link FundamentalData}. Note if a
+     *                                {@link FeedMessageListener} already exists for the given <code>symbol</code>, then
+     *                                it is overwritten with this one.
+     * @param summaryUpdateListener   the {@link FeedMessageListener} of {@link SummaryUpdate}s. Note if a
+     *                                {@link FeedMessageListener} already exists for the given <code>symbol</code>, then
+     *                                it is overwritten with this one.
+     * @param tradeCorrectionListener the {@link FeedMessageListener} of {@link TradeCorrection}s. Set to
+     *                                <code>null</code> if {@link TradeCorrection} messages should not be listened to
+     *                                for this <code>symbol</code>. Note if a {@link FeedMessageListener} already exists
+     *                                for the given <code>symbol</code>, then it is overwritten with this one.
+     *
+     * @throws IOException thrown for {@link IOException}s
+     */
+    public void requestWatch(String symbol, FeedMessageListener<FundamentalData> fundamentalDataListener,
+            FeedMessageListener<SummaryUpdate> summaryUpdateListener,
+            FeedMessageListener<TradeCorrection> tradeCorrectionListener) throws IOException {
         checkNotNull(symbol);
         checkNotNull(fundamentalDataListener);
         checkNotNull(summaryUpdateListener);
@@ -791,6 +842,9 @@ public class Level1Feed extends AbstractServerConnectionFeed {
         synchronized (messageReceivedLock) {
             fundamentalDataListenersOfSymbols.put(symbol, fundamentalDataListener);
             summaryUpdateListenersOfSymbols.put(symbol, summaryUpdateListener);
+            if (tradeCorrectionListener != null) {
+                tradeCorrectionListenersOfSymbols.put(symbol, tradeCorrectionListener);
+            }
         }
 
         // If symbol is already being watched, nothing happens
@@ -798,21 +852,39 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     }
 
     /**
-     * Begins a trades only watch on a symbol for Level 1 updates. This sends a {@link Level1Command#WATCH_TRADES}
-     * request.
-     *
-     * @param symbol                  the symbol that you wish to receive updates on
-     * @param fundamentalDataListener the {@link FeedMessageListener} of {@link FundamentalData}. Note if a {@link
-     *                                FeedMessageListener} already exists for the given <code>symbol</code>, then it is
-     *                                overwritten with this one.
-     * @param summaryUpdateListener   the {@link FeedMessageListener} of {@link SummaryUpdate}s. Note if a {@link
-     *                                FeedMessageListener} already exists for the given <code>symbol</code>, then it is
-     *                                overwritten with this one.
+     * Calls {@link #requestWatchTrades(String, FeedMessageListener, FeedMessageListener, FeedMessageListener)} with
+     * <code>tradeCorrectionListener</code> set to <code>null</code>.
      *
      * @throws IOException thrown for {@link IOException}s
      */
     public void requestWatchTrades(String symbol, FeedMessageListener<FundamentalData> fundamentalDataListener,
             FeedMessageListener<SummaryUpdate> summaryUpdateListener) throws IOException {
+        requestWatchTrades(symbol, fundamentalDataListener, summaryUpdateListener, null);
+    }
+
+    /**
+     * Begins a trades only watch on a symbol for Level 1 updates. This sends a {@link Level1Command#WATCH_TRADES}
+     * request. This method and
+     * {@link #requestWatch(String, FeedMessageListener, FeedMessageListener, FeedMessageListener)} should never be
+     * called with the same <code>symbol</code>.
+     *
+     * @param symbol                  the symbol that you wish to receive updates on
+     * @param fundamentalDataListener the {@link FeedMessageListener} of {@link FundamentalData}. Note if a
+     *                                {@link FeedMessageListener} already exists for the given <code>symbol</code>, then
+     *                                it is overwritten with this one.
+     * @param summaryUpdateListener   the {@link FeedMessageListener} of {@link SummaryUpdate}s. Note if a
+     *                                {@link FeedMessageListener} already exists for the given <code>symbol</code>, then
+     *                                it is overwritten with this one.
+     * @param tradeCorrectionListener the {@link FeedMessageListener} of {@link TradeCorrection}s. Set to
+     *                                <code>null</code> if {@link TradeCorrection} messages should not be listened to
+     *                                for this <code>symbol</code>. Note if a {@link FeedMessageListener} already exists
+     *                                for the given <code>symbol</code>, then it is overwritten with this one.
+     *
+     * @throws IOException thrown for {@link IOException}s
+     */
+    public void requestWatchTrades(String symbol, FeedMessageListener<FundamentalData> fundamentalDataListener,
+            FeedMessageListener<SummaryUpdate> summaryUpdateListener,
+            FeedMessageListener<TradeCorrection> tradeCorrectionListener) throws IOException {
         checkNotNull(symbol);
         checkNotNull(fundamentalDataListener);
         checkNotNull(summaryUpdateListener);
@@ -825,6 +897,9 @@ public class Level1Feed extends AbstractServerConnectionFeed {
         synchronized (messageReceivedLock) {
             fundamentalDataListenersOfSymbols.put(symbol, fundamentalDataListener);
             summaryUpdateListenersOfSymbols.put(symbol, summaryUpdateListener);
+            if (tradeCorrectionListener != null) {
+                tradeCorrectionListenersOfSymbols.put(symbol, tradeCorrectionListener);
+            }
         }
 
         // If symbol is already being watched, nothing happens
@@ -851,6 +926,7 @@ public class Level1Feed extends AbstractServerConnectionFeed {
             fundamentalDataListenersOfSymbols.remove(symbol);
             summaryUpdateListenersOfSymbols.remove(symbol);
             regionalQuoteListenersOfSymbols.remove(symbol);
+            tradeCorrectionListenersOfSymbols.remove(symbol);
         }
 
         sendAndLogMessage(requestBuilder.toString());
@@ -1128,6 +1204,7 @@ public class Level1Feed extends AbstractServerConnectionFeed {
             fundamentalDataListenersOfSymbols.clear();
             summaryUpdateListenersOfSymbols.clear();
             regionalQuoteListenersOfSymbols.clear();
+            tradeCorrectionListenersOfSymbols.clear();
         }
 
         sendLevel1SystemCommand(Level1SystemCommand.UNWATCH_ALL);

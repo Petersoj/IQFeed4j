@@ -8,26 +8,30 @@
     "R",
     "N",
     "T",
+    "C",
     "n"
   ],
   "javaEnums": [
     {
-      "name": "FUNDAMENTAL_MESSAGE"
+      "name": "FUNDAMENTAL"
     },
     {
-      "name": "SUMMARY_MESSAGE"
+      "name": "SUMMARY"
     },
     {
-      "name": "UPDATE_MESSAGE"
+      "name": "UPDATE"
     },
     {
       "name": "REGIONAL_UPDATE"
     },
     {
-      "name": "NEWS_HEADLINE_MESSAGE"
+      "name": "NEWS_HEADLINE"
     },
     {
-      "name": "TIMESTAMP_MESSAGE"
+      "name": "TIMESTAMP"
+    },
+    {
+      "name": "TRADE_CORRECTION"
     },
     {
       "name": "SYMBOL_NOT_WATCHED"

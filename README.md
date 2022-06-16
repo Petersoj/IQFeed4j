@@ -7,7 +7,7 @@
 </p>
 
 # Overview
-IQFeed4j is a Java API for the market-data-vendor DTN IQFeed. IQFeed provides a wide variety of market data including:
+IQFeed4j is a Java API for the market data vendor DTN IQFeed. IQFeed provides a wide variety of market data including:
 - Real-time tick-by-tick data on US and Canadian equities
 - Real-time equity/index Options and Forex data
 - OHLCV historical data

@@ -1,0 +1,18 @@
+{
+  "type": "string",
+  "title": "Represents a trade correction message. See <a href=\"http://www.iqfeed.net/dev/api/docs/Level1TradeCorrectionMessage.cfm\">Trade Correction Message Format</a>",
+  "enum": [
+    "I",
+    "X"
+  ],
+  "javaEnums": [
+    {
+      "name": "INSERTION",
+      "title": "Trade insertion."
+    },
+    {
+      "name": "DELETION",
+      "title": "Trade deletion."
+    }
+  ]
+}
