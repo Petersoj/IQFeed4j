@@ -344,8 +344,8 @@ public class DerivativeFeed extends AbstractServerConnectionFeed {
     }
 
     /**
-     * Remove a watch request given a {@link FeedMessageListener} of {@link Interval}s. This sends a {@link
-     * DerivativeCommand#BAR_REMOVE} request.
+     * Remove a watch request given a {@link FeedMessageListener} of {@link Interval}s. This sends a
+     * {@link DerivativeCommand#BAR_REMOVE} request.
      *
      * @param intervalListener the {@link FeedMessageListener} to unwatch
      *

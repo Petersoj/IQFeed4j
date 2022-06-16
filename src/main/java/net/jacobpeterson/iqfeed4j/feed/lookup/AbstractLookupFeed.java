@@ -45,8 +45,9 @@ public abstract class AbstractLookupFeed extends AbstractFeed {
 
     /**
      * Handles a standard message for a {@link MultiMessageListener} by: checking for request error messages, handling
-     * {@link FeedSpecialMessage#END_OF_MESSAGE} messages, and performing {@link AbstractIndexCSVMapper#map(String[],
-     * int)} on the <code>csv</code> to call {@link MultiMessageListener#onMessageReceived(Object)}.
+     * {@link FeedSpecialMessage#END_OF_MESSAGE} messages, and performing
+     * {@link AbstractIndexCSVMapper#map(String[], int)} on the <code>csv</code> to call
+     * {@link MultiMessageListener#onMessageReceived(Object)}.
      *
      * @param <T>                   the type of {@link MultiMessageListener}
      * @param csv                   the CSV

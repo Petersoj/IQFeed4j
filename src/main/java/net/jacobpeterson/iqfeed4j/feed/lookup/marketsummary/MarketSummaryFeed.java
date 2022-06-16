@@ -224,9 +224,9 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
 
     /**
      * Handles a message for a {@link MultiMessageListener} by: checking for request error messages, handling 'End of
-     * Message' messages, populating {@link #csvIndicesOfIndexNamesOfRequestIDs} as needed, and performing {@link
-     * NamedCSVMapper#map(String[], int, Map)} on the <code>csv</code> to call {@link
-     * MultiMessageListener#onMessageReceived(Object)}.
+     * Message' messages, populating {@link #csvIndicesOfIndexNamesOfRequestIDs} as needed, and performing
+     * {@link NamedCSVMapper#map(String[], int, Map)} on the <code>csv</code> to call
+     * {@link MultiMessageListener#onMessageReceived(Object)}.
      *
      * @param <T>                   the type of {@link MultiMessageListener}
      * @param csv                   the CSV
@@ -310,8 +310,8 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
     //
 
     /**
-     * Retrieves {@link EndOfDaySnapshot}s for all symbols in a Security Type and Exchange Group. This sends a {@link
-     * MarketSummaryCommand#END_OF_DAY_SUMMARY} request.
+     * Retrieves {@link EndOfDaySnapshot}s for all symbols in a Security Type and Exchange Group. This sends a
+     * {@link MarketSummaryCommand#END_OF_DAY_SUMMARY} request.
      *
      * @param securityType             a number representing the desired security type. (Futures, equities, spots,
      *                                 etc... Values can be found using
@@ -364,16 +364,16 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Retrieves {@link FundamentalSnapshot}s for all symbols in a Security Type and Exchange Group. This sends a {@link
-     * MarketSummaryCommand#FUNDAMENTAL_SUMMARY} request.
+     * Retrieves {@link FundamentalSnapshot}s for all symbols in a Security Type and Exchange Group. This sends a
+     * {@link MarketSummaryCommand#FUNDAMENTAL_SUMMARY} request.
      *
      * @param securityType                a number representing the desired security type. (Futures, equities, spots,
      *                                    etc... Values can be found using
      *                                    {@link SymbolMarketInfoFeed#requestSecurityTypes(MultiMessageListener)}).
      * @param groupID                     a number representing the desired exchange group.
      * @param date                        the date of data being requested
-     * @param fundamentalSnapshotListener the {@link MultiMessageListener} for the requested {@link
-     *                                    FundamentalSnapshot}s
+     * @param fundamentalSnapshotListener the {@link MultiMessageListener} for the requested
+     *                                    {@link FundamentalSnapshot}s
      *
      * @throws IOException thrown for {@link IOException}s
      */
@@ -420,8 +420,8 @@ public class MarketSummaryFeed extends AbstractLookupFeed {
 
     /**
      * Retrieves a snapshot of the current market data for all symbols in a Security Type and Exchange Group. NOTE: The
-     * timing of the snapshot is not guaranteed, but data will be gathered every 5 minutes. This sends a {@link
-     * MarketSummaryCommand#FIVE_MINUTE_SNAPSHOT} request.
+     * timing of the snapshot is not guaranteed, but data will be gathered every 5 minutes. This sends a
+     * {@link MarketSummaryCommand#FIVE_MINUTE_SNAPSHOT} request.
      *
      * @param securityType               a number representing the desired security type. (Futures, equities, spots,
      *                                   etc... Values can be found using

@@ -364,7 +364,8 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Calls {@link #requestTicks(String, LocalDateTime, LocalDateTime, Integer, LocalTime, LocalTime, DataDirection,
+     * Calls
+     * {@link #requestTicks(String, LocalDateTime, LocalDateTime, Integer, LocalTime, LocalTime, DataDirection,
      * MultiMessageListener)} and will accumulate all requested data into a {@link List} which can be consumed later.
      *
      * @return a {@link List} of {@link Tick}s
@@ -521,7 +522,8 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Calls {@link #requestIntervals(String, int, int, Integer, LocalTime, LocalTime, DataDirection, IntervalType,
+     * Calls
+     * {@link #requestIntervals(String, int, int, Integer, LocalTime, LocalTime, DataDirection, IntervalType,
      * MultiMessageListener)} and will accumulate all requested data into a {@link List} which can be consumed later.
      *
      * @return a {@link List} of {@link Interval}s
@@ -623,9 +625,10 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Calls {@link #requestIntervals(String, int, LocalDateTime, LocalDateTime, Integer, LocalTime, LocalTime,
-     * DataDirection, IntervalType, MultiMessageListener)} and will accumulate all requested data into a {@link List}
-     * which can be consumed later.
+     * Calls
+     * {@link #requestIntervals(String, int, LocalDateTime, LocalDateTime, Integer, LocalTime, LocalTime, DataDirection,
+     * IntervalType, MultiMessageListener)} and will accumulate all requested data into a {@link List} which can be
+     * consumed later.
      *
      * @return a {@link List} of {@link Interval}s
      *
@@ -651,8 +654,8 @@ public class HistoricalFeed extends AbstractLookupFeed {
      * @param maxDays                the max days
      * @param dataDirection          the data direction (defaults to {@link DataDirection#NEWEST_TO_OLDEST}) (optional)
      * @param partialDatapoint       whether to include a {@link PartialDatapoint} based on the current day's trading up
-     *                               to the time the request is received by the server (defaults to {@link
-     *                               PartialDatapoint#INCLUDE}) (optional)
+     *                               to the time the request is received by the server (defaults to
+     *                               {@link PartialDatapoint#INCLUDE}) (optional)
      * @param datedIntervalsListener the {@link MultiMessageListener} for the requested {@link DatedInterval}s
      *
      * @throws IOException thrown for {@link IOException}s
@@ -718,8 +721,8 @@ public class HistoricalFeed extends AbstractLookupFeed {
      * @param maxDataPoints          the maximum number of datapoints to be retrieved (optional)
      * @param dataDirection          the data direction (defaults to {@link DataDirection#NEWEST_TO_OLDEST}) (optional)
      * @param partialDatapoint       whether to include a {@link PartialDatapoint} based on the current day's trading up
-     *                               to the time the request is received by the server (defaults to {@link
-     *                               PartialDatapoint#INCLUDE}) (optional)
+     *                               to the time the request is received by the server (defaults to
+     *                               {@link PartialDatapoint#INCLUDE}) (optional)
      * @param datedIntervalsListener the {@link MultiMessageListener} for the requested {@link DatedInterval}s
      *
      * @throws IOException thrown for {@link IOException}s
@@ -774,7 +777,8 @@ public class HistoricalFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Calls {@link #requestDayIntervals(String, LocalDate, LocalDate, Integer, DataDirection, PartialDatapoint,
+     * Calls
+     * {@link #requestDayIntervals(String, LocalDate, LocalDate, Integer, DataDirection, PartialDatapoint,
      * MultiMessageListener)} and will accumulate all requested data into a {@link List} which can be consumed later.
      *
      * @return a {@link List} of {@link DatedInterval}s
@@ -799,8 +803,8 @@ public class HistoricalFeed extends AbstractLookupFeed {
      * @param maxWeeks               the max weeks
      * @param dataDirection          the data direction (defaults to {@link DataDirection#NEWEST_TO_OLDEST}) (optional)
      * @param partialDatapoint       whether to include a {@link PartialDatapoint} based on the current day's trading up
-     *                               to the time the request is received by the server (defaults to {@link
-     *                               PartialDatapoint#INCLUDE}) (optional)
+     *                               to the time the request is received by the server (defaults to
+     *                               {@link PartialDatapoint#INCLUDE}) (optional)
      * @param datedIntervalsListener the {@link MultiMessageListener} for the requested {@link DatedInterval}s
      *
      * @throws IOException thrown for {@link IOException}s
@@ -864,8 +868,8 @@ public class HistoricalFeed extends AbstractLookupFeed {
      * @param maxMonths              the max months
      * @param dataDirection          the data direction (defaults to {@link DataDirection#NEWEST_TO_OLDEST}) (optional)
      * @param partialDatapoint       whether to include a {@link PartialDatapoint} based on the current day's trading up
-     *                               to the time the request is received by the server (defaults to {@link
-     *                               PartialDatapoint#INCLUDE}) (optional)
+     *                               to the time the request is received by the server (defaults to
+     *                               {@link PartialDatapoint#INCLUDE}) (optional)
      * @param datedIntervalsListener the {@link MultiMessageListener} for the requested {@link DatedInterval}s
      *
      * @throws IOException thrown for {@link IOException}s

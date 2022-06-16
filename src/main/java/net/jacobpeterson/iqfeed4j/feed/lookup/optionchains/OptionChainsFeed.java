@@ -272,8 +272,8 @@ public class OptionChainsFeed extends AbstractLookupFeed {
         }
 
         /**
-         * Specifically for a CEO request, this populates an Equity {@link OptionContract} from a CSV list {@link
-         * String} value. Note this could throw a variety of {@link Exception}s.
+         * Specifically for a CEO request, this populates an Equity {@link OptionContract} from a CSV list
+         * {@link String} value. Note this could throw a variety of {@link Exception}s.
          *
          * @param equityOptionContract the Equity {@link OptionContract} instance
          * @param csvValue             the CSV value
@@ -385,8 +385,8 @@ public class OptionChainsFeed extends AbstractLookupFeed {
 
     /**
      * Handles a message for a {@link SingleMessageFuture} {@link List} by: checking for request error messages, and
-     * performing {@link ListCSVMapper#mapToList(String[], int)} on the <code>csv</code> to complete the {@link
-     * SingleMessageFuture}.
+     * performing {@link ListCSVMapper#mapToList(String[], int)} on the <code>csv</code> to complete the
+     * {@link SingleMessageFuture}.
      *
      * @param <T>                   the type of {@link SingleMessageFuture} {@link List}
      * @param csv                   the CSV
@@ -641,8 +641,8 @@ public class OptionChainsFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Gets an Equity {@link OptionContract} chain using a Strike price filter. This sends a {@link
-     * OptionChainsCommand#EQUITY_OPTION_CHAIN} request.
+     * Gets an Equity {@link OptionContract} chain using a Strike price filter. This sends a
+     * {@link OptionChainsCommand#EQUITY_OPTION_CHAIN} request.
      *
      * @param symbol                 the symbol. Max Length 30 characters.
      * @param putsCallsOption        the {@link PutsCallsOption}

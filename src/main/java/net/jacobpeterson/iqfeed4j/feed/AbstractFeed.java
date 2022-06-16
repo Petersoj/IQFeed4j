@@ -227,8 +227,8 @@ public abstract class AbstractFeed implements Runnable {
     protected abstract void onFeedSocketException(Exception exception);
 
     /**
-     * Called when the underlying {@link Socket} of this {@link AbstractFeed} is closed gracefully. {@link
-     * #onMessageReceived(String[])} is guaranteed to never be called on this instance after this method has been
+     * Called when the underlying {@link Socket} of this {@link AbstractFeed} is closed gracefully.
+     * {@link #onMessageReceived(String[])} is guaranteed to never be called on this instance after this method has been
      * invoked.
      */
     protected abstract void onFeedSocketClose();
@@ -288,8 +288,8 @@ public abstract class AbstractFeed implements Runnable {
     }
 
     /**
-     * Checks if the feed is valid. Returns true if {@link #isFeedSocketOpen()} is true and {@link
-     * #isProtocolVersionValidated()} is true
+     * Checks if the feed is valid. Returns true if {@link #isFeedSocketOpen()} is true and
+     * {@link #isProtocolVersionValidated()} is true
      *
      * @return a boolean
      */
@@ -325,8 +325,8 @@ public abstract class AbstractFeed implements Runnable {
     }
 
     /**
-     * Blocks until the protocol version is validated for this feed (uses {@link #protocolVersionValidated} {@link
-     * CompletableFuture} internally).
+     * Blocks until the protocol version is validated for this feed (uses {@link #protocolVersionValidated}
+     * {@link CompletableFuture} internally).
      *
      * @param timeout     the timeout time
      * @param timeoutUnit the {@link TimeUnit} of <code>timeout</code>

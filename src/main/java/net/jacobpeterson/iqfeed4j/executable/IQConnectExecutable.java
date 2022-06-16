@@ -35,8 +35,8 @@ public class IQConnectExecutable {
     private Process iqConnectProcess;
 
     /**
-     * Instantiates a new {@link IQConnectExecutable} with properties defined in {@link
-     * IQFeed4jProperties#PROPERTIES_FILE}.
+     * Instantiates a new {@link IQConnectExecutable} with properties defined in
+     * {@link IQFeed4jProperties#PROPERTIES_FILE}.
      */
     public IQConnectExecutable() {
         this(IQFeed4jProperties.IQCONNECT_COMMAND,
@@ -173,8 +173,8 @@ public class IQConnectExecutable {
     }
 
     /**
-     * Calls {@link #waitForConnection(String, int, int, long)} with {@link IQFeed4jProperties#FEED_HOSTNAME} and {@link
-     * IQFeed4jProperties#LOOKUP_FEED_PORT} and a <code>pollingInterval</code> of 250ms.
+     * Calls {@link #waitForConnection(String, int, int, long)} with {@link IQFeed4jProperties#FEED_HOSTNAME} and
+     * {@link IQFeed4jProperties#LOOKUP_FEED_PORT} and a <code>pollingInterval</code> of 250ms.
      *
      * @see #waitForConnection(String, int, int, long)
      */
@@ -235,8 +235,8 @@ public class IQConnectExecutable {
     }
 
     /**
-     * Sets whether to disable internal logging of the {@link #iqConnectProcess} or not. Must be called before {@link
-     * #start()}.
+     * Sets whether to disable internal logging of the {@link #iqConnectProcess} or not. Must be called before
+     * {@link #start()}.
      *
      * @param disableInternalProcessLogging a boolean
      */

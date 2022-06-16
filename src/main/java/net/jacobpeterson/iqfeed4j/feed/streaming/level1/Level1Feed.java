@@ -907,8 +907,8 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     }
 
     /**
-     * Terminates Level 1 updates for the symbol specified (including regionals). This sends a {@link
-     * Level1Command#UNWATCH} request.
+     * Terminates Level 1 updates for the symbol specified (including regionals). This sends a
+     * {@link Level1Command#UNWATCH} request.
      *
      * @param symbol the symbol that you wish to terminate updates on
      *
@@ -990,8 +990,8 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     }
 
     /**
-     * Enables or disables the once-per-second {@link LocalDateTime} timestamp. This sends a {@link
-     * Level1SystemCommand#TIMESTAMPSON} or {@link Level1SystemCommand#TIMESTAMPSOFF} request.
+     * Enables or disables the once-per-second {@link LocalDateTime} timestamp. This sends a
+     * {@link Level1SystemCommand#TIMESTAMPSON} or {@link Level1SystemCommand#TIMESTAMPSOFF} request.
      *
      * @param toggle true to enable, false to disable
      *
@@ -1002,13 +1002,13 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     }
 
     /**
-     * Begins watching a symbol for Level 1 {@link RegionalQuote} updates. This sends a {@link
-     * Level1SystemCommand#REGON} request.
+     * Begins watching a symbol for Level 1 {@link RegionalQuote} updates. This sends a
+     * {@link Level1SystemCommand#REGON} request.
      *
      * @param symbol                the symbol that you wish to receive updates on
-     * @param regionalQuoteListener the {@link FeedMessageListener} of {@link RegionalQuote}s. Note if a {@link
-     *                              FeedMessageListener} already exists for the given <code>symbol</code>, then it is
-     *                              overwritten with this one.
+     * @param regionalQuoteListener the {@link FeedMessageListener} of {@link RegionalQuote}s. Note if a
+     *                              {@link FeedMessageListener} already exists for the given <code>symbol</code>, then
+     *                              it is overwritten with this one.
      *
      * @throws IOException thrown for {@link IOException}s
      */
@@ -1025,8 +1025,8 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     }
 
     /**
-     * Stops watching a symbol for Level 1 {@link RegionalQuote} updates. This sends a {@link
-     * Level1SystemCommand#REGOFF} request.
+     * Stops watching a symbol for Level 1 {@link RegionalQuote} updates. This sends a
+     * {@link Level1SystemCommand#REGOFF} request.
      *
      * @param symbol the symbol that you wish to stop receiving updates on
      *
@@ -1043,8 +1043,8 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     }
 
     /**
-     * Enables or disables streaming {@link NewsHeadline}s. This sends a {@link Level1SystemCommand#NEWSON} or {@link
-     * Level1SystemCommand#NEWSOFF} request.
+     * Enables or disables streaming {@link NewsHeadline}s. This sends a {@link Level1SystemCommand#NEWSON} or
+     * {@link Level1SystemCommand#NEWSOFF} request.
      *
      * @param toggle true to enable, false to disable
      *
@@ -1073,8 +1073,8 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     }
 
     /**
-     * Request a list of all available {@link SummaryUpdateField}s for fundamental messages. This sends a {@link
-     * Level1SystemCommand#REQUEST_FUNDAMENTAL_FIELDNAMES} request.
+     * Request a list of all available {@link SummaryUpdateField}s for fundamental messages. This sends a
+     * {@link Level1SystemCommand#REQUEST_FUNDAMENTAL_FIELDNAMES} request.
      *
      * @return the {@link SingleMessageFuture} of the {@link String} field names
      *
@@ -1133,8 +1133,8 @@ public class Level1Feed extends AbstractServerConnectionFeed {
      * Change your fieldset for this connection. This fieldset applies to all {@link SummaryUpdate} messages you receive
      * on this connection. This sends a {@link Level1SystemCommand#SELECT_UPDATE_FIELDS} request.
      * <br>
-     * NOTE: The {@link SummaryUpdateField#SYMBOL} is not selectable and will always be the first field of a {@link
-     * SummaryUpdate}.
+     * NOTE: The {@link SummaryUpdateField#SYMBOL} is not selectable and will always be the first field of a
+     * {@link SummaryUpdate}.
      *
      * @param summaryUpdateFields the {@link SummaryUpdateField}s
      *
@@ -1176,8 +1176,8 @@ public class Level1Feed extends AbstractServerConnectionFeed {
     }
 
     /**
-     * Request a list of all symbols currently watched on this connection. This sends a {@link
-     * Level1SystemCommand#REQUEST_WATCHES} request.
+     * Request a list of all symbols currently watched on this connection. This sends a
+     * {@link Level1SystemCommand#REQUEST_WATCHES} request.
      *
      * @return the {@link SingleMessageFuture} of the {@link String} symbols
      *

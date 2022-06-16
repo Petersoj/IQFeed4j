@@ -150,8 +150,8 @@ public class NewsFeed extends AbstractLookupFeed {
     /**
      * This requests News headlines. This sends a {@link NewsCommand#NEWS_HEADLINE} request.
      *
-     * @param sources             a {@link Collection} of news sources which can be retrieved via {@link
-     *                            #requestNewsConfiguration(XMLTextOption, MultiMessageListener)}. (optional)
+     * @param sources             a {@link Collection} of news sources which can be retrieved via
+     *                            {@link #requestNewsConfiguration(XMLTextOption, MultiMessageListener)}. (optional)
      * @param symbols             a {@link Collection} of symbols for which to receive headlines (optional)
      * @param xmlTextOption       the {@link XMLTextOption}. See
      *                            <a href="https://www.iqfeed.net/dev/api/docs//NewsLookupviaTCPIP.cfm">News
@@ -218,7 +218,8 @@ public class NewsFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Calls {@link #requestNewsHeadlines(Collection, Collection, XMLTextOption, Integer, Collection, Map,
+     * Calls
+     * {@link #requestNewsHeadlines(Collection, Collection, XMLTextOption, Integer, Collection, Map,
      * MultiMessageListener)} and parses the XML data into POJOs.
      *
      * @return {@link NewsHeadlines}
@@ -242,14 +243,14 @@ public class NewsFeed extends AbstractLookupFeed {
     /**
      * This requests News stories. This sends a {@link NewsCommand#NEWS_STORY} request.
      *
-     * @param id                  the headline/story identifier which can be retrieved via {@link
-     *                            #requestNewsHeadlines(Collection, Collection, XMLTextOption, Integer, Collection, Map,
-     *                            MultiMessageListener)}.
+     * @param id                  the headline/story identifier which can be retrieved via
+     *                            {@link #requestNewsHeadlines(Collection, Collection, XMLTextOption, Integer,
+     *                            Collection, Map, MultiMessageListener)}.
      * @param xmlTextEmailOption  the {@link XMLTextEmailOption}. See
      *                            <a href="https://www.iqfeed.net/dev/api/docs//NewsLookupviaTCPIP.cfm">News
      *                            Lookup via TCP/IP</a> for the response formats.
-     * @param deliverTo           email address to deliver story to if <code>xmlTextEmailOption</code> is {@link
-     *                            XMLTextEmailOption#EMAIL}
+     * @param deliverTo           email address to deliver story to if <code>xmlTextEmailOption</code> is
+     *                            {@link XMLTextEmailOption#EMAIL}
      * @param messageLineListener the {@link MultiMessageListener} for the message {@link MessageLine}s
      *
      * @throws IOException thrown for {@link IOException}s
@@ -312,8 +313,8 @@ public class NewsFeed extends AbstractLookupFeed {
      * @param xmlTextOption       the {@link XMLTextOption}. See
      *                            <a href="https://www.iqfeed.net/dev/api/docs//NewsLookupviaTCPIP.cfm">News
      *                            Lookup via TCP/IP</a> for the response formats.
-     * @param sources             a {@link Collection} of news sources which can be retrieved via {@link
-     *                            #requestNewsConfiguration(XMLTextOption, MultiMessageListener)}. (optional)
+     * @param sources             a {@link Collection} of news sources which can be retrieved via
+     *                            {@link #requestNewsConfiguration(XMLTextOption, MultiMessageListener)}. (optional)
      * @param fromDate            the 'from' {@link LocalDate} (optional if <code>toDate</code> is also
      *                            <code>null</code>)
      * @param toDate              the 'to' {@link LocalDate} (optional if <code>fromDate</code> is also
@@ -361,8 +362,9 @@ public class NewsFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Calls {@link #requestNewsStoryCount(Collection, XMLTextOption, Collection, LocalDate, LocalDate,
-     * MultiMessageListener)} and parses the XML data into POJOs.
+     * Calls
+     * {@link #requestNewsStoryCount(Collection, XMLTextOption, Collection, LocalDate, LocalDate, MultiMessageListener)}
+     * and parses the XML data into POJOs.
      *
      * @return {@link NewsStoryCounts}
      *

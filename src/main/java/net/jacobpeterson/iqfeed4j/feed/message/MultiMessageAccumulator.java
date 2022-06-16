@@ -40,8 +40,8 @@ public class MultiMessageAccumulator<T> extends MultiMessageListener<T> {
     }
 
     /**
-     * Gets the {@link List} for all the messages in {@link #messages}. Note this will block until {@link
-     * #onEndOfMultiMessage()} has been called by the underlying feed.
+     * Gets the {@link List} for all the messages in {@link #messages}. Note this will block until
+     * {@link #onEndOfMultiMessage()} has been called by the underlying feed.
      *
      * @return an {@link List}
      *

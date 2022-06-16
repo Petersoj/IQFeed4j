@@ -35,8 +35,8 @@ public class TrailingIndexCSVMapper<T> extends AbstractIndexCSVMapper<T> {
     }
 
     /**
-     * Adds a CSV index to POJO field mapping as the CSV index being the largest {@link #setMapping(int, BiConsumer,
-     * Function)} CSV index + 1.
+     * Adds a CSV index to POJO field mapping as the CSV index being the largest
+     * {@link #setMapping(int, BiConsumer, Function)} CSV index + 1.
      *
      * @param <P>                    the type of the POJO field
      * @param fieldSetter            see {@link CSVMapping} constructor doc
@@ -71,8 +71,8 @@ public class TrailingIndexCSVMapper<T> extends AbstractIndexCSVMapper<T> {
     }
 
     /**
-     * Sets the trailing CSV mapping that accumulates/maps all CSV values after the being the largest {@link
-     * #setMapping(int, BiConsumer, Function)} CSV index + 1.
+     * Sets the trailing CSV mapping that accumulates/maps all CSV values after the being the largest
+     * {@link #setMapping(int, BiConsumer, Function)} CSV index + 1.
      *
      * @param <P>                    the type of the POJO field
      * @param fieldSetter            see {@link CSVMapping} constructor doc
@@ -85,8 +85,8 @@ public class TrailingIndexCSVMapper<T> extends AbstractIndexCSVMapper<T> {
     /**
      * {@inheritDoc}
      * <br>
-     * Note this will map with the mappings added via {@link #setMapping(int, BiConsumer, Function)} and {@link
-     * #setTrailingMapping(BiConsumer, Function)}.
+     * Note this will map with the mappings added via {@link #setMapping(int, BiConsumer, Function)} and
+     * {@link #setTrailingMapping(BiConsumer, Function)}.
      */
     @Override
     public T map(String[] csv, int offset) {

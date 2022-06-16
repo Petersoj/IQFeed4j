@@ -33,8 +33,8 @@ public class HistoricalFeedPool {
     private long lastRequestMillis;
 
     /**
-     * Instantiates a new {@link HistoricalFeedPool} using {@link Factory} as the {@link HistoricalFeed} {@link
-     * PooledObjectFactory} and a customized {@link GenericObjectPoolConfig}.
+     * Instantiates a new {@link HistoricalFeedPool} using {@link Factory} as the {@link HistoricalFeed}
+     * {@link PooledObjectFactory} and a customized {@link GenericObjectPoolConfig}.
      *
      * @param historicalFeedName the {@link HistoricalFeed} name
      * @param hostname           the hostname
@@ -62,8 +62,8 @@ public class HistoricalFeedPool {
     }
 
     /**
-     * Instantiates a new {@link HistoricalFeedPool} using {@link Factory} as the {@link HistoricalFeed} {@link
-     * PooledObjectFactory} and a given {@link GenericObjectPoolConfig}.
+     * Instantiates a new {@link HistoricalFeedPool} using {@link Factory} as the {@link HistoricalFeed}
+     * {@link PooledObjectFactory} and a given {@link GenericObjectPoolConfig}.
      *
      * @param historicalFeedName the {@link HistoricalFeed} name
      * @param hostname           the hostname

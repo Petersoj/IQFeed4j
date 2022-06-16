@@ -41,8 +41,8 @@ public class NestedListCSVMapper<T> extends AbstractListCSVMapper<T> {
     }
 
     /**
-     * Adds a CSV index to POJO field mapping as the CSV index being the largest {@link #setMapping(int, BiConsumer,
-     * Function)} CSV index + 1.
+     * Adds a CSV index to POJO field mapping as the CSV index being the largest
+     * {@link #setMapping(int, BiConsumer, Function)} CSV index + 1.
      *
      * @param <P>                    the type of the POJO field
      * @param fieldSetter            see {@link CSVMapping} constructor doc
@@ -77,8 +77,9 @@ public class NestedListCSVMapper<T> extends AbstractListCSVMapper<T> {
     /**
      * {@inheritDoc}
      * <br>
-     * Note: this will map to a list of POJOs using the mappings added via {@link #setMapping(int, BiConsumer,
-     * Function)}. This will iterate through the list at {@link #nestedListLength} length.
+     * Note: this will map to a list of POJOs using the mappings added via
+     * {@link #setMapping(int, BiConsumer, Function)}. This will iterate through the list at {@link #nestedListLength}
+     * length.
      */
     @Override
     public List<T> mapToList(String[] csv, int offset) {

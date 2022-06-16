@@ -251,9 +251,9 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Searches for a list of symbols existing within a specific {@link SearchCodeType} or group of {@link
-     * SearchCodeType} codes. This sends a {@link SymbolMarketInfoCommand#SYMBOLS_BY_SIC_CODE} or {@link
-     * SymbolMarketInfoCommand#SYMBOLS_BY_NIAC_CODE} request.
+     * Searches for a list of symbols existing within a specific {@link SearchCodeType} or group of
+     * {@link SearchCodeType} codes. This sends a {@link SymbolMarketInfoCommand#SYMBOLS_BY_SIC_CODE} or
+     * {@link SymbolMarketInfoCommand#SYMBOLS_BY_NIAC_CODE} request.
      *
      * @param searchCodeType             the {@link SearchCodeType}
      * @param searchString               at least the first 2 digits of an existing {@link SearchCodeType}.
@@ -333,8 +333,7 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
 
     /**
      * Request a list of {@link ListedMarket}s from the feed. This sends a
-     * {@link SymbolMarketInfoCommand#LISTED_MARKETS}
-     * request.
+     * {@link SymbolMarketInfoCommand#LISTED_MARKETS} request.
      *
      * @param listedMarketListener the {@link MultiMessageListener} for the requested {@link ListedMarket}s
      *
@@ -346,8 +345,8 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Calls {@link #requestListedMarkets(MultiMessageListener)} and will accumulate all requested data into a {@link
-     * List} which can be consumed later.
+     * Calls {@link #requestListedMarkets(MultiMessageListener)} and will accumulate all requested data into a
+     * {@link List} which can be consumed later.
      *
      * @return a {@link List} of {@link ListedMarket}s
      *
@@ -363,8 +362,7 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
 
     /**
      * Request a list of {@link SecurityType}s from the feed. This sends a
-     * {@link SymbolMarketInfoCommand#SECURITY_TYPES}
-     * request.
+     * {@link SymbolMarketInfoCommand#SECURITY_TYPES} request.
      *
      * @param securityTypeListener the {@link MultiMessageListener} for the requested {@link SecurityType}s
      *
@@ -376,8 +374,8 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Calls {@link #requestSecurityTypes(MultiMessageListener)} and will accumulate all requested data into a {@link
-     * List} which can be consumed later.
+     * Calls {@link #requestSecurityTypes(MultiMessageListener)} and will accumulate all requested data into a
+     * {@link List} which can be consumed later.
      *
      * @return a {@link List} of {@link SecurityType}s
      *
@@ -392,8 +390,8 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Request a list of {@link TradeCondition}s from the feed. This sends a {@link
-     * SymbolMarketInfoCommand#TRADE_CONDITIONS} request.
+     * Request a list of {@link TradeCondition}s from the feed. This sends a
+     * {@link SymbolMarketInfoCommand#TRADE_CONDITIONS} request.
      *
      * @param tradeConditionListener the {@link MultiMessageListener} for the requested {@link TradeCondition}s
      *
@@ -405,8 +403,8 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Calls {@link #requestTradeConditions(MultiMessageListener)} and will accumulate all requested data into a {@link
-     * List} which can be consumed later.
+     * Calls {@link #requestTradeConditions(MultiMessageListener)} and will accumulate all requested data into a
+     * {@link List} which can be consumed later.
      *
      * @return a {@link List} of {@link TradeCondition}s
      *
@@ -464,8 +462,8 @@ public class SymbolMarketInfoFeed extends AbstractLookupFeed {
     }
 
     /**
-     * Calls {@link #requestNIACCodeCodes(MultiMessageListener)} and will accumulate all requested data into a {@link
-     * List} which can be consumed later.
+     * Calls {@link #requestNIACCodeCodes(MultiMessageListener)} and will accumulate all requested data into a
+     * {@link List} which can be consumed later.
      *
      * @return a {@link List} of {@link NIACCode}s
      *

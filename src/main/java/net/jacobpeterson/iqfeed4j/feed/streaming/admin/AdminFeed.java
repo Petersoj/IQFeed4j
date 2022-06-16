@@ -217,9 +217,9 @@ public class AdminFeed extends AbstractFeed {
     }
 
     /**
-     * Gets the {@link AdminSystemCommand} {@link SingleMessageFuture} or calls {@link
-     * #sendAdminSystemCommand(AdminSystemCommand, String...)} and creates/puts a new {@link SingleMessageFuture}. This
-     * method is synchronized with {@link #messageReceivedLock}.
+     * Gets the {@link AdminSystemCommand} {@link SingleMessageFuture} or calls
+     * {@link #sendAdminSystemCommand(AdminSystemCommand, String...)} and creates/puts a new
+     * {@link SingleMessageFuture}. This method is synchronized with {@link #messageReceivedLock}.
      *
      * @param <T>                             the {@link SingleMessageFuture} type
      * @param futureOfAdminSystemMessageTypes the {@link SingleMessageFuture}s of {@link AdminSystemMessageType}s
@@ -270,8 +270,8 @@ public class AdminFeed extends AbstractFeed {
     }
 
     /**
-     * Removes the registration of your application with the feed. This sends a {@link
-     * AdminSystemCommand#REMOVE_CLIENT_APP} request.
+     * Removes the registration of your application with the feed. This sends a
+     * {@link AdminSystemCommand#REMOVE_CLIENT_APP} request.
      *
      * @param productID      the Registered Product ID that you were assigned when you created your developer API
      *                       account.
@@ -328,8 +328,8 @@ public class AdminFeed extends AbstractFeed {
      * Sets the save login info (loginID/password) flag for IQFeed. This will be ignored at the time of connection if
      * either the loginID, password are not set. This sends a {@link AdminSystemCommand#SET_SAVE_LOGIN_INFO} request.
      *
-     * @param onOffOption {@link OnOffOption#ON} if you want IQConnect to save the user's loginID and password or {@link
-     *                    OnOffOption#OFF} if you do not want IQConnect to save the user's loginID and password.
+     * @param onOffOption {@link OnOffOption#ON} if you want IQConnect to save the user's loginID and password or
+     *                    {@link OnOffOption#OFF} if you do not want IQConnect to save the user's loginID and password.
      *
      * @return a {@link SingleMessageFuture} completed upon command response
      *
@@ -356,8 +356,8 @@ public class AdminFeed extends AbstractFeed {
      * Sets the auto connect flag for IQFeed. This will be ignored at the time of connection if either the loginID,
      * password are not set. This sends a {@link AdminSystemCommand#SET_AUTOCONNECT} request.
      *
-     * @param onOffOption {@link OnOffOption#ON} if you want IQConnect to automatically connect to the servers or {@link
-     *                    OnOffOption#OFF} if you do not want IQConnect to automatically connect.
+     * @param onOffOption {@link OnOffOption#ON} if you want IQConnect to automatically connect to the servers or
+     *                    {@link OnOffOption#OFF} if you do not want IQConnect to automatically connect.
      *
      * @return a {@link SingleMessageFuture} completed upon command response
      *
@@ -385,9 +385,9 @@ public class AdminFeed extends AbstractFeed {
      * unless the ProductID and/or Product version have not been set. This message is ignored if the feed is already
      * connected. This sends a {@link AdminSystemCommand#CONNECT} request.
      * <br>
-     * There is no set message associated with this command but you should notice the connection status in the {@link
-     * #getLatestFeedStatistics()} message change from {@link Status#NOT_CONNECTED} to {@link Status#CONNECTED} if the
-     * connection was successful.
+     * There is no set message associated with this command but you should notice the connection status in the
+     * {@link #getLatestFeedStatistics()} message change from {@link Status#NOT_CONNECTED} to {@link Status#CONNECTED}
+     * if the connection was successful.
      *
      * @throws IOException thrown for {@link IOException}s
      */
@@ -401,9 +401,9 @@ public class AdminFeed extends AbstractFeed {
      * returns to zero (after having incremented above zero). This message is ignored if the feed is already
      * disconnected. This sends a {@link AdminSystemCommand#DISCONNECT} request.
      * <br>
-     * There is no set message associated with this command but you should notice the connection status in the {@link
-     * #getLatestFeedStatistics()} message change from {@link Status#CONNECTED} to {@link Status#NOT_CONNECTED} if the
-     * disconnection was successful.
+     * There is no set message associated with this command but you should notice the connection status in the
+     * {@link #getLatestFeedStatistics()} message change from {@link Status#CONNECTED} to {@link Status#NOT_CONNECTED}
+     * if the disconnection was successful.
      *
      * @throws IOException thrown for {@link IOException}s
      */
@@ -412,8 +412,8 @@ public class AdminFeed extends AbstractFeed {
     }
 
     /**
-     * Tells IQConnect.exe to start streaming client stats to your connection. This sends a {@link
-     * AdminSystemCommand#CLIENTSTATS_ON} request.
+     * Tells IQConnect.exe to start streaming client stats to your connection. This sends a
+     * {@link AdminSystemCommand#CLIENTSTATS_ON} request.
      * <br>
      * There is no set message associated with this command but you should start receiving {@link ClientStatistics}
      * messages (detailed on the Admin System Messages page). You will receive 1 stats message per second per client
@@ -427,8 +427,8 @@ public class AdminFeed extends AbstractFeed {
     }
 
     /**
-     * Tells IQConnect.exe to stop streaming client stats to your connection. This sends a {@link
-     * AdminSystemCommand#CLIENTSTATS_OFF} request.
+     * Tells IQConnect.exe to stop streaming client stats to your connection. This sends a
+     * {@link AdminSystemCommand#CLIENTSTATS_OFF} request.
      * <br>
      * There is no set message associated with this command but you should stop receiving {@link ClientStatistics}
      * messages.
