@@ -36,17 +36,17 @@ repositories {
 
 dependencies {
     // Logging framework
-    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.32'
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.36'
 
     // Google Guava for a variety of useful methods
-    implementation group: 'com.google.guava', name: 'guava', version: '30.1.1-jre'
+    implementation group: 'com.google.guava', name: 'guava', version: '31.1-jre'
 
     // Jackson for XML <-> POJO (de)serialization
     // Note: not using JAXB since it's slower and Jackson XML has more features
-    implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-xml', version: '2.12.3'
+    implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-xml', version: '2.13.3'
     implementation group: 'org.codehaus.woodstox', name: 'woodstox-core-asl', version: '4.4.1'
     // For JDK 8 common Jackson (de)serializers
-    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.12.3'
+    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.13.3'
 
     // Apache Commons object pooling
     implementation group: 'org.apache.commons', name: 'commons-pool2', version: '2.11.1'
