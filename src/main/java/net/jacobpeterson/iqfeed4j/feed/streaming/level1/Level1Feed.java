@@ -252,7 +252,7 @@ public class Level1Feed extends AbstractServerConnectionFeed {
         CSV_MAPPINGS_OF_SUMMARY_UPDATE_FIELDS.put(TICK,
                 new CSVMapping<>(SummaryUpdate::setTick, INTEGER));
         CSV_MAPPINGS_OF_SUMMARY_UPDATE_FIELDS.put(TICK_ID,
-                new CSVMapping<>(SummaryUpdate::setTickID, INTEGER));
+                new CSVMapping<>(SummaryUpdate::setTickID, LONG));
         CSV_MAPPINGS_OF_SUMMARY_UPDATE_FIELDS.put(TOTAL_VOLUME,
                 new CSVMapping<>(SummaryUpdate::setTotalVolume, INTEGER));
         CSV_MAPPINGS_OF_SUMMARY_UPDATE_FIELDS.put(VOLATILITY,
