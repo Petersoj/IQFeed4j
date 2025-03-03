@@ -312,7 +312,7 @@
       "title": "\"173\"=Up,\"175\"=Down, \"183\"=No Change. Only valid for Last qualified trades."
     },
     "TickID": {
-      "existingJavaType": "java.lang.Integer",
+      "existingJavaType": "java.lang.Long",
       "title": "Identifier for tick."
     },
     "TotalVolume": {
